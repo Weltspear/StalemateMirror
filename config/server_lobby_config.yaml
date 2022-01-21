@@ -1,0 +1,11 @@
+# This is a lobby configuration file
+
+lobbies:
+  - map: "maps/vs_default.json"
+    next_maps : [
+       "maps/vs_default.json"
+    ]
+  - map: "maps/dev_default.json"
+    next_maps : [
+      "maps/dev_default.json"
+    ]

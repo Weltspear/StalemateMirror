@@ -1,0 +1,11 @@
+.idea/
+.gradle/
+out/
+build/
+gradle/
+lib/
+pyutils/
+gradle.properties
+gradlew.bat
+gradlew
+settings.gradle

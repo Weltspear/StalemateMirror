@@ -27,13 +27,6 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws IllegalAccessException {
 
-
-        // Server server = new Server();
-        // server.start_server();
-
-        // Imposter sus
-        // InterfaceUI.start_ui();
-
         File f = new File("grass32");
         if (!f.exists()){
             throw new IllegalAccessException("grass32 doesn't exist");

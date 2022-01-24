@@ -22,6 +22,7 @@ import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.event.EventListenerRegistry;
 import com.stalemate.core.upgrade.Upgrade;
 import com.stalemate.core.util.IGameController;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -247,11 +248,13 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. (It is one dimensional ArrayList)
      */
+    @Nullable
     public abstract ArrayList<IButton> getButtons();
 
     /***
      * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. These buttons can be used by enemy team. Can be null. (It is one dimensional ArrayList)
      */
+    @Nullable
     public ArrayList<IButton> getButtonsEnemy(){return null;}
 
     public UnitStats unitStats(){
@@ -271,11 +274,6 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
             dmg = 1;
         }
         this.hp -= dmg;
-    }
-
-    @Deprecated
-    public void modHP(int HP){
-        hp += HP;
     }
 
     public AnimationController getAnimationController() {
@@ -313,6 +311,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * This method returns a <code>UnitQueue</code> which is going to be rendered by client
      */
+    @Nullable
     public UnitQueue getUnitQueue(){return null;}
 
     public int getHp() {

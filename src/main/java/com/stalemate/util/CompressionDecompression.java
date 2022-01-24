@@ -6,7 +6,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /***
- * Slightly modified gzip compression/decompression: https://gist.github.com/yfnick/227e0c12957a329ad138
+ * Slightly modified gzip compression/decompression:
+ * <a href="https://gist.github.com/yfnick/227e0c12957a329ad138">Original Gist</a>
  */
 public class CompressionDecompression {
     public static byte[] compress(String data) throws IOException {

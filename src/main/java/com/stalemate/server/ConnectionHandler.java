@@ -316,6 +316,7 @@ public class ConnectionHandler implements Runnable{
     public String readCompressedAndEncrypted(){
         try {
             String compressed = readEncryptedDataAES();
+            if (compressed == null) return null;
             return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
         } catch (IOException e) {
             e.printStackTrace();

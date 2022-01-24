@@ -135,7 +135,13 @@ public class Lobby implements Runnable{
                 player.setEndOfGameMessage("You won!");
             }
             else{
-                player.setEndOfGameMessage("You lost!");
+                String nick = null;
+                for (Player p: players){
+                    if (p.getTeam() == game.getVictoriousTeam()){
+                        nick = p.nickname;
+                    }
+                }
+                player.setEndOfGameMessage("You lost! Player " + nick + " won!");
             }
         }
         resetLobby();

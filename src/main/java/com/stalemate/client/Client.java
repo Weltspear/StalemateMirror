@@ -362,7 +362,7 @@ public class Client {
 
                 while (true) {
                     long t1 = System.currentTimeMillis();
-                    String json = readCompressedAndEncrypted();
+                    String json = readEncryptedDataAES();
                     long t2 = System.currentTimeMillis();
                     tick++;
                     if (tick == 1000) {
@@ -379,12 +379,12 @@ public class Client {
                         inGameUI.getFrame().dispose();
                         return;
                     }
-                    if (json.equals("endofgame")){
+                    if (json.startsWith("endofgame")){
                         break;
                     }
 
-                    if (json.equals("connection_terminated")){
-                        String cause = readCompressedAndEncrypted();
+                    if (json.startsWith("connection_terminated")){
+                        String cause = readEncryptedDataAES();
                         System.out.println("Lobby was terminated. Additional information: " + cause);
                         inGameUI.getFrame().dispose();
                         client.close();
@@ -396,12 +396,12 @@ public class Client {
 
                     String packet = controller.create_json_packet();
                     // System.out.println(packet);
-                    sendCompressedAndEncrypted(packet);
+                    sendEncryptedDataAES(packet);
                     inGameUI.repaint();
                     // System.out.println(t2-t1);
                 }
 
-                System.out.println(readEncryptedData());
+                System.out.println(readEncryptedDataAES());
                 inGameUI.getFrame().dispose();
 
             } else {
@@ -490,29 +490,5 @@ public class Client {
         }
 
         return null;
-    }
-
-    public void sendCompressedAndEncrypted(String s){
-        Deflater d = new Deflater();
-        d.setInput(s.getBytes(StandardCharsets.UTF_8));
-        d.finish();
-        byte[] compressed = new byte[1024 * 8];
-        int compsize = d.deflate(compressed);
-        d.end();
-        sendEncryptedDataAES(Base64.getEncoder().encodeToString(compressed));
-    }
-
-    public String readCompressedAndEncrypted(){
-        String compressed = readEncryptedDataAES();
-        byte[] compressedb = Base64.getDecoder().decode(compressed);
-        Inflater i = new Inflater();
-        i.setInput(compressedb);
-        byte[] orig = new byte[1024 * 8];
-        try {
-            int origSize = i.inflate(orig, 0, 1024*8);
-        } catch (DataFormatException e) {
-            e.printStackTrace();
-        }
-        return new String(orig, StandardCharsets.UTF_8);
     }
 }

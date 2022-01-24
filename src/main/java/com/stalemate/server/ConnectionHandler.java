@@ -168,20 +168,20 @@ public class ConnectionHandler implements Runnable{
 
             while (!terminated){
                 if (player.isConnectionTerminated()){
-                    sendCompressedAndEncrypted("connection_terminated");
-                    sendCompressedAndEncrypted("Cause is unknown. Probably another player had disconnected");
+                    sendEncryptedDataAES("connection_terminated");
+                    sendEncryptedDataAES("Cause is unknown. Probably another player had disconnected");
                     client.close();
                     isHandlerTerminated = true;
                     return;
                 }
                 // 50 packets per second
                 long t1 = System.currentTimeMillis();
-                sendCompressedAndEncrypted(player.create_json_packet());
+                sendEncryptedDataAES(player.create_json_packet());
                 long t2 = System.currentTimeMillis() - t1;
                 if (20 - t2 > 0){
                     Thread.sleep(20-t2);
                 }
-                String packet = readCompressedAndEncrypted();
+                String packet = readEncryptedDataAES();
                 if (packet == null){
                     System.out.println("Connection lost unexpectedly!");
                     player.terminateConnection();
@@ -206,7 +206,7 @@ public class ConnectionHandler implements Runnable{
             }
 
             sendEncryptedDataAES("endofgame");
-            sendEncryptedData(player.getEndOfAGameMessage());
+            sendEncryptedDataAES(player.getEndOfAGameMessage());
             isHandlerTerminated = true;
             client.close();
         } catch (Exception e){
@@ -301,33 +301,5 @@ public class ConnectionHandler implements Runnable{
         }
 
         return null;
-    }
-
-    public void sendCompressedAndEncrypted(String s){
-        Deflater d = new Deflater();
-        d.setInput(s.getBytes(StandardCharsets.UTF_8));
-        d.finish();
-        byte[] compressed = new byte[1024*8];
-        d.deflate(compressed);
-        d.end();
-        sendEncryptedDataAES(Base64.getEncoder().encodeToString(compressed));
-    }
-
-    public String readCompressedAndEncrypted(){
-        try {
-            String compressed = readEncryptedDataAES();
-            byte[] compressedb = Base64.getDecoder().decode(compressed);
-            Inflater i = new Inflater();
-            i.setInput(compressedb);
-            byte[] orig = new byte[1024 * 8];
-            try {
-                i.inflate(orig, 0, 1024 * 8);
-            } catch (DataFormatException e) {
-                e.printStackTrace();
-            }
-            return new String(orig, StandardCharsets.UTF_8);
-        } catch (NullPointerException e){
-            return null;
-        }
     }
 }

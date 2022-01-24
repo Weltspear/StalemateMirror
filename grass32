@@ -1,0 +1,6 @@
+config:
+  client:
+    nickname: "unnamed"
+    # Timeouts in seconds
+    timeout: 30
+    lobby_timeout: 120

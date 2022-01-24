@@ -20,6 +20,7 @@ package com.stalemate.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stalemate.client.config.Grass32ConfigClient;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -248,8 +249,11 @@ public class Client {
 
     private void handle_connection(){ // TODO: make it handle socket exceptions etc
         try {
+            // load grass32
+            Grass32ConfigClient.loadGrass32();
+
             client.setTcpNoDelay(true);
-            client.setSoTimeout(30000);
+            client.setSoTimeout(Grass32ConfigClient.getTimeout()*1000);
             try {
                 // Initialize encryption
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
@@ -292,6 +296,8 @@ public class Client {
                 return;
             }
 
+            client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout()*1000);
+
             // Make player choose the lobby
             String lobby_list = readEncryptedData();
             if (lobby_list == null){
@@ -301,7 +307,7 @@ public class Client {
             }
             Map<String, Object> lobby_map = (new ObjectMapper()).readValue(lobby_list, Map.class);
 
-            sendEncryptedData("default");
+            sendEncryptedData(Grass32ConfigClient.getNickname());
 
             boolean lobby_invalid = true;
             while (lobby_invalid) {
@@ -345,6 +351,8 @@ public class Client {
                 System.out.println("Server closed connection unexpectedly");
                 return;
             }
+
+            client.setSoTimeout(Grass32ConfigClient.getTimeout()*1000);
 
             if (data.equals("start")) {
                 InGameUI inGameUI = new InGameUI();

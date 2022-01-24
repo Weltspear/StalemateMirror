@@ -44,7 +44,7 @@ public class LobbyConfigLoader {
 
             return lobbies;
         } catch (Exception e){
-            System.out.println("Failed to load lobby configuration.");
+            System.err.println("Failed to load lobby configuration.");
         }
         return new ArrayList<>();
     }

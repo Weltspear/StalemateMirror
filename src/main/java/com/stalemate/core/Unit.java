@@ -19,7 +19,6 @@
 package com.stalemate.core;
 
 import com.stalemate.core.animation.AnimationController;
-import com.stalemate.core.event.EventListenerRegistry;
 import com.stalemate.core.upgrade.Upgrade;
 import com.stalemate.core.util.IGameController;
 import org.jetbrains.annotations.Nullable;
@@ -126,32 +125,8 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * Unit statistics
      */
-    public static class UnitStats {
-        protected final int hp;
-        protected final int max_hp;
-
-        protected final int attack_range;
-        protected final int movement_range;
-
-        protected final int atk;
-        protected final int df;
-
-        protected final int supply;
-        protected final int max_supply;
-
-        protected final int armor;
-
-        public UnitStats(int hp, int max_hp, int attack_range, int movement_range, int atk, int df, int supply, int max_supply, int armor){
-            this.hp = hp;
-            this.max_hp = max_hp;
-            this.attack_range = attack_range;
-            this.movement_range = movement_range;
-            this.atk = atk;
-            this.df = df;
-            this.supply = supply;
-            this.max_supply = max_supply;
-            this.armor = armor;
-        }
+    public record UnitStats(int hp, int max_hp, int attack_range, int movement_range, int atk, int df, int supply,
+                            int max_supply, int armor) {
 
         public int getAtk() {
             return atk;

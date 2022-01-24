@@ -34,6 +34,7 @@ import com.stalemate.core.controller.Game;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+// todo: make it ignore neutral team
 public class CaptureTheCity implements IGamemode {
     public static class RebelUnit extends Infantry{
 

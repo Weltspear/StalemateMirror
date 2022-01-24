@@ -87,16 +87,6 @@ public class Game implements IGameControllerGamemode {
         protected boolean AUTO_SKIP_TURN = false;
 
         /***
-         * Ignore this team in victory calculation
-         */
-        protected final boolean isNeutral = false;
-
-        @Deprecated
-        public boolean isNeutral() {
-            return isNeutral;
-        }
-
-        /***
          * For testing purposes only
          */
         public void setDev(){
@@ -142,6 +132,31 @@ public class Game implements IGameControllerGamemode {
     }
 
     /***
+     * Team which automatically skips turns, and it should be ignored in victory calculations
+     */
+    public static class NeutralTeam extends Team{
+        public NeutralTeam(Color c) {
+            super(c);
+            AUTO_SKIP_TURN = true;
+        }
+    }
+
+    /***
+     * Neutral team which is added to every instance of game when initialized
+     */
+    public static class StandardNeutralTeam extends NeutralTeam{
+        public StandardNeutralTeam() {
+            super(Color.WHITE);
+        }
+    }
+
+    private final StandardNeutralTeam NEUTRAL;
+
+    public StandardNeutralTeam getNeutralTeam(){
+        return NEUTRAL;
+    }
+
+    /***
      * It means method can be thread unsafe or cause a <code>ConcurrentModificationException</code> inside a <code>Game</code> class
      */
     public @interface GameUnsafe{
@@ -178,30 +193,6 @@ public class Game implements IGameControllerGamemode {
         return combatTracker;
     }
 
-    @Deprecated
-    public Game(){
-        for (int i = 0; i < 50; i++){
-            map.add(new ArrayList<>());
-            for (int a = 0; a < 50; a++){
-                map.get(i).add(new MapObject("assets/default.png", true));
-            }
-        }
-
-        teams.add(new Team(Color.RED));
-        teams.add((new Team(Color.BLUE)));
-
-        Unit base1 = new MilitaryTent(1, 1, this);
-        Unit base2 = new MilitaryTent(48, 48, this);
-
-        teams.get(0).addUnit(base1);
-        teams.get(1).addUnit(base2);
-
-        forceAddEntity(base1);
-        forceAddEntity(base2);
-
-        evReg.addEventListener(combatTracker);
-    }
-
     /***
      * Marks a method as a method which must be used only by <code>MapLoader</code>
      */
@@ -211,6 +202,9 @@ public class Game implements IGameControllerGamemode {
         this.map = map;
         this.teams = teams;
         this.aparams = aparams;
+
+        NEUTRAL = new StandardNeutralTeam();
+        teams.add(NEUTRAL);
     }
 
     @MapLoaderMethod
@@ -298,6 +292,8 @@ public class Game implements IGameControllerGamemode {
         for (Team team: teams){
             team.update();
         }
+
+        mode.tick(this);
     }
 
     @Override
@@ -359,7 +355,7 @@ public class Game implements IGameControllerGamemode {
 
     public synchronized Team getUnassignedTeam(){
         for (Team team : teams){
-            if (!already_assigned_teams.contains(team)){
+            if (!already_assigned_teams.contains(team) && !(team instanceof NeutralTeam)){
                 already_assigned_teams.add(team);
                 return team;
             }

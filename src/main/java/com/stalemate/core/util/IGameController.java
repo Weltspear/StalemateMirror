@@ -45,4 +45,5 @@ public interface IGameController {
 
     EventListenerRegistry getEvReg();
 
+    public Game.StandardNeutralTeam getNeutralTeam();
 }

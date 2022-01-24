@@ -49,6 +49,7 @@ public class Versus implements IGamemode {
         ArrayList<Game.Team> teams_who_have_units = new ArrayList<>();
 
         for (Game.Team team : g.getTeams()) {
+            if (!(team instanceof Game.NeutralTeam))
             if (!team.getTeamUnits().isEmpty()) {
                 teams_who_have_units.add(team);
             }

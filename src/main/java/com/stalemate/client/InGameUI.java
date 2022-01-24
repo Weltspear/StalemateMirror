@@ -38,7 +38,6 @@ public class InGameUI extends JPanel {
     private final KeyboardInput in_client;
     @SuppressWarnings("FieldCanBeLocal") private Font basis33;
     private Font basis33_button;
-    private Font anyFont;
 
     private final JFrame frame;
     public JFrame getFrame(){return frame;}
@@ -588,7 +587,10 @@ public class InGameUI extends JPanel {
                 for (String point: row) {
                     if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
                         && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
-                        InGameUI.this.setToolTipText(ButtonTooltips.getTooltip(point));
+                        if (ButtonTooltips.getTooltip(point) != null)
+                            InGameUI.this.setToolTipText("<html><font face=\"basis33\" size=4>" + ButtonTooltips.getTooltip(point) + "</font></html>");
+                        else
+                            InGameUI.this.setToolTipText(null);
                         clearTooltip = true;
                     }
                     x++;
@@ -642,14 +644,17 @@ public class InGameUI extends JPanel {
             basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
             basis33_button = basis33.deriveFont(((float)(14))).deriveFont(Font.BOLD);
 
-            anyFont = GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()[0];
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
         }
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);
-        UIManager.put("ToolTip.font", basis33.deriveFont((float) 14));
+
+        // because tooltip font stopped working correctly of html for some reason
+        GraphicsEnvironment ge =
+                GraphicsEnvironment.getLocalGraphicsEnvironment();
+        ge.registerFont(basis33);
 
         try {
             placeholder_ui = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/placeholder_ui.png")));

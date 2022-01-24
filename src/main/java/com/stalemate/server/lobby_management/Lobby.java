@@ -25,6 +25,7 @@ import com.stalemate.core.MapObject;
 import com.stalemate.core.Unit;
 import com.stalemate.core.controller.Game;
 import com.stalemate.core.map_system.MapLoader;
+import com.stalemate.core.utypes.UBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,8 +86,17 @@ public class Lobby implements Runnable{
         }
         System.out.print("Game Started!");
 
-        for (Player player: players){ // todo: add camera initialization
-            player.setTeam(game.getUnassignedTeam());
+        for (Player player: players){
+            Game.Team t = game.getUnassignedTeam();
+            player.setTeam(t);
+
+            for (Unit u: t.getTeamUnits()){
+                if (u instanceof UBase){
+                    player.setCamPos(u.getX() - 6, u.getY() - 2);
+                    break;
+                }
+            }
+
             player.setGame(game);
         }
 
@@ -165,6 +175,11 @@ public class Lobby implements Runnable{
         private volatile boolean isConnectionTerminated = false;
         public synchronized boolean isConnectionTerminated(){return isConnectionTerminated;}
         public synchronized void terminateConnection(){isConnectionTerminated = true;}
+
+        public synchronized void setCamPos(int x, int y){
+            this.cam_x = x;
+            this.cam_y = y;
+        }
 
         public synchronized void setTeam(Game.Team t){
             team = t;

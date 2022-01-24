@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class InterfaceUI extends JPanel {
+public class InGameUI extends JPanel {
     private final ClientDataRenderer renderer;
     private final KeyboardInput in_client;
     @SuppressWarnings("FieldCanBeLocal") private Font basis33;
@@ -171,7 +171,7 @@ public class InterfaceUI extends JPanel {
     }
 
     public static class ClientDataRenderer {
-        private final InterfaceUI interface_;
+        private final InGameUI interface_;
         private final BufferedImage fog_of_war;
         private final HashMap<String, BufferedImage> loaded_images = new HashMap<>();
 
@@ -219,7 +219,7 @@ public class InterfaceUI extends JPanel {
 
          */
 
-        public ClientDataRenderer(InterfaceUI interface_) {
+        public ClientDataRenderer(InGameUI interface_) {
             fog_of_war = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = fog_of_war.createGraphics();
             graphics2D.setColor(new Color(0,0,0, 0.5F));
@@ -588,7 +588,7 @@ public class InterfaceUI extends JPanel {
                 for (String point: row) {
                     if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
                         && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
-                        InterfaceUI.this.setToolTipText(ButtonTooltips.getTooltip(point));
+                        InGameUI.this.setToolTipText(ButtonTooltips.getTooltip(point));
                         clearTooltip = true;
                     }
                     x++;
@@ -596,12 +596,12 @@ public class InterfaceUI extends JPanel {
                 y++;
             }
             if (!clearTooltip) {
-                InterfaceUI.this.setToolTipText(null);
+                InGameUI.this.setToolTipText(null);
             }
         }
     }
 
-    public InterfaceUI(){
+    public InGameUI(){
         ButtonTooltips.init();
         renderer = new ClientDataRenderer(this);
 

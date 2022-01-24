@@ -72,11 +72,11 @@ public class Client {
 
         HashMap<String, Object> selected_unit = null;
 
-        final InterfaceUI.KeyboardInput in;
+        final InGameUI.KeyboardInput in;
 
         private boolean isselectorbutton_press = false;
 
-        public GameControllerClient(InterfaceUI.KeyboardInput input){
+        public GameControllerClient(InGameUI.KeyboardInput input){
             in = input;
         }
 
@@ -347,8 +347,8 @@ public class Client {
             }
 
             if (data.equals("start")) {
-                InterfaceUI interfaceUI = new InterfaceUI();
-                controller = new GameControllerClient(interfaceUI.getInput());
+                InGameUI inGameUI = new InGameUI();
+                controller = new GameControllerClient(inGameUI.getInput());
 
                 int tick = 0;
 
@@ -368,7 +368,7 @@ public class Client {
                     if (json == null){
                         client.close();
                         System.out.println("Server closed connection unexpectedly");
-                        interfaceUI.getFrame().dispose();
+                        inGameUI.getFrame().dispose();
                         return;
                     }
                     if (json.equals("endofgame")){
@@ -378,23 +378,23 @@ public class Client {
                     if (json.equals("connection_terminated")){
                         String cause = readCompressedAndEncrypted();
                         System.out.println("Lobby was terminated. Additional information: " + cause);
-                        interfaceUI.getFrame().dispose();
+                        inGameUI.getFrame().dispose();
                         client.close();
                         return;
                     }
 
-                    interfaceUI.getRenderer().change_render_data(json, controller.camSelMode);
+                    inGameUI.getRenderer().change_render_data(json, controller.camSelMode);
                     controller.receive_packet(json);
 
                     String packet = controller.create_json_packet();
                     // System.out.println(packet);
                     sendCompressedAndEncrypted(packet);
-                    interfaceUI.repaint();
+                    inGameUI.repaint();
                     // System.out.println(t2-t1);
                 }
 
                 System.out.println(readEncryptedData());
-                interfaceUI.getFrame().dispose();
+                inGameUI.getFrame().dispose();
 
             } else {
                 System.out.println("Server miscommunication closing connection");

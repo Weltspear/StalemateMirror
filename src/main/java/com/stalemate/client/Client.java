@@ -21,6 +21,7 @@ package com.stalemate.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stalemate.client.config.Grass32ConfigClient;
+import com.stalemate.util.CompressionDecompression;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -362,7 +363,7 @@ public class Client {
 
                 while (true) {
                     long t1 = System.currentTimeMillis();
-                    String json = readEncryptedDataAES();
+                    String json = readCompressedAndEncrypted();
                     long t2 = System.currentTimeMillis();
                     tick++;
                     if (tick == 1000) {
@@ -384,7 +385,7 @@ public class Client {
                     }
 
                     if (json.startsWith("connection_terminated")){
-                        String cause = readEncryptedDataAES();
+                        String cause = readCompressedAndEncrypted();
                         System.out.println("Lobby was terminated. Additional information: " + cause);
                         inGameUI.getFrame().dispose();
                         client.close();
@@ -396,12 +397,12 @@ public class Client {
 
                     String packet = controller.create_json_packet();
                     // System.out.println(packet);
-                    sendEncryptedDataAES(packet);
+                    sendCompressedAndEncryptedAES(packet);
                     inGameUI.repaint();
                     // System.out.println(t2-t1);
                 }
 
-                System.out.println(readEncryptedDataAES());
+                System.out.println(readCompressedAndEncrypted());
                 inGameUI.getFrame().dispose();
 
             } else {
@@ -489,6 +490,25 @@ public class Client {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public void sendCompressedAndEncryptedAES(String data){
+        try {
+            byte[] compressed = CompressionDecompression.compress(data);
+            sendEncryptedDataAES(new String(Base64.getEncoder().encode(compressed)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String readCompressedAndEncrypted(){
+        try {
+            String compressed = readEncryptedDataAES();
+            return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

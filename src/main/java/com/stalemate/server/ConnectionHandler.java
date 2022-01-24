@@ -20,6 +20,7 @@ package com.stalemate.server;
 
 import com.stalemate.server.lobby_management.Lobby;
 import com.stalemate.server.lobby_management.LobbyHandler;
+import com.stalemate.util.CompressionDecompression;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -168,20 +169,20 @@ public class ConnectionHandler implements Runnable{
 
             while (!terminated){
                 if (player.isConnectionTerminated()){
-                    sendEncryptedDataAES("connection_terminated");
-                    sendEncryptedDataAES("Cause is unknown. Probably another player had disconnected");
+                    sendCompressedAndEncryptedAES("connection_terminated");
+                    sendCompressedAndEncryptedAES("Cause is unknown. Probably another player had disconnected");
                     client.close();
                     isHandlerTerminated = true;
                     return;
                 }
                 // 50 packets per second
                 long t1 = System.currentTimeMillis();
-                sendEncryptedDataAES(player.create_json_packet());
+                sendCompressedAndEncryptedAES(player.create_json_packet());
                 long t2 = System.currentTimeMillis() - t1;
                 if (20 - t2 > 0){
                     Thread.sleep(20-t2);
                 }
-                String packet = readEncryptedDataAES();
+                String packet = readCompressedAndEncrypted();
                 if (packet == null){
                     System.out.println("Connection lost unexpectedly!");
                     player.terminateConnection();
@@ -205,8 +206,8 @@ public class ConnectionHandler implements Runnable{
                 }
             }
 
-            sendEncryptedDataAES("endofgame");
-            sendEncryptedDataAES(player.getEndOfAGameMessage());
+            sendCompressedAndEncryptedAES("endofgame");
+            sendCompressedAndEncryptedAES(player.getEndOfAGameMessage());
             isHandlerTerminated = true;
             client.close();
         } catch (Exception e){
@@ -300,6 +301,25 @@ public class ConnectionHandler implements Runnable{
 
         }
 
+        return null;
+    }
+
+    public void sendCompressedAndEncryptedAES(String data){
+        try {
+            byte[] compressed = CompressionDecompression.compress(data);
+            sendEncryptedDataAES(new String(Base64.getEncoder().encode(compressed)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String readCompressedAndEncrypted(){
+        try {
+            String compressed = readEncryptedDataAES();
+            return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

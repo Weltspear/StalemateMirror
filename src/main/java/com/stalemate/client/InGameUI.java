@@ -21,6 +21,7 @@ package com.stalemate.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stalemate.client.config.ButtonTooltips;
+import com.stalemate.client.config.PropertiesMatcher;
 import com.stalemate.client.property.ClientSideProperty;
 
 import javax.imageio.ImageIO;
@@ -620,6 +621,7 @@ public class InGameUI extends JPanel {
 
     public InGameUI(){
         ButtonTooltips.init();
+        PropertiesMatcher.loadPropertyMatcher();
         renderer = new ClientDataRenderer(this);
 
         frame = new JFrame("Stalemate");
@@ -683,17 +685,6 @@ public class InGameUI extends JPanel {
             panel = texture_missing;
             selector = texture_missing;
         }
-    }
-
-    public String matchKeyToString(String key){
-        return switch (key) {
-            case "atk" -> "ATK";
-            case "df" -> "DF";
-            case "hp" -> "HP";
-            case "su" -> "SU";
-            case "ar" -> "Armor";
-            default -> null;
-        };
     }
 
     public void paint(Graphics g)
@@ -856,8 +847,8 @@ public class InGameUI extends JPanel {
 
                 int y__ = 1;
                 for (ClientSideProperty clientSideProperty: propertiesToRender2.properties){
-                    if (matchKeyToString(clientSideProperty.key()) != null){
-                        g.drawString(matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192+32+64+128, 384+43+13*y__);
+                    if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null){
+                        g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192+32+64+128, 384+43+13*y__);
                         y__++;
                     }
                 }

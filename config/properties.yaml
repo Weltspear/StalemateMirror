@@ -1,0 +1,6 @@
+properties:
+  atk: "ATK"
+  df: "DF"
+  hp: "HP"
+  su: "SU"
+  ar: "Armor"

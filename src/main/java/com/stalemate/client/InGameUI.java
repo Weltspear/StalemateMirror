@@ -87,6 +87,11 @@ public class InGameUI extends JPanel {
 
     int cam_sel_mode;
 
+    int x_prev = 0;
+    int y_prev = 0;
+    boolean do_render_prev = false;
+
+
     public void setRender(ArrayList<ArrayList<BufferedImage>> map_to_render, ArrayList<ArrayList<BufferedImage>> fog_of_war, ArrayList<ArrayList<BufferedImage>> entity_render,
                           ArrayList<BufferedImage> buttons, ArrayList<String> binds, BufferedImage unit_img, StatsToRender statsToRender, BufferedImage selector,
                           ArrayList<ArrayList<BufferedImage>> unit_data_ar, ArrayList<BufferedImage> unit_queue, ArrayList<String> unit_times,
@@ -597,6 +602,16 @@ public class InGameUI extends JPanel {
                 }
                 y++;
             }
+
+            if ((((64 <= e.getY())&&( e.getY() <= 6 * 64)) && ((0 <= e.getX())&&(e.getX() <= 13 * 64))) || (((9 * 64 <= e.getX())&&(e.getX() <= 13 * 64)) && ((6 * 64 <= e.getY())&&( e.getY() <= 9 * 64)))){
+                InGameUI.this.x_prev = e.getX() / 64;
+                InGameUI.this.y_prev = e.getY() / 64;
+                InGameUI.this.do_render_prev = true;
+            }
+            else {
+                InGameUI.this.do_render_prev = false;
+            }
+
             if (!clearTooltip) {
                 InGameUI.this.setToolTipText(null);
             }
@@ -830,6 +845,11 @@ public class InGameUI extends JPanel {
             g.setFont(basis33.deriveFont((float)(15)));
             g.drawString("Military Points: " + mp, 20, 20);
             g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
+
+
+            if (selector != null && do_render_prev){
+                g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev*64,y_prev*64,null);
+            }
 
             unsafe_ = false;
             g.dispose();

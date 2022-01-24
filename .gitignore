@@ -9,3 +9,4 @@ gradle.properties
 gradlew.bat
 gradlew
 settings.gradle
+maps/dev_default_tank__.json

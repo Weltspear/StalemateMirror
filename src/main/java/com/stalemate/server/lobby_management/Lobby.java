@@ -25,7 +25,7 @@ import com.stalemate.core.MapObject;
 import com.stalemate.core.Unit;
 import com.stalemate.core.controller.Game;
 import com.stalemate.core.map_system.MapLoader;
-import com.stalemate.core.utypes.UBase;
+import com.stalemate.core.units.util.IBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,7 +91,7 @@ public class Lobby implements Runnable{
             player.setTeam(t);
 
             for (Unit u: t.getTeamUnits()){
-                if (u instanceof UBase){
+                if (u instanceof IBase){
                     player.setCamPos(u.getX() - 6, u.getY() - 2);
                     break;
                 }

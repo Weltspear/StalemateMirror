@@ -98,6 +98,22 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
 
                 unit.consumeSupply(2);
                 selected_unit.consumeSupply(2);
+
+                if (selected_unit.getHp() <= 0){
+                    gameController.rmEntity(selected_unit);
+                    if (Math.abs(selected_unit.getX() - unit.getX()) <= 1 && Math.abs(selected_unit.getY() - unit.getY()) <= 1){
+                        unit.setX(selected_unit.getX());
+                        unit.setY(selected_unit.getY());
+
+                        if (selected_unit.getMaxSupply() != -1 && selected_unit.getSupply() > 0){
+                            unit.setSupply((int) (unit.getSupply() + (0.2*selected_unit.getSupply())));
+
+                            if (unit.getSupply() > unit.getMaxSupply()){
+                                unit.setSupply(unit.getMaxSupply());
+                            }
+                        }
+                    }
+                }
             }
         }
     }

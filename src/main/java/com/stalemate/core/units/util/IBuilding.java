@@ -18,8 +18,10 @@
 
 package com.stalemate.core.units.util;
 
+import com.stalemate.core.buttons.util.Unflippable;
+
 /***
  * Used to mark a unit as a building
  */
-public interface IBuilding {
+public interface IBuilding extends Unflippable {
 }

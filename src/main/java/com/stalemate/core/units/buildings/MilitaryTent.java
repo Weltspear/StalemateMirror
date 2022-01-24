@@ -26,11 +26,11 @@ import com.stalemate.core.buttons.Scrap;
 import com.stalemate.core.units.*;
 import com.stalemate.core.units.util.IConstructableBuilding;
 import com.stalemate.core.util.IGameController;
-import com.stalemate.core.utypes.UBase;
+import com.stalemate.core.units.util.IBase;
 
 import java.util.ArrayList;
 
-public class MilitaryTent extends AbstractFactoryBuilding implements IConstructableBuilding, UBase {
+public class MilitaryTent extends AbstractFactoryBuilding implements IConstructableBuilding, IBase {
 
     public MilitaryTent(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(13, 13, 0, 0, 0, 0, 0, -1, 0), new AnimationController(), "Base");

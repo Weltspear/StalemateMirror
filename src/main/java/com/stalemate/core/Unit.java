@@ -19,6 +19,8 @@
 package com.stalemate.core;
 
 import com.stalemate.core.animation.AnimationController;
+import com.stalemate.core.properties.Properties;
+import com.stalemate.core.properties.Property;
 import com.stalemate.core.upgrade.Upgrade;
 import com.stalemate.core.util.IGameController;
 import org.jetbrains.annotations.Nullable;
@@ -363,5 +365,20 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     public void setFogOfWarRange(int fog_of_war_range) {
         this.fog_of_war_range = fog_of_war_range;
+    }
+
+    public Properties getProperties(){
+        Properties properties = new Properties();
+        properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
+        if (this.unitStats().max_supply != -1)
+        properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
+        properties.put("df", "" + this.unitStats().getDf());
+        if (this.unitStats().armor > 0)
+        properties.put("ar", "" + this.unitStats().getArmor());
+        properties.put("name", this.getName());
+
+        properties.put("atk_range", "" + this.unitStats().getAttackRange());
+        properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        return properties;
     }
 }

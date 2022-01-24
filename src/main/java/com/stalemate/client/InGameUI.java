@@ -21,6 +21,7 @@ package com.stalemate.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stalemate.client.config.ButtonTooltips;
+import com.stalemate.client.property.ClientSideProperty;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -30,6 +31,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -55,10 +57,9 @@ public class InGameUI extends JPanel {
         return in_client;
     }
 
-    private record StatsToRender(int hp, int max_hp, int su, int max_su, int atk, int df, String name, int armor){
+    public record PropertiesToRender(ArrayList<ClientSideProperty> properties){};
 
-    }
-    private StatsToRender statsToRender = null;
+    private PropertiesToRender propertiesToRender = null;
 
     protected volatile boolean unsafe_;
 
@@ -93,7 +94,7 @@ public class InGameUI extends JPanel {
 
 
     public void setRender(ArrayList<ArrayList<BufferedImage>> map_to_render, ArrayList<ArrayList<BufferedImage>> fog_of_war, ArrayList<ArrayList<BufferedImage>> entity_render,
-                          ArrayList<BufferedImage> buttons, ArrayList<String> binds, BufferedImage unit_img, StatsToRender statsToRender, BufferedImage selector,
+                          ArrayList<BufferedImage> buttons, ArrayList<String> binds, BufferedImage unit_img, PropertiesToRender propertiesToRender, BufferedImage selector,
                           ArrayList<ArrayList<BufferedImage>> unit_data_ar, ArrayList<BufferedImage> unit_queue, ArrayList<String> unit_times,
                           int mp, boolean is_it_your_turn, String[][] button_ids, int sel_x_frame, int sel_y_frame, int cam_sel_mode){
         while (unsafe_) {
@@ -105,7 +106,7 @@ public class InGameUI extends JPanel {
         this.buttons = buttons;
         this.binds = binds;
         this.unit_img = unit_img;
-        this.statsToRender = statsToRender;
+        this.propertiesToRender = propertiesToRender;
         this.selector = selector;
         this.unit_data_ar = unit_data_ar;
         this.queue = unit_queue;
@@ -205,12 +206,7 @@ public class InGameUI extends JPanel {
                    "queue" : [0, {"texture" : "", "turn_time" : 0}],
 
                    NOTE: If buttons are -1 it means unit doesn't have buttons
-                   "hp" : 0,
-                   "max_hp" : 0,
-                   "supply" : 0,
-                   "max_supply" : 0,
-                   "df" : 0,
-                   "ar" : 0 <- Armor
+                   "properties" : <Properties>
                    "texture" : "texture_here.png"
 
                    "iselectorbutton_press" : true,
@@ -248,7 +244,7 @@ public class InGameUI extends JPanel {
                 ArrayList<String> binds = new ArrayList<>();
                 ArrayList<String> unit_queue_turn_time = new ArrayList<>();
                 BufferedImage selected_unit_image = null;
-                StatsToRender statsToRender = null;
+                PropertiesToRender propertiesToRender = null;
                 BufferedImage selector = null;
 
                 String[][] button_ids ={{null, null, null},{null, null, null},{null, null, null}};
@@ -259,9 +255,13 @@ public class InGameUI extends JPanel {
                 if (!(data_map.get("selected_unit_data") instanceof Integer)) {
                     selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");
 
-                    // Create StatsToRender
-                    statsToRender = new StatsToRender((int)(selected_unit.get("hp")), (int)(selected_unit.get("max_hp")),
-                            (int)(selected_unit.get("su")), (int)(selected_unit.get("max_su")), (int)(selected_unit.get("atk")), (int)(selected_unit.get("df")), (String)(selected_unit.get("name")), (int)(selected_unit.get("ar")));
+                    // Create PropertiesToRender
+                    ArrayList<ArrayList<String>> unready_properties = (ArrayList<ArrayList<String>>) selected_unit.get("properties");
+                    ArrayList<ClientSideProperty> clientSideProperties = new ArrayList<>();
+                    for (ArrayList<String> p : unready_properties){
+                        clientSideProperties.add(new ClientSideProperty(p.get(0), p.get(1)));
+                    }
+                    propertiesToRender = new PropertiesToRender(clientSideProperties);
 
                     // Add "big unit texture"
                     boolean texture_missing = false;
@@ -517,7 +517,7 @@ public class InGameUI extends JPanel {
                 int sel_x_frame = (sel_x - ((int)data_map.get("x")+6))*64 + 6*64;
                 int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 3*64;
 
-                interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, statsToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode);
+                interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, propertiesToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -685,6 +685,17 @@ public class InGameUI extends JPanel {
         }
     }
 
+    public String matchKeyToString(String key){
+        return switch (key) {
+            case "atk" -> "ATK";
+            case "df" -> "DF";
+            case "hp" -> "HP";
+            case "su" -> "SU";
+            case "ar" -> "Armor";
+            default -> null;
+        };
+    }
+
     public void paint(Graphics g)
     {
         g.clearRect(0, 0, 900, 900);
@@ -825,19 +836,31 @@ public class InGameUI extends JPanel {
             if (unit_img != null) g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192+32, 384+32, null);
 
             // Render the stats
-            if (statsToRender != null){
+            if (propertiesToRender != null){
+                // Find name of a unit
+                ClientSideProperty name = null;
+                for (ClientSideProperty property: propertiesToRender.properties){
+                    if (property.key().equals("name")){
+                        name = property;
+                    }
+                }
+                @SuppressWarnings("unchecked") ArrayList<ClientSideProperty> properties = (ArrayList<ClientSideProperty>) propertiesToRender.properties.clone();
+                properties.remove(name);
+                PropertiesToRender propertiesToRender2 = new PropertiesToRender(properties);
+
                 g.setColor(Color.BLACK);
                 g.setFont(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
-                g.drawString(statsToRender.name,192+32+64+128+32, 384+30);
+                g.drawString(name.value(),192+32+64+128+32, 384+30);
 
                 g.setFont(basis33.deriveFont((float)(20)));
-                g.drawString("ATK: " + statsToRender.atk, 192+32+64+128, 384+43);
-                g.drawString("DF: " + statsToRender.df, 192+32+64+128, 384+43+13);
-                g.drawString("HP: " + statsToRender.hp + "/" + statsToRender.max_hp, 192+32+64+128, 384+43+13+13);
-                if (statsToRender.max_su != -1)
-                g.drawString("SU: " + statsToRender.su + "/" + statsToRender.max_su, 192+32+64+128, 384+43+13+13+13);
-                if (statsToRender.armor > 0)
-                g.drawString("Armor: " + statsToRender.armor, 192+32+64+128, 384+43+13+13+13+13);
+
+                int y__ = 1;
+                for (ClientSideProperty clientSideProperty: propertiesToRender2.properties){
+                    if (matchKeyToString(clientSideProperty.key()) != null){
+                        g.drawString(matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192+32+64+128, 384+43+13*y__);
+                        y__++;
+                    }
+                }
             }
 
             g.setColor(Color.BLACK);

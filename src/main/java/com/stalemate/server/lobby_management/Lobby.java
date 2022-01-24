@@ -699,18 +699,8 @@ public class Lobby implements Runnable{
 
                 if (selected_unit != null) {
                     HashMap<String, Object> selected_unit_data = new HashMap<>();
-                    selected_unit_data.put("hp", selected_unit.unitStats().getHp());
-                    selected_unit_data.put("max_hp", selected_unit.unitStats().getMaxHp());
-                    selected_unit_data.put("atk", selected_unit.unitStats().getAtk());
-                    selected_unit_data.put("su", selected_unit.unitStats().getSupply());
-                    selected_unit_data.put("max_su", selected_unit.unitStats().getMaxSupply());
-                    selected_unit_data.put("df", selected_unit.unitStats().getDf());
-                    selected_unit_data.put("ar", selected_unit.unitStats().getArmor());
-                    selected_unit_data.put("name", selected_unit.getName());
+                    selected_unit_data.put("properties", selected_unit.getProperties().getProperties());
                     selected_unit_data.put("texture", selected_unit.getTextureFileName());
-
-                    selected_unit_data.put("atk_range", selected_unit.unitStats().getAttackRange());
-                    selected_unit_data.put("mov_range", selected_unit.unitStats().getMovementRange());
 
                     ArrayList<Object> buttons = new ArrayList<>();
                     Unit.IButton iselectorbutton_used = null;

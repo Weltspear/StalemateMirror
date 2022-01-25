@@ -2,8 +2,8 @@ Source code of this game is licensed under GNU AGPLv3 (see [LICENSE](LICENSE)).
 (content which is located under src/main/java directory and src/test/java directory)
 
 All content which is located under src/main/resources directory is licensed under
-CC-BY-SA. (see https://creativecommons.org/licenses/by-sa/4.0/legalcode) and content which is located there was made by 
-Weltspear and Dżołąb.
+CC-BY-SA except font basis33. (see https://creativecommons.org/licenses/by-sa/4.0/legalcode) and content which is located there was made by 
+Weltspear and Dżołąb except font basis33.
 
 This game uses font called basis33:
 ```

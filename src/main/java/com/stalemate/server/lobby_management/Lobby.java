@@ -228,21 +228,24 @@ public class Lobby implements Runnable{
             *       {
             *           "action" : "ISelectorButtonPress"
             *           "params" : {"id" : "id_here"}
-            *       }
+            *       },
             *       {
             *           "action" : "DeselectUnit"
-            *       }
+            *       },
             *       {
             *           "action" : "ISBSelect"
-            *       }
+            *       },
             *       {
             *           "action" : "ISBCancel"
-            *       }
+            *       },
             *       {
             *           "action" : "EndTurn"
-            *       }
+            *       },
             *       {
             *           "action" : "ChangeCamSelMode"
+            *       }
+            *       {
+            *           "action" : "TeleportCamToBase1"
             *       }
             *   ]
             * }
@@ -257,6 +260,8 @@ public class Lobby implements Runnable{
                 Map<String, Object> data_map = (new ObjectMapper()).readValue(json, Map.class);
                 ArrayList<Map<String, Object>> actions = (ArrayList<Map<String, Object>>) data_map.get("actions");
 
+                boolean ignore_cam_set = false;
+
                 for (Map<String, Object> action : actions) {
                     if (action.get("action").equals("ChangeCamSelMode")){
                         switch (camSelMode) {
@@ -264,8 +269,25 @@ public class Lobby implements Runnable{
                             case 1 -> camSelMode = 0;
                         }
                     }
+                    else if (action.get("action").equals("TeleportCamToBase1")){
+                        iselectorbuttonid = null;
+                        selected_unit = null;
+                        camSelMode = 0;
 
-                    if (action.get("action").equals("SelectUnit")) {
+                        for (Unit u: team.getTeamUnits()){
+                            if (u instanceof IBase){
+                                cam_x = u.getX() - 6;
+                                cam_y = u.getY() - 2;
+
+                                selector_x = u.getX();
+                                selector_y = u.getY();
+                                break;
+                            }
+                        }
+                        ignore_cam_set = true;
+                    }
+
+                    else if (action.get("action").equals("SelectUnit")) {
                         iselectorbuttonid = null;
                         selected_unit = null;
 
@@ -278,7 +300,7 @@ public class Lobby implements Runnable{
                         }
 
                     }
-                    if (action.get("action").equals("IStandardButtonPress")) {
+                    else if (action.get("action").equals("IStandardButtonPress")) {
                         if (game.getTeamDoingTurn() == team) {
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
@@ -310,7 +332,7 @@ public class Lobby implements Runnable{
                         }
                     }
 
-                    if (action.get("action").equals("ISelectorButtonPress")) {
+                    else if (action.get("action").equals("ISelectorButtonPress")) {
                         if (game.getTeamDoingTurn() == team) {
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
@@ -350,7 +372,7 @@ public class Lobby implements Runnable{
                         }
                     }
 
-                    if (action.get("action").equals("ISBSelect")) {
+                    else if (action.get("action").equals("ISBSelect")) {
                         if (game.getTeamDoingTurn() == team) {
                             if (selected_unit != null && iselectorbuttonid != null) {
                                 if (team.getTeamUnits().contains(selected_unit)) {
@@ -383,16 +405,16 @@ public class Lobby implements Runnable{
                         }
                     }
 
-                    if (action.get("action").equals("ISBCancel")) {
+                    else if (action.get("action").equals("ISBCancel")) {
                         iselectorbuttonid = null;
                     }
 
-                    if (action.get("action").equals("DeselectUnit")) {
+                    else if (action.get("action").equals("DeselectUnit")) {
                         selected_unit = null;
                         iselectorbuttonid = null;
                     }
 
-                    if (action.get("action").equals("EndTurn")) {
+                    else if (action.get("action").equals("EndTurn")) {
                         if (game.getTeamDoingTurn() == team) {
                             if (!team.endedTurn()) {
                                 team.endTurn();
@@ -456,7 +478,7 @@ public class Lobby implements Runnable{
                             }
                         }
                     }
-                } else {
+                } else if (!ignore_cam_set){
                     if (camSelMode == 0) {
                         if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
                             if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {

@@ -129,8 +129,13 @@ public class Client {
                     action.put("action", "ChangeCamSelMode");
                     actions.add(action);
                 }
-
-                if (Objects.equals(input, "UP")){
+                else if (Objects.equals(input, "SHIFT")){
+                    camSelMode = 0;
+                    HashMap<String, Object> action = new HashMap<>();
+                    action.put("action", "TeleportCamToBase1");
+                    actions.add(action);
+                }
+                else if (Objects.equals(input, "UP")){
                     if (camSelMode == 0)
                         client_cam_y--;
                     else

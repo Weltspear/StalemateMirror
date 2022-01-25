@@ -167,6 +167,9 @@ public class InGameUI extends JPanel {
             else if (e.getKeyCode() == KeyEvent.VK_CONTROL){
                 keysInQueue.add("CTRL");
             }
+            else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
+                keysInQueue.add("SHIFT");
+            }
             isBusy = false;
         }
 

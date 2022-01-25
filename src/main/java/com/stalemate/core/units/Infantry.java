@@ -32,15 +32,18 @@ public class Infantry extends Unit {
     public Infantry(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 30, 30, 0), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
-        idle.addFrame("assets/units/soldier_idle_0.png");
-        idle.addFrame("assets/units/soldier_idle_1.png");
+        idle.addFrame("assets/units/rifleman_idle_1.png");
+        idle.addFrame("assets/units/rifleman_idle_2.png");
 
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
 
-        Animation attack = new Animation(3);
-        attack.addFrame("assets/units/soldier_idle_0.png");
-        attack.addFrame("assets/units/soldier_attack_1.png");
+        Animation attack = new Animation(1);
+        attack.addFrame("assets/units/rifleman_fire_1.png");
+        attack.addFrame("assets/units/rifleman_fire_2.png");
+        attack.addFrame("assets/units/rifleman_fire_3.png");
+        attack.addFrame("assets/units/rifleman_fire_4.png");
+        attack.addFrame("assets/units/rifleman_fire_5.png");
 
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");

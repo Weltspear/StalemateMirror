@@ -305,7 +305,7 @@ public class Lobby implements Runnable{
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
                             if (selected_unit != null) {
-                                if (team.getTeamUnits().contains(selected_unit)) {
+                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                     for (Unit.IButton ibutton : selected_unit.getButtons()) {
                                         if (ibutton != null)
                                             if (ibutton.identifier().equals(params.get("id"))) {
@@ -337,7 +337,7 @@ public class Lobby implements Runnable{
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
                             if (selected_unit != null & iselectorbuttonid == null) {
-                                if (team.getTeamUnits().contains(selected_unit)) {
+                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                     for (Unit.IButton button : selected_unit.getButtons()) {
                                         if (button != null)
                                             if (button.identifier().equals(params.get("id"))) {
@@ -375,7 +375,7 @@ public class Lobby implements Runnable{
                     else if (action.get("action").equals("ISBSelect")) {
                         if (game.getTeamDoingTurn() == team) {
                             if (selected_unit != null && iselectorbuttonid != null) {
-                                if (team.getTeamUnits().contains(selected_unit)) {
+                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                     for (Unit.IButton button : selected_unit.getButtons()) {
                                         if (button != null)
                                             if (button.identifier().equals(iselectorbuttonid)) {
@@ -442,7 +442,7 @@ public class Lobby implements Runnable{
                     int range = -1;
 
                     // Get selector button
-                    if (team.getTeamUnits().contains(selected_unit))
+                    if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)
                         for (Unit.IButton button : selected_unit.getButtons()) {
                             if (button != null)
                                 if (button.identifier().equals(iselectorbuttonid)) {
@@ -727,7 +727,7 @@ public class Lobby implements Runnable{
                     ArrayList<Object> buttons = new ArrayList<>();
                     Unit.IButton iselectorbutton_used = null;
 
-                    if (team.getTeamUnits().contains(selected_unit)){
+                    if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null){
                         for (Unit.IButton button : selected_unit.getButtons()){
                             if (button != null){
                                 HashMap<String, Object> button_ = new HashMap<>();

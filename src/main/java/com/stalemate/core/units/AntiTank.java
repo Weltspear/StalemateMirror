@@ -23,6 +23,7 @@ import com.stalemate.core.animation.Animation;
 import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.buttons.AttackButton;
 import com.stalemate.core.buttons.MoveButton;
+import com.stalemate.core.properties.Properties;
 import com.stalemate.core.units.util.IMechanized;
 import com.stalemate.core.util.IGameController;
 
@@ -54,5 +55,21 @@ public class AntiTank extends Unit implements IMechanized {
         buttons.add((new AttackButton(attack_range)).enableAT());
         buttons.add(new MoveButton(movement_range));
         return buttons;
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties properties = new Properties();
+        properties.put("name", this.getName());
+        properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
+        properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
+        properties.put("df", "" + this.unitStats().getDf());
+        properties.put("atk", "" + (this.unitStats().getAtk() - 3));
+        properties.put("atk_ar_1", "" + (this.unitStats().getAtk() + 1));
+        properties.put("atk_ar_2", "" + (this.unitStats().getAtk() + 3));
+
+        properties.put("atk_range", "" + this.unitStats().getAttackRange());
+        properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        return properties;
     }
 }

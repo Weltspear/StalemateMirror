@@ -372,6 +372,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
         if (this.unitStats().max_supply != -1)
         properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
+        if (this.unitStats().getAtk() > 0)
+        properties.put("atk", "" + this.unitStats().getAtk());
+        if (this.unitStats().getDf() > 0)
         properties.put("df", "" + this.unitStats().getDf());
         if (this.unitStats().armor > 0)
         properties.put("ar", "" + this.unitStats().getArmor());

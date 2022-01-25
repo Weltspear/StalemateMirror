@@ -4,3 +4,5 @@ properties:
   hp: "HP"
   su: "SU"
   ar: "Armor"
+  atk_ar_1: "ATK (vs Armor: 1)"
+  atk_ar_2: "ATK (vs Armor: 2)"

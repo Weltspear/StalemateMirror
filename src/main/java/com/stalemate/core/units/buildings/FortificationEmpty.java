@@ -53,8 +53,10 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
             if (!selected_unit.hasTurnEnded() && selected_unit instanceof Infantry selected_unit_i){
                 gameController.rmEntity(unit);
                 gameController.rmEntity(selected_unit);
-                Unit f = new Fortification(unit.getX(), unit.getY(), gameController, selected_unit_i);
+                Fortification f = new Fortification(unit.getX(), unit.getY(), gameController, selected_unit_i);
+                f.setSupplyLevel((float)selected_unit.getSupply()/(float)selected_unit.getMaxSupply());
                 gameController.getUnitsTeam(selected_unit).addUnit(f);
+                f.endTurn();
                 gameController.addEntity(f);
             }
         }

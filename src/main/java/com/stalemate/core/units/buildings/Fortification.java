@@ -22,6 +22,7 @@ import com.stalemate.core.Unit;
 import com.stalemate.core.animation.Animation;
 import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.buttons.AttackButton;
+import com.stalemate.core.buttons.Scrap;
 import com.stalemate.core.buttons.util.Unflippable;
 import com.stalemate.core.units.Infantry;
 import com.stalemate.core.units.util.IBuilding;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 
 public class Fortification extends Unit implements IBuilding, Unflippable {
     private Infantry unitInside;
+
+    private boolean isScrapped = false;
 
     public Fortification(int x, int y, IGameController game, Infantry unit) {
         super(x, y, game, new UnitStats(20, 20, 2, 0, 2, 1, 15, 15, 2), new AnimationController(), "Fortification");
@@ -63,7 +66,50 @@ public class Fortification extends Unit implements IBuilding, Unflippable {
     public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new AttackButton(attack_range));
+        buttons.add(new ScrapFortification());
 
         return buttons;
     }
+
+    public void setSupplyLevel(float supplyLevel){
+        supply = (int) (supply * supplyLevel);
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        if (this.hp <= 0 && !isScrapped){
+            unitInside.setSupply(
+                    (int) (((float)getSupply()/(float)getMaxSupply())
+                            * (float)unitInside.getMaxSupply()));
+            unitInside.setX(x);
+            unitInside.setY(y);
+            game.addEntity(unitInside);
+        }
+    }
+
+    public class ScrapFortification extends Scrap{
+        ScrapFortification(){
+
+        }
+
+        @Override
+        public void action(Unit unit, IGameController gameController) {
+            isScrapped = true;
+            super.action(unit, gameController);
+
+            if (!unit.hasTurnEnded()){
+                unitInside.setSupply(
+                        (int) (((float)getSupply()/(float)getMaxSupply())
+                                * (float)unitInside.getMaxSupply()));
+                unitInside.setX(x);
+                unitInside.setY(y);
+                gameController.addEntity(unitInside);
+            }
+
+        }
+    }
+
+
 }

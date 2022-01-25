@@ -127,9 +127,11 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
         if (currently_processed_unit != null){
             if (currently_processed_unit.time_in_production != 0)
             currently_processed_unit.time_in_production -= 1;
+            currently_processed_unit.unit.setX(x+deployment_x);
+            currently_processed_unit.unit.setY(y+deployment_y);
             if (currently_processed_unit.time_in_production <= 0){
                 boolean isBlocked = false;
-                for (Entity entity: game.getEntities(x+deployment_x, y)){
+                for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
                     if (entity instanceof Unit){
                         isBlocked = true;
                         break;

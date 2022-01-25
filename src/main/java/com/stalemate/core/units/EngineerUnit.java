@@ -24,10 +24,7 @@ import com.stalemate.core.animation.Animation;
 import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.buttons.AttackButton;
 import com.stalemate.core.buttons.MoveButton;
-import com.stalemate.core.units.buildings.MilitaryTent;
-import com.stalemate.core.units.buildings.SupplyStation;
-import com.stalemate.core.units.buildings.TankFactory;
-import com.stalemate.core.units.buildings.UnderConstructionBuilding;
+import com.stalemate.core.units.buildings.*;
 import com.stalemate.core.units.util.IConstructableBuilding;
 import com.stalemate.core.units.util.IMechanized;
 import com.stalemate.core.util.IGameController;
@@ -146,11 +143,13 @@ public class EngineerUnit extends Unit {
         private final Class<? extends Unit> b;
         private final int constructionTime;
         private final int cost;
+        private final boolean isNeutral;
 
-        public ConstructBuildingButton(Class<? extends Unit> building, int constructionTime, int cost){
+        public ConstructBuildingButton(Class<? extends Unit> building, int constructionTime, int cost, boolean isNeutral){
             b = building;
             this.constructionTime = constructionTime;
             this.cost = cost;
+            this.isNeutral = isNeutral;
         }
 
         @Override
@@ -175,14 +174,20 @@ public class EngineerUnit extends Unit {
                     e.printStackTrace();
                 }
                 assert building != null;
-                gameController.getUnitsTeam(unit).addUnit(building);
+                if (!isNeutral)
+                    gameController.getUnitsTeam(unit).addUnit(building);
+                else
+                    gameController.getNeutralTeam().addUnit(building);
 
                 if (!(building instanceof IConstructableBuilding)){
                     throw new IllegalArgumentException("Building must be constructable!");
                 }
 
                 UnderConstructionBuilding ucb = new UnderConstructionBuilding(x, y, gameController, building, constructionTime, ((IConstructableBuilding) building).underConstructionAC());
-                gameController.getUnitsTeam(unit).addUnit(ucb);
+                if (!isNeutral)
+                    gameController.getUnitsTeam(unit).addUnit(ucb);
+                else
+                    gameController.getNeutralTeam().addUnit(ucb);
                 gameController.addEntity(ucb);
 
                 gameController.getUnitsTeam(unit).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
@@ -230,7 +235,7 @@ public class EngineerUnit extends Unit {
             buttons.add(new BuildMenuButton());
         }
         else{
-            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 3, 2) {
+            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 3, 2, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -251,7 +256,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_military_tent";
                 }
             });
-            buttons.add(new ConstructBuildingButton(TankFactory.class, 4, 3) {
+            buttons.add(new ConstructBuildingButton(TankFactory.class, 4, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -272,7 +277,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_tank_factory";
                 }
             });
-            buttons.add(new ConstructBuildingButton(SupplyStation.class, 3, 4) {
+            buttons.add(new ConstructBuildingButton(SupplyStation.class, 3, 4, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -293,8 +298,29 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_supply_station";
                 }
             });
+            buttons.add(new ConstructBuildingButton(FortificationEmpty.class, 3, 4, true) {
+                @Override
+                public String selector_texture() {
+                    return "assets/ui/selectors/ui_repair.png";
+                }
 
-            for (int i = 0; i < 5; i++){
+                @Override
+                public String bind() {
+                    return "F";
+                }
+
+                @Override
+                public String texture() {
+                    return "texture_missing.png";
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_engineer_unit_build_menu_build_fortification";
+                }
+            });
+
+            for (int i = 0; i < 4; i++){
                 buttons.add(null);
             }
             buttons.add(new ExitBuildMenuButton());

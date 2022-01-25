@@ -30,6 +30,7 @@ import com.stalemate.core.units.util.IBase;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Lobby implements Runnable{
     Game game;
@@ -375,8 +376,9 @@ public class Lobby implements Runnable{
                     else if (action.get("action").equals("ISBSelect")) {
                         if (game.getTeamDoingTurn() == team) {
                             if (selected_unit != null && iselectorbuttonid != null) {
-                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
-                                    for (Unit.IButton button : selected_unit.getButtons()) {
+                                if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (!team.getTeamUnits().contains(selected_unit) && selected_unit.getButtonsEnemy() != null)) {
+                                    for (Unit.IButton button : Objects.requireNonNull((selected_unit.getButtons() != null
+                                            && team.getTeamUnits().contains(selected_unit)) ? selected_unit.getButtons() : selected_unit.getButtonsEnemy())) {
                                         if (button != null)
                                             if (button.identifier().equals(iselectorbuttonid)) {
                                                 if (button instanceof Unit.ISelectorButton) {
@@ -388,10 +390,12 @@ public class Lobby implements Runnable{
 
                                                     for (Entity entity : entities) {
                                                         if (entity instanceof Unit) {
-                                                            if (((Unit.ISelectorButtonUnit) button).isUsedOnOurUnit() && team.getTeamUnits().contains(entity)) {
+                                                            if ((((Unit.ISelectorButtonUnit) button).isUsedOnOurUnit() &&
+                                                                    (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)) == team.getTeamUnits().contains(entity)) {
                                                                 ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 iselectorbuttonid = null;
-                                                            } else if (((Unit.ISelectorButtonUnit) button).isUsedOnEnemy() && !team.getTeamUnits().contains(entity)) {
+                                                            } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
+                                                                    && (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)) != team.getTeamUnits().contains(entity)) {
                                                                 ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 iselectorbuttonid = null;
                                                             }
@@ -442,8 +446,9 @@ public class Lobby implements Runnable{
                     int range = -1;
 
                     // Get selector button
-                    if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)
-                        for (Unit.IButton button : selected_unit.getButtons()) {
+                    if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (selected_unit.getButtonsEnemy() != null && !team.getTeamUnits().contains(selected_unit)))
+                        for (Unit.IButton button : Objects.requireNonNull((selected_unit.getButtons() != null
+                                && team.getTeamUnits().contains(selected_unit)) ? selected_unit.getButtons() : selected_unit.getButtonsEnemy())) {
                             if (button != null)
                                 if (button.identifier().equals(iselectorbuttonid)) {
                                     if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
@@ -746,7 +751,7 @@ public class Lobby implements Runnable{
                                 buttons.add(0);
                             }
                         }
-                    } else {
+                    } else if (!team.getTeamUnits().contains(selected_unit)) {
                         if (selected_unit.getButtonsEnemy() != null)
                             for (Unit.IButton button : selected_unit.getButtonsEnemy()){
                                 if (button != null){

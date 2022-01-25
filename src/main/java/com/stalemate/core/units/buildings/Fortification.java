@@ -23,13 +23,16 @@ import com.stalemate.core.animation.Animation;
 import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.buttons.AttackButton;
 import com.stalemate.core.buttons.util.Unflippable;
+import com.stalemate.core.units.Infantry;
 import com.stalemate.core.units.util.IBuilding;
 import com.stalemate.core.util.IGameController;
 
 import java.util.ArrayList;
 
 public class Fortification extends Unit implements IBuilding, Unflippable {
-    public Fortification(int x, int y, IGameController game) {
+    private Infantry unitInside;
+
+    public Fortification(int x, int y, IGameController game, Infantry unit) {
         super(x, y, game, new UnitStats(20, 20, 2, 0, 2, 1, 15, 15, 2), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);
@@ -52,6 +55,8 @@ public class Fortification extends Unit implements IBuilding, Unflippable {
         anim.setCurrentAnimation("idle");
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
+
+        unitInside = unit;
     }
 
     @Override

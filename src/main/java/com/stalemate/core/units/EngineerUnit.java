@@ -209,11 +209,15 @@ public class EngineerUnit extends Unit {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 1, 1, 27, 27, 0), new AnimationController(), "Engineer");
 
         Animation idle = new Animation(20);
-        idle.addFrame("assets/units/engineer_idle_0.png");
         idle.addFrame("assets/units/engineer_idle_1.png");
+        idle.addFrame("assets/units/engineer_idle_2.png");
 
-        Animation attack = new Animation(3);
-        attack.addFrame("assets/units/engineer_attack_0.png");
+        Animation attack = new Animation(1);
+        attack.addFrame("assets/units/engineer_fire_1.png");
+        attack.addFrame("assets/units/engineer_fire_2.png");
+        attack.addFrame("assets/units/engineer_fire_3.png");
+        attack.addFrame("assets/units/engineer_fire_4.png");
+        attack.addFrame("assets/units/engineer_fire_5.png");
 
         anim.addAnimation("idle", idle);
         anim.addAnimation("attack", attack);

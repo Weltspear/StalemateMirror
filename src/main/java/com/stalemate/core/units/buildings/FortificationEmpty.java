@@ -88,7 +88,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
     }
 
     public FortificationEmpty(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(20, 20, 0, 0, 0, 0, 0, -1, 2), new AnimationController(), "Fortification");
+        super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, 0, -1, 2), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/fortification.png");

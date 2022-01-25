@@ -36,7 +36,7 @@ public class Fortification extends Unit implements IBuilding, Unflippable {
     private boolean isScrapped = false;
 
     public Fortification(int x, int y, IGameController game, Infantry unit) {
-        super(x, y, game, new UnitStats(20, 20, 2, 0, 2, 1, 15, 15, 2), new AnimationController(), "Fortification");
+        super(x, y, game, new UnitStats(15, 15, 2, 0, 2, 1, 30, 30, 2), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/fortification.png");

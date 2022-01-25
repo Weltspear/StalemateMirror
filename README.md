@@ -21,7 +21,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Make a tutorial on how to play this game.
 - [ ] Replace `System.out.println` with a logger.
 - [ ] Replace raw `HashMap`s with `EntryTable`s.
-- [ ] Make compression `Base64` handle unexpected things.
+- [x] Make compression `Base64` handle unexpected things.
 - [ ] Correct `ConnectionHandler` saying wrong ip after user connects.
 
 ## Project status

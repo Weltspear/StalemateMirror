@@ -20,6 +20,9 @@ package com.stalemate.server.lobby_management;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.stalemate.core.Entity;
 import com.stalemate.core.MapObject;
 import com.stalemate.core.Unit;
@@ -258,7 +261,16 @@ public class Lobby implements Runnable{
                     selector_y = cam_y + 2;
                 }
 
-                Map<String, Object> data_map = (new ObjectMapper()).readValue(json, Map.class);
+                PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType(HashMap.class)
+                        .allowIfBaseType(Float.class)
+                        .allowIfBaseType(Integer.class)
+                        .allowIfBaseType(String.class)
+                        .allowIfBaseType(Double.class)
+                        .allowIfBaseType(Short.class)
+                        .allowIfBaseType(ArrayList.class).build();
+                ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
                 ArrayList<Map<String, Object>> actions = (ArrayList<Map<String, Object>>) data_map.get("actions");
 
                 boolean ignore_cam_set = false;

@@ -20,6 +20,9 @@ package com.stalemate.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.stalemate.client.config.Grass32ConfigClient;
 import com.stalemate.util.CompressionDecompression;
 
@@ -85,7 +88,16 @@ public class Client {
         @SuppressWarnings("unchecked")
         public void receive_packet(String json){
             try {
-                Map<String, Object> data_map = (new ObjectMapper()).readValue(json, Map.class);
+                PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType(HashMap.class)
+                        .allowIfBaseType(Float.class)
+                        .allowIfBaseType(Integer.class)
+                        .allowIfBaseType(String.class)
+                        .allowIfBaseType(Double.class)
+                        .allowIfBaseType(Short.class)
+                        .allowIfBaseType(ArrayList.class).build();
+                ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
 
                 cam_x = (int) data_map.get("x");
                 cam_y = (int) data_map.get("y");
@@ -228,7 +240,16 @@ public class Client {
             packet.put("actions", actions);
 
             try {
-                return (new ObjectMapper()).writeValueAsString(packet);
+                PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                        .allowIfBaseType(HashMap.class)
+                        .allowIfBaseType(Float.class)
+                        .allowIfBaseType(Integer.class)
+                        .allowIfBaseType(String.class)
+                        .allowIfBaseType(Double.class)
+                        .allowIfBaseType(Short.class)
+                        .allowIfBaseType(ArrayList.class).build();
+                ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                return (objectMapper).writeValueAsString(packet);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -311,7 +332,16 @@ public class Client {
                 System.out.println("Server closed connection unexpectedly");
                 return;
             }
-            Map<String, Object> lobby_map = (new ObjectMapper()).readValue(lobby_list, Map.class);
+            PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                    .allowIfBaseType(HashMap.class)
+                    .allowIfBaseType(Float.class)
+                    .allowIfBaseType(Integer.class)
+                    .allowIfBaseType(String.class)
+                    .allowIfBaseType(Double.class)
+                    .allowIfBaseType(Short.class)
+                    .allowIfBaseType(ArrayList.class).build();
+            ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+            Map<String, Object> lobby_map = (objectMapper).readValue(lobby_list, Map.class);
 
             sendEncryptedData(Grass32ConfigClient.getNickname());
 
@@ -346,7 +376,16 @@ public class Client {
                         System.out.println("Server closed connection unexpectedly");
                         return;
                     }
-                    lobby_map = (new ObjectMapper()).readValue(lobby_list, Map.class);
+                    ptv = BasicPolymorphicTypeValidator.builder()
+                            .allowIfBaseType(HashMap.class)
+                            .allowIfBaseType(Float.class)
+                            .allowIfBaseType(Integer.class)
+                            .allowIfBaseType(String.class)
+                            .allowIfBaseType(Double.class)
+                            .allowIfBaseType(Short.class)
+                            .allowIfBaseType(ArrayList.class).build();
+                    objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                    lobby_map = (objectMapper).readValue(lobby_list, Map.class);
                 }
             }
             System.out.println("Connected to lobby!");

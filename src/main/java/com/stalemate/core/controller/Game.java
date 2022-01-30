@@ -42,6 +42,7 @@ public class Game implements IGameControllerGamemode {
     final ArrayList<Team> already_assigned_teams = new ArrayList<>();
     private int team_doing_turn = 0;
     private volatile boolean entity_update_unsafe = false;
+    private volatile boolean team_update_unsafe = false;
     private volatile boolean tbunsafe; // to be added / to be removed unsafe
 
     // Additional map parameters
@@ -256,6 +257,7 @@ public class Game implements IGameControllerGamemode {
         }
         entity_update_unsafe = false;
 
+        team_update_unsafe = true;
         if (teams.get(team_doing_turn).endedTurn() || teams.get(team_doing_turn).AUTO_SKIP_TURN){
             ArrayList<Unit> to_remove_dead = new ArrayList<>();
 
@@ -292,6 +294,7 @@ public class Game implements IGameControllerGamemode {
         for (Team team: teams){
             team.update();
         }
+        team_update_unsafe = false;
 
         mode.tick(this);
     }
@@ -354,6 +357,9 @@ public class Game implements IGameControllerGamemode {
     }
 
     public synchronized Team getUnassignedTeam(){
+        while (team_update_unsafe) {
+            Thread.onSpinWait();
+        }
         for (Team team : teams){
             if (!already_assigned_teams.contains(team) && !(team instanceof NeutralTeam)){
                 already_assigned_teams.add(team);
@@ -372,6 +378,9 @@ public class Game implements IGameControllerGamemode {
     }
 
     public Team getUnitsTeam(Unit u){
+        while (team_update_unsafe) {
+            Thread.onSpinWait();
+        }
         for (Team team: teams){
             if (team.getTeamUnits().contains(u)){
                 return team;
@@ -400,6 +409,9 @@ public class Game implements IGameControllerGamemode {
     }
 
     public Team getVictoriousTeam(){
+        while (team_update_unsafe) {
+            Thread.onSpinWait();
+        }
         return mode.getVictoriousTeam(this);
     }
 }

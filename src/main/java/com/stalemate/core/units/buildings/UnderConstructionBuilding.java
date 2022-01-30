@@ -48,6 +48,10 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
             game.rmEntity(this);
             game.addEntity(outBuilding);
         }
+
+        if (hp <= 0){
+            outBuilding.setHp(-1);
+        }
     }
 
     @Override

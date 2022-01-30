@@ -19,6 +19,9 @@
 package com.stalemate.core.map_system;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.stalemate.core.Entity;
 import com.stalemate.core.MapObject;
 import com.stalemate.core.Unit;
@@ -105,7 +108,9 @@ public class MapLoader {
     @SuppressWarnings("unchecked")
     public static Game load(String map_path){
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                    .build();
+            ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
             HashMap<String, Object> map = null;
             try {
                 map = objectMapper.readValue(new File(map_path), HashMap.class);

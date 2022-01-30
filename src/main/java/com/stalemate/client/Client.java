@@ -89,13 +89,7 @@ public class Client {
         public void receive_packet(String json){
             try {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                        .allowIfBaseType(HashMap.class)
-                        .allowIfBaseType(Float.class)
-                        .allowIfBaseType(Integer.class)
-                        .allowIfBaseType(String.class)
-                        .allowIfBaseType(Double.class)
-                        .allowIfBaseType(Short.class)
-                        .allowIfBaseType(ArrayList.class).build();
+                        .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
 
@@ -241,13 +235,7 @@ public class Client {
 
             try {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                        .allowIfBaseType(HashMap.class)
-                        .allowIfBaseType(Float.class)
-                        .allowIfBaseType(Integer.class)
-                        .allowIfBaseType(String.class)
-                        .allowIfBaseType(Double.class)
-                        .allowIfBaseType(Short.class)
-                        .allowIfBaseType(ArrayList.class).build();
+                        .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 return (objectMapper).writeValueAsString(packet);
             } catch (JsonProcessingException e) {
@@ -333,13 +321,7 @@ public class Client {
                 return;
             }
             PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                    .allowIfBaseType(HashMap.class)
-                    .allowIfBaseType(Float.class)
-                    .allowIfBaseType(Integer.class)
-                    .allowIfBaseType(String.class)
-                    .allowIfBaseType(Double.class)
-                    .allowIfBaseType(Short.class)
-                    .allowIfBaseType(ArrayList.class).build();
+                    .build();
             ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
             Map<String, Object> lobby_map = (objectMapper).readValue(lobby_list, Map.class);
 
@@ -377,13 +359,7 @@ public class Client {
                         return;
                     }
                     ptv = BasicPolymorphicTypeValidator.builder()
-                            .allowIfBaseType(HashMap.class)
-                            .allowIfBaseType(Float.class)
-                            .allowIfBaseType(Integer.class)
-                            .allowIfBaseType(String.class)
-                            .allowIfBaseType(Double.class)
-                            .allowIfBaseType(Short.class)
-                            .allowIfBaseType(ArrayList.class).build();
+                            .build();
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                     lobby_map = (objectMapper).readValue(lobby_list, Map.class);
                 }

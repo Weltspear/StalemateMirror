@@ -262,13 +262,7 @@ public class Lobby implements Runnable{
                 }
 
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                        .allowIfBaseType(HashMap.class)
-                        .allowIfBaseType(Float.class)
-                        .allowIfBaseType(Integer.class)
-                        .allowIfBaseType(String.class)
-                        .allowIfBaseType(Double.class)
-                        .allowIfBaseType(Short.class)
-                        .allowIfBaseType(ArrayList.class).build();
+                        .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
                 ArrayList<Map<String, Object>> actions = (ArrayList<Map<String, Object>>) data_map.get("actions");

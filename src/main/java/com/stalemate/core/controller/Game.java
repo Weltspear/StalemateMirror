@@ -389,6 +389,15 @@ public class Game implements IGameControllerGamemode {
         return null;
     }
 
+    public Team getUnitsTeamIgnoreSafety(Unit u){
+        for (Team team: teams){
+            if (team.getTeamUnits().contains(u)){
+                return team;
+            }
+        }
+        return null;
+    }
+
     @Override
     public int getMapWidth() {
         if (getMapHeight() >= 1){

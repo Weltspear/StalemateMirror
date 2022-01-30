@@ -21,6 +21,7 @@ package com.stalemate.core.units.buildings;
 import com.stalemate.core.Entity;
 import com.stalemate.core.Unit;
 import com.stalemate.core.animation.AnimationController;
+import com.stalemate.core.controller.Game;
 import com.stalemate.core.units.util.IBuilding;
 import com.stalemate.core.util.IGameController;
 
@@ -145,7 +146,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
                 }
 
                 if (!isBlocked) {
-                    game.getUnitsTeam(this).addUnit(currently_processed_unit.unit);
+                    ((Game)game).getUnitsTeamIgnoreSafety(this).addUnit(currently_processed_unit.unit);
                     game.addEntity(currently_processed_unit.unit);
                     currently_processed_unit = null;
                 }

@@ -844,7 +844,14 @@ public class InGameUI extends JPanel {
 
                 g.setColor(Color.BLACK);
                 g.setFont(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
-                g.drawString(name.value(),192+32+64+128+32, 384+30);
+
+                // Get font char size
+                FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
+                int width = metrics.stringWidth("A");
+
+                int h = ((224 - (name.value().length() * width))/2);
+
+                g.drawString(name.value(),192+32+64+128+h, 384+30); // 416-640
 
                 g.setFont(basis33.deriveFont((float)(20)));
 

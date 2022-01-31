@@ -98,7 +98,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
 
             @Override
             public String texture() {
-                return "texture_missing.png";
+                return "assets/ui/buttons/scrap_unit_queue.png";
             }
 
             @Override
@@ -119,7 +119,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
 
             @Override
             public String texture() {
-                return "texture_missing.png";
+                return "assets/ui/buttons/set_deployment_point.png";
             }
 
             @Override

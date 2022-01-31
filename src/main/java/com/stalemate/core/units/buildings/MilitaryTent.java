@@ -147,7 +147,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
 
             @Override
             public String texture() {
-                return "texture_missing.png";
+                return "assets/ui/buttons/scrap_unit_queue.png";
             }
 
             @Override
@@ -168,7 +168,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
 
             @Override
             public String texture() {
-                return "texture_missing.png";
+                return "assets/ui/buttons/set_deployment_point.png";
             }
 
             @Override

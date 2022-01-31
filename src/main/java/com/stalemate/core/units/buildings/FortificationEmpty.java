@@ -40,7 +40,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
 
         @Override
         public String texture() {
-            return "texture_missing.png";
+            return "assets/ui/buttons/load_fortification.png";
         }
 
         @Override

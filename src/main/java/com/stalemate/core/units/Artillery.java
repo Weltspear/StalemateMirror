@@ -126,7 +126,7 @@ public class Artillery extends Unit implements IMechanized {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new AttackButton(attack_range));
         buttons.add(new MoveButton(movement_range));
-        buttons.add(new ShellingButton(attack_range));
+        // buttons.add(new ShellingButton(attack_range));
         return buttons;
     }
 }

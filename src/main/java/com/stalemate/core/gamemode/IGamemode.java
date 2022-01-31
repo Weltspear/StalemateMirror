@@ -18,11 +18,15 @@
 
 package com.stalemate.core.gamemode;
 
-import com.stalemate.core.util.IGameControllerGamemode;
 import com.stalemate.core.controller.Game;
+import com.stalemate.core.properties.Properties;
+import com.stalemate.core.util.IGameControllerGamemode;
 
 public interface IGamemode {
     void tick(IGameControllerGamemode g);
     boolean hasGameEnded(IGameControllerGamemode g);
     Game.Team getVictoriousTeam(IGameControllerGamemode g);
+    default Properties getProperties(){
+        return new Properties();
+    }
 }

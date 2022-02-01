@@ -22,6 +22,7 @@ import com.stalemate.core.Unit;
 import com.stalemate.core.animation.Animation;
 import com.stalemate.core.animation.AnimationController;
 import com.stalemate.core.buttons.Scrap;
+import com.stalemate.core.controller.Game;
 import com.stalemate.core.units.util.IBuilding;
 import com.stalemate.core.units.util.IConstructableBuilding;
 import com.stalemate.core.util.IGameController;
@@ -124,7 +125,8 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     @Override
     public void turnUpdate() {
         super.turnUpdate();
-        game.getUnitsTeam(this).setMilitaryPoints(game.getUnitsTeam(this).getMilitaryPoints()+1);
+        ((Game)game).getUnitsTeamIgnoreSafety(this).setMilitaryPoints(((Game)game).getUnitsTeamIgnoreSafety(this)
+                .getMilitaryPoints()+1);
 
         supply+=5;
         if (supply > max_supply){

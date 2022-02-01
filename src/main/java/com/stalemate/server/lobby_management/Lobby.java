@@ -383,8 +383,12 @@ public class Lobby implements Runnable{
                         if (game.getTeamDoingTurn() == team) {
                             if (selected_unit != null && iselectorbuttonid != null) {
                                 if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (!team.getTeamUnits().contains(selected_unit) && selected_unit.getButtonsEnemy() != null)) {
-                                    for (Unit.IButton button : Objects.requireNonNull((selected_unit.getButtons() != null
-                                            && team.getTeamUnits().contains(selected_unit)) ? selected_unit.getButtons() : selected_unit.getButtonsEnemy())) {
+                                    boolean isSelectedUnitEnemyTeam = !(selected_unit.getButtons() != null
+                                            && team.getTeamUnits().contains(selected_unit));
+                                    for (Unit.IButton button : isSelectedUnitEnemyTeam && selected_unit.getButtonsEnemy() != null ?
+                                        selected_unit.getButtonsEnemy() : isSelectedUnitEnemyTeam
+                                            ? new ArrayList<Unit.IButton>() : selected_unit.getButtons() != null
+                                            ? selected_unit.getButtons() : new ArrayList<Unit.IButton>()) {
                                         if (button != null)
                                             if (button.identifier().equals(iselectorbuttonid)) {
                                                 if (button instanceof Unit.ISelectorButton) {
@@ -396,13 +400,16 @@ public class Lobby implements Runnable{
 
                                                     for (Entity entity : entities) {
                                                         if (entity instanceof Unit) {
-                                                            if ((((Unit.ISelectorButtonUnit) button).isUsedOnOurUnit() &&
-                                                                    (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)) == team.getTeamUnits().contains(entity)) {
+                                                            if ((((Unit.ISelectorButtonUnit) button).isUsedOnAlliedUnit()
+                                                                    && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
                                                                 ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 iselectorbuttonid = null;
                                                             } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
-                                                                    && (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null)) != team.getTeamUnits().contains(entity)) {
-                                                                ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                    && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
+                                                                if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
+                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                else if (!isSelectedUnitEnemyTeam)
+                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 iselectorbuttonid = null;
                                                             }
                                                         }

@@ -114,6 +114,8 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         boolean isUsedOnOurUnit();
         boolean isUsedOnEnemy();
         boolean isUsedOnAlliedUnit();
+
+        default boolean canEnemyTeamUseOnOtherEnemyTeamUnit() {return false;}
     }
 
     /***

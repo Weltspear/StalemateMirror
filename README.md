@@ -22,7 +22,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Replace `System.out.println` with a logger.
 - [ ] Replace raw `HashMap`s with `EntryTable`s.
 - [x] Make compression `Base64` handle unexpected things.
-- [ ] Correct `ConnectionHandler` saying wrong ip after user connects.
+- [x] Correct `ConnectionHandler` saying wrong ip after user connects.
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

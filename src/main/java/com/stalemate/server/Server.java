@@ -44,7 +44,7 @@ public class Server {
             serverSocket = new ServerSocket(59657);
             while (server_running) {
                 Socket client = serverSocket.accept();
-                System.out.println("Connection established from " + serverSocket.getInetAddress().getHostAddress() + " port: " + serverSocket.getLocalPort());
+                System.out.println("Connection established from remote address" + client.getRemoteSocketAddress().toString());
                 ConnectionHandler connection_handler = new ConnectionHandler(client, lobbyHandler);
                 new Thread(connection_handler).start();
                 // connectionHandlers.add(connection_handler);

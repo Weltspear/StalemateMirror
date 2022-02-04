@@ -30,8 +30,7 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
@@ -253,12 +252,14 @@ public class Client {
 
             // InetAddress.getByName(sc.next())
             String ip = sc.next();
-            
+
             client = new Socket(InetAddress.getByName(ip).getHostAddress(), 59657);
 
             handle_connection();
-        } catch (Exception e){
-            e.printStackTrace();
+        } catch (ConnectException e){
+            System.out.println("Connection refused");
+        } catch (IOException e){
+            System.out.println("Unknown host");
         }
     }
 
@@ -450,7 +451,6 @@ public class Client {
             byte[] decipheredText = cipherDecryption.doFinal(Base64.getDecoder().decode(input.readLine()));
             return new String(decipheredText, StandardCharsets.UTF_8);
         } catch (Exception e){
-            e.printStackTrace();
             return null;
         }
     }
@@ -496,7 +496,11 @@ public class Client {
     }
 
     private String readEncryptedDataAES(){
-        byte[] iv = Base64.getDecoder().decode(readEncryptedData());
+        String data_read = readEncryptedData();
+        if (data_read == null){
+            return null;
+        }
+        byte[] iv = Base64.getDecoder().decode(data_read);
         IvParameterSpec iv_ = new IvParameterSpec(iv);
 
         Cipher cipher;
@@ -525,6 +529,9 @@ public class Client {
     public String readCompressedAndEncrypted(){
         try {
             String compressed = readEncryptedDataAES();
+            if (compressed == null){
+                return null;
+            }
             return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
         } catch (IOException e) {
             e.printStackTrace();

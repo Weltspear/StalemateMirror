@@ -9,3 +9,7 @@ lobbies:
     next_maps : [
       "maps/dev_default.json"
     ]
+  - map: "maps/dev_combat_test.json"
+    next_maps: [
+      "maps/dev_combat_test.json"
+    ]

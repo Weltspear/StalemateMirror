@@ -408,6 +408,8 @@ public class Lobby implements Runnable{
                                                                     && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
                                                                 if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))
+                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 else if (!isSelectedUnitEnemyTeam)
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 iselectorbuttonid = null;

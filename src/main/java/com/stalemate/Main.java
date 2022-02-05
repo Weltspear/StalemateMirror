@@ -42,7 +42,7 @@ public class Main {
                         Stalemate
                      1: Play
                      2: Start a server
-                     ##################
+                    ##################
                      """;
 
             System.out.println(menu);

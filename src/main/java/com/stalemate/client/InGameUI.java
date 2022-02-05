@@ -607,7 +607,7 @@ public class InGameUI extends JPanel {
                 y++;
             }
 
-            if ((((64 <= e.getY())&&( e.getY() <= 6 * 64)) && ((0 <= e.getX())&&(e.getX() <= 13 * 64))) || (((10 * 64 <= e.getX())&&(e.getX() <= 13 * 64)) && ((6 * 64 <= e.getY())&&( e.getY() <= 9 * 64)))){
+            if ((((64 < e.getY())&&( e.getY() < 6 * 64)) && ((0 < e.getX())&&(e.getX() < 13 * 64))) || (((10 * 64 < e.getX())&&(e.getX() < 13 * 64)) && ((6 * 64 < e.getY())&&( e.getY() < 9 * 64)))){
                 InGameUI.this.x_prev = e.getX() / 64;
                 InGameUI.this.y_prev = e.getY() / 64;
                 InGameUI.this.do_render_prev = true;

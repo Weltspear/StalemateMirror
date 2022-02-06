@@ -102,6 +102,7 @@ public class Lobby implements Runnable{
             }
 
             player.setGame(game);
+            player.setMapPath(map_path);
         }
 
         while (!game.hasGameEnded() /* Game isn't ended, true is a placeholder */){ // Hardcoded tick speed: 15
@@ -162,6 +163,7 @@ public class Lobby implements Runnable{
 
     public static class Player{
 
+        private String map_path = null;
         private int cam_x = 0;
         private int cam_y = 0;
 
@@ -180,6 +182,10 @@ public class Lobby implements Runnable{
         String nickname;
 
         public Player(){
+        }
+
+        public void setMapPath(String map_path){
+            this.map_path = map_path;
         }
 
         private volatile boolean isConnectionTerminated = false;
@@ -659,11 +665,13 @@ public class Lobby implements Runnable{
                 toBeJsoned.put("x", cam_x);
                 toBeJsoned.put("y", cam_y);
 
+                toBeJsoned.put("map_path", map_path);
+
                 toBeJsoned.put("sel_x", selector_x);
                 toBeJsoned.put("sel_y", selector_y);
 
                 toBeJsoned.put("entity_render", entity_render_final);
-                toBeJsoned.put("map_textures", map_textures);
+                // toBeJsoned.put("map_textures", map_textures);
                 toBeJsoned.put("fog_of_war", fog_of_war);
                 toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
 

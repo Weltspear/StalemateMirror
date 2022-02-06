@@ -20,6 +20,9 @@ package com.stalemate.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.stalemate.client.config.ButtonTooltips;
 import com.stalemate.client.config.PropertiesMatcher;
 import com.stalemate.client.property.ClientSideProperty;
@@ -183,6 +186,7 @@ public class InGameUI extends JPanel {
         private final InGameUI interface_;
         private final BufferedImage fog_of_war;
         private final HashMap<String, BufferedImage> loaded_images = new HashMap<>();
+        private final ClientMapLoader mapLoader = new ClientMapLoader();
 
         /*
         {
@@ -190,6 +194,8 @@ public class InGameUI extends JPanel {
 
             "x" : 0,
             "y" : 0,
+
+            "map_path" : path,
 
             "sel_x" : 0,
             "sel_y" : 0,
@@ -233,11 +239,16 @@ public class InGameUI extends JPanel {
         }
 
         @SuppressWarnings("unchecked")
-        public synchronized void change_render_data(String json, int CamSelMode) {
+        public synchronized void change_render_data(String json, int CamSelMode) throws ClientMapLoader.ClientMapLoaderException {
             try {
-                Map<String, Object> data_map = (new ObjectMapper()).readValue(json, Map.class);
+                PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                        .build();
+                ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
-                ArrayList<ArrayList<String>> map_textures = (ArrayList<ArrayList<String>>) data_map.get("map_textures");
+                mapLoader.load((String) data_map.get("map_path"));
+
+                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap((Integer) data_map.get("x"), (Integer)data_map.get("y"));
                 ArrayList<ArrayList<String>> entity_render = (ArrayList<ArrayList<String>>) data_map.get("entity_render");
                 ArrayList<ArrayList<Integer>> fog_of_war = (ArrayList<ArrayList<Integer>>) data_map.get("fog_of_war");
                 ArrayList<ArrayList<HashMap<String, Object>>> unit_data_ar_ = (ArrayList<ArrayList<HashMap<String, Object>>>) data_map.get("unit_data_ar");

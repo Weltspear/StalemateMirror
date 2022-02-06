@@ -20,19 +20,17 @@ package com.stalemate.server;
 
 import com.stalemate.server.lobby_management.Lobby;
 import com.stalemate.server.lobby_management.LobbyHandler;
-import com.stalemate.util.CompressionDecompression;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.Random;
 
 public class ConnectionHandler implements Runnable{
     public boolean isHandlerTerminated = false;
@@ -56,8 +54,8 @@ public class ConnectionHandler implements Runnable{
     public void run() {
         // todo: make it handle unexpected disconnects while choosing lobbies
         try {
-            // client.setTcpNoDelay(true);
             client.setSoTimeout(30000);
+
             try {
                 // Initialize encryption
                 Signature.getInstance("SHA256withRSA");
@@ -72,7 +70,7 @@ public class ConnectionHandler implements Runnable{
                 // System.out.println("[ConnectionHandler] Decryption initialized");
 
                 // Initialize output and input
-                output = new PrintWriter(client.getOutputStream(), true);
+                output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
                 // output = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(client.getOutputStream()), StandardCharsets.UTF_8), true);
                 input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
                 // System.out.println("[ConnectionHandler] Input output initialized");
@@ -169,20 +167,23 @@ public class ConnectionHandler implements Runnable{
 
             while (!terminated){
                 if (player.isConnectionTerminated()){
-                    sendCompressedAndEncryptedAES("connection_terminated");
-                    sendCompressedAndEncryptedAES("Cause is unknown. Probably another player had disconnected");
+                    writeSafely("connection_terminated");
+                    writeSafely("Cause is unknown. Probably another player had disconnected or another player has" +
+                            " map missing");
                     client.close();
                     isHandlerTerminated = true;
                     return;
                 }
-                // 50 packets per second
+                // 33.33 packets per second
                 long t1 = System.currentTimeMillis();
-                sendCompressedAndEncryptedAES(player.create_json_packet());
+                writeSafely(player.create_json_packet());
                 long t2 = System.currentTimeMillis() - t1;
-                if (20 - t2 > 0){
-                    Thread.sleep(20-t2);
+                if (30 - t2 > 0){
+                    Thread.sleep(30-t2);
                 }
-                String packet = readCompressedAndEncrypted();
+
+                String packet = readSafely();
+
                 if (packet == null){
                     System.out.println("Connection lost unexpectedly!");
                     player.terminateConnection();
@@ -206,8 +207,8 @@ public class ConnectionHandler implements Runnable{
                 }
             }
 
-            sendCompressedAndEncryptedAES("endofgame");
-            sendCompressedAndEncryptedAES(player.getEndOfAGameMessage());
+            writeSafely("endofgame");
+            writeSafely(player.getEndOfAGameMessage());
             isHandlerTerminated = true;
             client.close();
         } catch (Exception e){
@@ -250,7 +251,10 @@ public class ConnectionHandler implements Runnable{
         }
     }
 
-    private void sendEncryptedDataAES(String data){
+    private final Random rnd = new Random(new BigInteger((new SecureRandom()).generateSeed(30)).longValue());
+
+    @Deprecated
+    private void sendEncryptedDataAES(String data) {
         Cipher cipher = null;
         try {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
@@ -258,7 +262,6 @@ public class ConnectionHandler implements Runnable{
 
         }
         // Create random iv
-        SecureRandom rnd = new SecureRandom();
         assert cipher != null;
         byte[] iv = new byte[cipher.getBlockSize()];
         rnd.nextBytes(iv);
@@ -277,10 +280,9 @@ public class ConnectionHandler implements Runnable{
         } catch (IllegalBlockSizeException | BadPaddingException ignored) {
 
         }
-
-
     }
 
+    @Deprecated
     private String readEncryptedDataAES(){
         byte[] iv;
         try {
@@ -304,23 +306,15 @@ public class ConnectionHandler implements Runnable{
         return null;
     }
 
-    public void sendCompressedAndEncryptedAES(String data){
+    public String readSafely(){
         try {
-            byte[] compressed = CompressionDecompression.compress(data);
-            sendEncryptedDataAES(new String(Base64.getEncoder().encode(compressed)));
-        } catch (IOException e) {
-            e.printStackTrace();
+            return input.readLine();
+        } catch (IOException e){
+            return null;
         }
     }
 
-    public String readCompressedAndEncrypted(){
-        try {
-            String compressed = readEncryptedDataAES();
-            if (compressed == null) return null;
-            return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public void writeSafely(String a){
+        output.println(a);
     }
 }

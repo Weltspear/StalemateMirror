@@ -24,20 +24,19 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.stalemate.client.config.Grass32ConfigClient;
-import com.stalemate.util.CompressionDecompression;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.net.*;
+import java.math.BigInteger;
+import java.net.ConnectException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
 @SuppressWarnings("unchecked")
 public class Client {
@@ -51,10 +50,6 @@ public class Client {
 
     private PrintWriter output;
     private BufferedReader input;
-
-    private PublicKey server_public_key;
-
-    private GameControllerClient controller;
 
     public Client(){
 
@@ -283,14 +278,14 @@ public class Client {
                 // System.out.println("Decryption initialized");
 
                 // Initialize output and input
-                output = new PrintWriter(client.getOutputStream(), true);
+                output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
                 input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
                 // System.out.println("Input output initialized");
 
                 // Get server's public key
                 byte[] publicKeyByteServer = Base64.getDecoder().decode(input.readLine());
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                server_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteServer));
+                PublicKey server_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteServer));
                 // System.out.println("Public key received!");
 
                 // Send public key to client
@@ -378,26 +373,26 @@ public class Client {
 
             if (data.equals("start")) {
                 InGameUI inGameUI = new InGameUI();
-                controller = new GameControllerClient(inGameUI.getInput());
+                InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
+                (new Thread(runnable)).start();
+                GameControllerClient controller = new GameControllerClient(inGameUI.getInput());
 
                 int tick = 0;
 
                 while (true) {
                     long t1 = System.currentTimeMillis();
-                    String json = readCompressedAndEncrypted();
+                    String json = readSafely();
                     long t2 = System.currentTimeMillis();
                     tick++;
-                    if (tick == 1000) {
+                    if (tick == 100) {
                         System.out.println("ping:" + (t2 - t1));
                         tick = 0;
-                    }
-                    if (20-(t2-t1) > 0){
-                        Thread.sleep(20-(t2-t1));
                     }
 
                     if (json == null){
                         client.close();
                         System.out.println("Server closed connection unexpectedly");
+                        runnable.terminate();
                         inGameUI.getFrame().dispose();
                         return;
                     }
@@ -406,24 +401,31 @@ public class Client {
                     }
 
                     if (json.startsWith("connection_terminated")){
-                        String cause = readCompressedAndEncrypted();
+                        String cause = input.readLine();
                         System.out.println("Lobby was terminated. Additional information: " + cause);
+                        runnable.terminate();
                         inGameUI.getFrame().dispose();
                         client.close();
                         return;
                     }
 
-                    inGameUI.getRenderer().change_render_data(json, controller.camSelMode);
+                    try {
+                        inGameUI.getRenderer().change_render_data(json, controller.camSelMode);
+                    } catch (ClientMapLoader.ClientMapLoaderException e){
+                        System.err.println("Failed to load map shutting down client...");
+                        runnable.terminate();
+                        client.close();
+                        inGameUI.getFrame().dispose();
+                        return;
+                    }
                     controller.receive_packet(json);
 
                     String packet = controller.create_json_packet();
-                    // System.out.println(packet);
-                    sendCompressedAndEncryptedAES(packet);
-                    inGameUI.repaint();
-                    // System.out.println(t2-t1);
+                    writeSafely(packet);
                 }
 
-                System.out.println(readCompressedAndEncrypted());
+                System.out.println(readSafely());
+                runnable.terminate();
                 inGameUI.getFrame().dispose();
 
             } else {
@@ -458,12 +460,15 @@ public class Client {
     // AES encryption
     private SecretKey aesKey;
 
+    private final Random rnd = new Random(new BigInteger((new SecureRandom()).generateSeed(30)).longValue());
+
     private void initAES(){
         String key_str = readEncryptedData();
         byte[] key_bytes = Base64.getDecoder().decode(key_str);
         aesKey = new SecretKeySpec(key_bytes, "AES");
     }
 
+    @Deprecated
     private void sendEncryptedDataAES(String data){
         Cipher cipher = null;
         try {
@@ -472,7 +477,6 @@ public class Client {
             e.printStackTrace();
         }
         // Create random iv
-        SecureRandom rnd = new SecureRandom();
         assert cipher != null;
         byte[] iv = new byte[cipher.getBlockSize()];
         rnd.nextBytes(iv);
@@ -495,6 +499,7 @@ public class Client {
 
     }
 
+    @Deprecated
     private String readEncryptedDataAES(){
         String data_read = readEncryptedData();
         if (data_read == null){
@@ -517,25 +522,15 @@ public class Client {
         return null;
     }
 
-    public void sendCompressedAndEncryptedAES(String data){
+    public String readSafely(){
         try {
-            byte[] compressed = CompressionDecompression.compress(data);
-            sendEncryptedDataAES(new String(Base64.getEncoder().encode(compressed)));
-        } catch (IOException e) {
-            e.printStackTrace();
+            return input.readLine();
+        } catch (IOException e){
+            return null;
         }
     }
 
-    public String readCompressedAndEncrypted(){
-        try {
-            String compressed = readEncryptedDataAES();
-            if (compressed == null){
-                return null;
-            }
-            return CompressionDecompression.decompress(Base64.getDecoder().decode(compressed));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public void writeSafely(String a){
+        output.println(a);
     }
 }

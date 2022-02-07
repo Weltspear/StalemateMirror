@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.panic.ErrorResult;
+import net.panic.Expect;
 import net.stalemate.networking.client.config.Grass32ConfigClient;
 
 import javax.crypto.*;
@@ -310,16 +312,16 @@ public class Client {
             client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout()*1000);
 
             // Make player choose the lobby
-            String lobby_list = readEncryptedData();
-            if (lobby_list == null){
+            Expect<String, ?> lobby_list = readEncryptedData();
+            if (lobby_list.isNone()){
                 client.close();
-                System.out.println("Server closed connection unexpectedly");
+                System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
                 return;
             }
             PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                     .build();
             ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-            Map<String, Object> lobby_map = (objectMapper).readValue(lobby_list, Map.class);
+            Map<String, Object> lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
 
             sendEncryptedData(Grass32ConfigClient.getNickname());
 
@@ -341,37 +343,43 @@ public class Client {
                 }
                 sendEncryptedData(lobby_selected);
 
-                String status = readEncryptedData();
-                if (status.equals("OK")){
+                Expect<String, ?> status = readEncryptedData();
+                if (status.isNone()){
+                    client.close();
+                    System.out.println("Failed to read lobby selection status: " + status.getResult().message());
+                    return;
+                }
+
+                if (status.unwrap().equals("OK")){
                     lobby_invalid = false;
                 }
                 else{
-                    System.out.println("Can't connect to lobby because " + (status.equals("INCORRECT_LOBBY") ? "incorrect lobby number was provided" :
-                            status.equals("STARTED") ? "game has already started" : status.equals("FULL") ? "lobby is full" : "UNKNOWN") );
+                    System.out.println("Can't connect to lobby because " + (status.unwrap().equals("INCORRECT_LOBBY") ? "incorrect lobby number was provided" :
+                            status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN") );
                     lobby_list = readEncryptedData();
-                    if (lobby_list == null){
+                    if (lobby_list.isNone()){
                         client.close();
-                        System.out.println("Server closed connection unexpectedly");
+                        System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
                         return;
                     }
                     ptv = BasicPolymorphicTypeValidator.builder()
                             .build();
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                    lobby_map = (objectMapper).readValue(lobby_list, Map.class);
+                    lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
                 }
             }
             System.out.println("Connected to lobby!");
 
-            String data = readEncryptedData();
-            if (data == null){
+            Expect<String, ?> data = readEncryptedData();
+            if (data.isNone()){
                 client.close();
-                System.out.println("Server closed connection unexpectedly");
+                System.out.println("Unable to get data whether the game started or not: " + data.getResult());
                 return;
             }
 
             client.setSoTimeout(Grass32ConfigClient.getTimeout()*1000);
 
-            if (data.equals("start")) {
+            if (data.unwrap().equals("start")) {
                 InGameUI inGameUI = new InGameUI();
                 InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
                 (new Thread(runnable)).start();
@@ -381,7 +389,7 @@ public class Client {
 
                 while (true) {
                     long t1 = System.currentTimeMillis();
-                    String json = readSafely();
+                    Expect<String, ?> json = readSafely();
                     long t2 = System.currentTimeMillis();
                     tick++;
                     if (tick == 100) {
@@ -389,18 +397,18 @@ public class Client {
                         tick = 0;
                     }
 
-                    if (json == null){
+                    if (json.isNone()){
                         client.close();
-                        System.out.println("Server closed connection unexpectedly");
+                        System.out.println("Failed to read packet: " + json.getResult().message());
                         runnable.terminate();
                         inGameUI.getFrame().dispose();
                         return;
                     }
-                    if (json.startsWith("endofgame")){
+                    if (json.unwrap().startsWith("endofgame")){
                         break;
                     }
 
-                    if (json.startsWith("connection_terminated")){
+                    if (json.unwrap().startsWith("connection_terminated")){
                         String cause = input.readLine();
                         System.out.println("Lobby was terminated. Additional information: " + cause);
                         runnable.terminate();
@@ -410,7 +418,7 @@ public class Client {
                     }
 
                     try {
-                        inGameUI.getRenderer().change_render_data(json, controller.camSelMode);
+                        inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
                     } catch (ClientMapLoader.ClientMapLoaderException e){
                         System.err.println("Failed to load map shutting down client...");
                         runnable.terminate();
@@ -418,7 +426,7 @@ public class Client {
                         inGameUI.getFrame().dispose();
                         return;
                     }
-                    controller.receive_packet(json);
+                    controller.receive_packet(json.unwrap());
 
                     String packet = controller.create_json_packet();
                     writeSafely(packet);
@@ -448,12 +456,14 @@ public class Client {
         }
     }
 
-    private String readEncryptedData(){
+    private Expect<String, ?> readEncryptedData(){
         try {
             byte[] decipheredText = cipherDecryption.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new String(decipheredText, StandardCharsets.UTF_8);
-        } catch (Exception e){
-            return null;
+            return new Expect<>(new String(decipheredText, StandardCharsets.UTF_8));
+        } catch (IOException e){
+            return new Expect<>(() -> "Connection lost!");
+        } catch (IllegalBlockSizeException | BadPaddingException e){
+            return new Expect<>(() -> "Failed to decrypt data");
         }
     }
 
@@ -463,7 +473,7 @@ public class Client {
     private final Random rnd = new Random(new BigInteger((new SecureRandom()).generateSeed(30)).longValue());
 
     private void initAES(){
-        String key_str = readEncryptedData();
+        String key_str = readEncryptedData().unwrap();
         byte[] key_bytes = Base64.getDecoder().decode(key_str);
         aesKey = new SecretKeySpec(key_bytes, "AES");
     }
@@ -500,12 +510,15 @@ public class Client {
     }
 
     @Deprecated
-    private String readEncryptedDataAES(){
-        String data_read = readEncryptedData();
-        if (data_read == null){
-            return null;
+    private Expect<String, ?> readEncryptedDataAES(){
+        byte[] iv;
+
+        Expect<String, ?> data_read = readEncryptedData();
+        if (data_read.isNone()){
+            return new Expect<>(() -> "Failed to get initialization vector" + data_read.getResult().message());
         }
-        byte[] iv = Base64.getDecoder().decode(data_read);
+        iv = Base64.getDecoder().decode(data_read.unwrap());
+
         IvParameterSpec iv_ = new IvParameterSpec(iv);
 
         Cipher cipher;
@@ -513,20 +526,22 @@ public class Client {
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
             cipher.init(Cipher.DECRYPT_MODE, aesKey, iv_);
 
-            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new String(received_data, StandardCharsets.UTF_8);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException | IOException e) {
-            e.printStackTrace();
+            Expect<String, ?> data = readSafely();
+            if (data.isNone()){
+                return data;
+            }
+            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(data.unwrap()));
+            return new Expect<>(new String(received_data, StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException ignored) {
+            return new Expect<>(() -> "Decryption failure");
         }
-
-        return null;
     }
 
-    public String readSafely(){
+    public Expect<String, ErrorResult> readSafely(){
         try {
-            return input.readLine();
+            return new Expect<>(input.readLine());
         } catch (IOException e){
-            return null;
+            return new Expect<>(() -> "Connection lost!");
         }
     }
 

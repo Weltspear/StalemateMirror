@@ -199,9 +199,13 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         hasTurnEnded = false;
     }
 
+    private volatile boolean isAnimationUnsafe = false;
+
     @Override
     public void update() {
+        isAnimationUnsafe = true;
         anim.tick();
+        isAnimationUnsafe = false;
 
         if (hp <= 0){
             game.rmEntity(this);
@@ -218,6 +222,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     @Override
     public String getTextureFileName() {
+        while (isAnimationUnsafe){
+            Thread.onSpinWait();
+        }
         return anim.getCurrentFrame();
     }
 

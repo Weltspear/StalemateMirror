@@ -18,6 +18,8 @@
 
 package net.stalemate.networking.server;
 
+import net.panic.ErrorResult;
+import net.panic.Expect;
 import net.stalemate.networking.server.lobby_management.Lobby;
 import net.stalemate.networking.server.lobby_management.LobbyHandler;
 
@@ -103,10 +105,9 @@ public class ConnectionHandler implements Runnable{
             sendEncryptedData(lobbyHandler.lobby_list_json());
             // System.out.println("[ConnectionHandler] Lobby list sent!");
 
-            String player_nickname = readEncryptedData();
-
-            if (player_nickname == null){
-                System.out.println("Connection lost unexpectedly!");
+            Expect<String, ?> nick = readEncryptedData();
+            if (nick.isNone()){
+                System.err.println("Failed to read nickname: " + nick.getResult().message());
                 client.close();
                 isHandlerTerminated = true;
                 return;
@@ -116,16 +117,16 @@ public class ConnectionHandler implements Runnable{
             try {
                 boolean lobby_invalid = true;
                 while (lobby_invalid) {
-                    String lb = readEncryptedData();
-                    if (lb == null){
-                        System.out.println("Connection lost unexpectedly!");
+                    Expect<String, ?> lb = readEncryptedData();
+                    if (lb.isNone()){
+                        System.out.println("Failed to get player's lobby: " + lb.getResult().message());
                         client.close();
                         isHandlerTerminated = true;
                         return;
                     }
                     int lobby;
                     try {
-                        lobby = Integer.parseInt(lb);
+                        lobby = Integer.parseInt(lb.unwrap());
                     } catch (Exception e){
                         System.out.println("Client miscommunication closing connection");
                         client.close();
@@ -153,7 +154,7 @@ public class ConnectionHandler implements Runnable{
                 return;
             }
             // System.out.println("[ConnectionHandler] Lobby selection is OK!");
-            player.set_nickname(player_nickname);
+            player.set_nickname(nick.unwrap());
 
             while (!player.hasGameStarted()){
                 // Waits for game start
@@ -182,17 +183,17 @@ public class ConnectionHandler implements Runnable{
                     Thread.sleep(30-t2);
                 }
 
-                String packet = readSafely();
+                Expect<String, ?> packet = readSafely();
 
-                if (packet == null){
-                    System.out.println("Connection lost unexpectedly!");
+                if (packet.isNone()){
+                    System.out.println("Failed to read packet: " + packet.getResult().message());
                     player.terminateConnection();
                     client.close();
                     isHandlerTerminated = true;
                     return;
                 }
                 try {
-                    player.push_command(packet);
+                    player.push_command(packet.unwrap());
                 } catch (Exception e){
                     System.out.println("Client miscommunication. Closing connection");
                     e.printStackTrace();
@@ -227,12 +228,14 @@ public class ConnectionHandler implements Runnable{
         }
     }
 
-    private String readEncryptedData(){
+    private Expect<String, ?> readEncryptedData(){
         try {
             byte[] decipheredText = cipherDecryption.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new String(decipheredText, StandardCharsets.UTF_8);
-        } catch (Exception e){
-            return null;
+            return new Expect<>(new String(decipheredText, StandardCharsets.UTF_8));
+        } catch (IOException e){
+            return new Expect<>(() -> "Connection lost!");
+        } catch (IllegalBlockSizeException | BadPaddingException e){
+            return new Expect<>(() -> "Failed to decrypt data");
         }
     }
 
@@ -283,13 +286,15 @@ public class ConnectionHandler implements Runnable{
     }
 
     @Deprecated
-    private String readEncryptedDataAES(){
+    private Expect<String, ?> readEncryptedDataAES(){
         byte[] iv;
-        try {
-            iv = Base64.getDecoder().decode(readEncryptedData());
-        } catch (NullPointerException e){
-            return null;
+
+        Expect<String, ?> data_read = readEncryptedData();
+        if (data_read.isNone()){
+            return new Expect<>(() -> "Failed to get initialization vector" + data_read.getResult().message());
         }
+        iv = Base64.getDecoder().decode(data_read.unwrap());
+
         IvParameterSpec iv_ = new IvParameterSpec(iv);
 
         Cipher cipher;
@@ -297,20 +302,22 @@ public class ConnectionHandler implements Runnable{
             cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
             cipher.init(Cipher.DECRYPT_MODE, aesKey, iv_);
 
-            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new String(received_data, StandardCharsets.UTF_8);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException | IOException ignored) {
-
+            Expect<String, ?> data = readSafely();
+            if (data.isNone()){
+                return data;
+            }
+            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(data.unwrap()));
+            return new Expect<>(new String(received_data, StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException ignored) {
+            return new Expect<>(() -> "Decryption failure");
         }
-
-        return null;
     }
 
-    public String readSafely(){
+    public Expect<String, ErrorResult> readSafely(){
         try {
-            return input.readLine();
+            return new Expect<>(input.readLine());
         } catch (IOException e){
-            return null;
+            return new Expect<>(() -> "Connection lost!");
         }
     }
 

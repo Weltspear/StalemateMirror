@@ -540,24 +540,12 @@ public class Lobby implements Runnable{
                     selector_y = cam_y + 2;
                 }
 
-                // Create map render (Only tiles)
-                ArrayList<ArrayList<String>> map_textures = new ArrayList<>(); // FINAL
+                // Create entity render
                 ArrayList<ArrayList<Entity>> entity_render = new ArrayList<>();
                 int y2 = 0;
                 for (int y = 0; y < 5; y++){
-                    map_textures.add(new ArrayList<>());
                     entity_render.add(new ArrayList<>());
                     for (int x = 0; x < 13; x++){
-                        if (cam_x + x >= 0 && cam_y + y >= 0)
-                            if (cam_y + y < game.getSizeY())
-                                if (cam_x + x < game.getSizeX(cam_y+y))
-                                    map_textures.get(y2).add(game.getMapObject(cam_x+x, cam_y+y).texture_file);
-                                else
-                                    map_textures.get(y2).add("empty.png");
-                            else
-                                map_textures.get(y2).add("empty.png");
-                        else
-                            map_textures.get(y2).add("empty.png");
                         boolean has_space_been_filled = false;
                         for (Entity entity: game.getAllEntitiesCopy()){
                             if (entity.getX() == cam_x+x & entity.getY() == cam_y+y){
@@ -671,11 +659,8 @@ public class Lobby implements Runnable{
                 toBeJsoned.put("sel_y", selector_y);
 
                 toBeJsoned.put("entity_render", entity_render_final);
-                // toBeJsoned.put("map_textures", map_textures);
                 toBeJsoned.put("fog_of_war", fog_of_war);
                 toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
-
-                // Create a minimap thing
 
                 // tiles
                 ArrayList<ArrayList<Boolean>> map_tiles = new ArrayList<>();

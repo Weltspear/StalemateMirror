@@ -149,11 +149,9 @@ public class MapLoader {
             int y = 0;
             for (ArrayList<String> row : loaded_map) {
                 map_.add(new ArrayList<>());
-
                 for (String x : row) {
                     map_.get(y).add(tileset.get(x));
                 }
-
                 y++;
             }
 

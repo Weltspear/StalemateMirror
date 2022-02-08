@@ -373,7 +373,7 @@ public class Client {
             Expect<String, ?> data = readEncryptedData();
             if (data.isNone()){
                 client.close();
-                System.out.println("Unable to get data whether the game started or not: " + data.getResult());
+                System.out.println("Unable to get data whether the game started or not: " + data.getResult().message());
                 return;
             }
 
@@ -432,7 +432,15 @@ public class Client {
                     writeSafely(packet);
                 }
 
-                System.out.println(readSafely());
+                Expect<String, ?> result = readSafely();
+                if (result.isNone()){
+                    System.out.println("Failed to get result " + result.getResult().message());
+                    client.close();
+                    runnable.terminate();
+                    inGameUI.getFrame().dispose();
+                    return;
+                }
+                System.out.println(result.unwrap());
                 runnable.terminate();
                 inGameUI.getFrame().dispose();
 

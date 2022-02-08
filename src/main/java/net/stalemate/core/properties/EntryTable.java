@@ -18,6 +18,9 @@
 
 package net.stalemate.core.properties;
 
+import net.panic.ErrorResult;
+import net.panic.Expect;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,235 +28,93 @@ import java.util.NoSuchElementException;
 
 @SuppressWarnings("unchecked")
 public class EntryTable {
+    public static class EntryTableGetFailure implements ErrorResult {
+        @Override
+        public String message() {
+            return "Object not found";
+        }
+    }
 
     protected HashMap<String,Object> table = new HashMap<>();
 
     public EntryTable(){
-        table.put("entryTableMark", true);
+    }
+
+    public<T> Expect<T, EntryTableGetFailure> get(String key){
+        if (table.containsKey(key)){
+            try {
+                return new Expect<>((T) table.get(key));
+            } catch (ClassCastException e){
+                return new Expect<>((T) table.get(key));
+            }
+        } else{
+            return new Expect<>(new EntryTableGetFailure());
+        }
+    }
+
+    public<T> void set(String key, T var){
+        table.put(key, var);
     }
 
     public void setString(String key, String var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public String getString(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof String s) {
-                return s;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<String, EntryTableGetFailure> getString(String key){
+        return get(key);
     }
 
     public void setLong(String key, long var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public Long getLong(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof Long s) {
-                return s;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<Long, EntryTableGetFailure> getLong(String key){
+        return get(key);
     }
 
     public void setInt(String key, int var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public Integer getInteger(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof Integer s) {
-                return s;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<Integer, EntryTableGetFailure> getInteger(String key){
+        return get(key);
     }
 
     public void setDouble(String key, double var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public Double getDouble(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof Double s) {
-                return s;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<Double, EntryTableGetFailure> getDouble(String key){
+        return get(key);
     }
 
     public void setFloat(String key, float var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public Float getFloat(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof Float s) {
-                return s;
-            }
-            else if (table.get(key) instanceof Double s){
-                double s1 = s;
-                return (float)s1;
-            }
+    public Expect<Float, EntryTableGetFailure> getFloat(String key){
+        Expect<Double, EntryTableGetFailure> d = get(key);
+        if (d.isNone()){
+            return new Expect<>(d.getResult());
         }
-        throw new NoSuchElementException("Element " + key + " not found");
+
+        return new Expect<>(d.unwrap().floatValue());
     }
 
-    public EntryTable getEntryTable(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof HashMap s) {
-                if (s.containsKey("entryTableMark")){
-                    EntryTable table = new EntryTable();
-                    table.table = s;
-                    return table;
-                }
-            }
-            else if (table.get(key) == null){
-                return null;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
-    }
-
-    public void setEntryTable(String key, EntryTable var){
-        this.table.put(key, var != null ? var.table: null);
-    }
-
-    public ArrayList<EntryTable> getEntryTableArrayList(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof ArrayList t) {
-                ArrayList<EntryTable> entryTables = new ArrayList<>();
-                for (Object wildcard: t){
-                    if (wildcard == null){
-                        entryTables.add(null);
-                    }
-                    else if (wildcard instanceof HashMap map){
-                        if (map.containsKey("entryTableMark")){
-                            EntryTable entryTable = new EntryTable();
-                            entryTable.table = map;
-                            entryTables.add(entryTable);
-                        }
-                    }
-                }
-                return entryTables;
-            }
-
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
-    }
-
-    public void setEntryTableArrayList(String key, ArrayList<EntryTable> var){
-        ArrayList<HashMap<String, Object>> tables = new ArrayList<>();
-        for (EntryTable entryTable: var){
-            tables.add(entryTable != null ? entryTable.table : null);
-        }
-        table.put(key, tables);
-    }
-
-    public ArrayList<String> getStringArrayList(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof ArrayList t) {
-                ArrayList<String> strings = new ArrayList<>();
-                for (Object wildcard: t){
-                    if (wildcard instanceof String str){
-                        strings.add(str);
-                    }
-                }
-                return strings;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
-    }
-
-    public void setStringArrayList(String key, ArrayList<String> var){
-        table.put(key, var);
-    }
-
-    public Boolean getBoolean(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof Boolean s) {
-                return s;
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<Boolean, EntryTableGetFailure> getBoolean(String key){
+        return get(key);
     }
 
     public void setBoolean(String key, Boolean var){
-        table.put(key, var);
+        set(key, var);
     }
 
-    public Character getChar(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof String s && s.length() == 1) {
-                return s.charAt(0);
-            }
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
+    public Expect<Character, EntryTableGetFailure> getChar(String key){
+        return get(key);
     }
 
     public void setChar(String key, char var){
         table.put(key, var);
-    }
-
-    public Color getColor(String key){
-        EntryTable t = getEntryTable(key);
-        return new Color(t.getInteger("r"), t.getInteger("g"), t.getInteger("b"));
-    }
-
-    public void setColor(String key, Color var){
-        EntryTable t = new EntryTable();
-        t.setInt("r", var.getRed());
-        t.setInt("g", var.getGreen());
-        t.setInt("b", var.getBlue());
-        setEntryTable(key, t);
-    }
-
-    public ArrayList<ArrayList<EntryTable>> get2DEntryTableArrayList(String key){
-        if (table.containsKey(key)){
-            if (table.get(key) instanceof ArrayList t) {
-                ArrayList<ArrayList<EntryTable>> entryTables = new ArrayList<>();
-                int y = 0;
-                for (Object wildcard: t){
-                    entryTables.add(new ArrayList<>());
-                    if (wildcard instanceof ArrayList t2){
-                        for (Object wildcard2 : t2){
-                            if (wildcard2 == null){
-                                entryTables.get(y).add(null);
-                            }
-                            else if (wildcard2 instanceof HashMap map){
-                                if (map.containsKey("entryTableMark")){
-                                    EntryTable entryTable = new EntryTable();
-                                    entryTable.table = map;
-                                    entryTables.get(y).add(entryTable);
-                                }
-                            }
-                        }
-                    }
-                    y++;
-                }
-                return entryTables;
-            }
-
-        }
-        throw new NoSuchElementException("Element " + key + " not found");
-    }
-
-    public void set2DEntryTableArrayList(String key, ArrayList<ArrayList<EntryTable>> ar2D){
-        ArrayList<ArrayList<HashMap<String, Object>>> ar2DH = new ArrayList<>();
-        int y = 0;
-        for (ArrayList<EntryTable> row: ar2D){
-            ar2DH.add(new ArrayList<>());
-            for (EntryTable point: row){
-                if (point != null)
-                    ar2DH.get(y).add(point.table);
-                else
-                    ar2DH.get(y).add(null);
-            }
-            y++;
-        }
-        this.table.put(key, ar2DH);
     }
 
     public HashMap<String, Object> getTable() {

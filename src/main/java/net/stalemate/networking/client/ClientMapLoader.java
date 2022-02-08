@@ -94,9 +94,9 @@ public class ClientMapLoader {
             map_textures.add(new ArrayList<>());
             for (int x = 0; x < 13; x++){
                 if (cam_x + x >= 0 && cam_y + y >= 0)
-                    if (cam_y + y < this.map.get(0).size())
+                    if (cam_y + y < this.map.size())
                         if (cam_x + x < this.map.get(cam_y+y).size())
-                            map_textures.get(y2).add(this.map.get(cam_x+x).get(cam_y+y));
+                            map_textures.get(y2).add(this.map.get(cam_y+y).get(cam_x+x));
                         else
                             map_textures.get(y2).add("empty.png");
                     else

@@ -91,7 +91,7 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
 
         @Override
         public boolean isUsedOnAlliedUnit() {
-            return false;
+            return true;
         }
     }
 

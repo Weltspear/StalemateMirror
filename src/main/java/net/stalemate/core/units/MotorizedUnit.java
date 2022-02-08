@@ -87,7 +87,7 @@ public class MotorizedUnit extends Unit implements IMechanized {
 
         @Override
         public boolean isUsedOnAlliedUnit() {
-            return false;
+            return true;
         }
     }
 

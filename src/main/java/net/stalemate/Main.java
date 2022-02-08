@@ -32,7 +32,7 @@ public class Main {
             throw new IllegalAccessException("grass32 doesn't exist");
         }
 
-        System.out.println("Stalemate Version: Alpha v0.2.3");
+        System.out.println("Stalemate Version: Alpha v0.2.50");
 
         while (true) {
             Scanner scanner = new Scanner(System.in);

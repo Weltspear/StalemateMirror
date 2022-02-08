@@ -13,10 +13,10 @@ tooltips:
   button_fortification_load_infantry: "Loads infantry unit into fortification"
 
   button_repair: "Repairs mechanized units<br><p color=green>(0/4/0)</p>"
-  button_engineer_unit_build_menu_build_military_tent: "Constructs Base<br><p color=green>(0/0/2)</p>"
-  button_engineer_unit_build_menu_build_tank_factory: "Constructs Tank Factory<br><p color=green>(0/0/3)</p>" # 3
-  button_engineer_unit_build_menu_build_supply_station: "Constructs Supply Station which increases your income per turn by 1<br><p color=green>(0/0/4)</p>" # 4
-  button_engineer_unit_build_menu_build_fortification: "Constructs Fortification <br><p color=green>(0/0/4)</p>"
+  button_engineer_unit_build_menu_build_military_tent: "Constructs Base<br>Construction Time: 3<br><p color=green>(0/0/2)</p>"
+  button_engineer_unit_build_menu_build_tank_factory: "Constructs Tank Factory<br>Construction Time: 4<br><p color=green>(0/0/3)</p>" # 3
+  button_engineer_unit_build_menu_build_supply_station: "Constructs Supply Station which increases your income per turn by 1<br>Construction Time: 3<br><p color=green>(0/0/4)</p>" # 4
+  button_engineer_unit_build_menu_build_fortification: "Constructs Fortification <br>Construction Time: 3<br><p color=green>(0/0/4)</p>"
 
   button_engineer_unit_build_menu: "Enters build menu"
   button_engineer_unit_build_menu_exit: "Exits build menu"

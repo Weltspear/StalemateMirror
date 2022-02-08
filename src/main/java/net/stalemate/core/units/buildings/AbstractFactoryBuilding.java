@@ -22,6 +22,7 @@ import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.controller.Game;
+import net.stalemate.core.properties.Properties;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
 
@@ -167,5 +168,12 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
     public void endTurn() {
         super.endTurn();
         deploy();
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        p.rm("ended_turn");
+        return p;
     }
 }

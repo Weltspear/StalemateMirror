@@ -31,6 +31,18 @@ public class Properties {
         properties.add(new Property(key, value));
     }
 
+    public void rm(String key){
+        Property rm = null;
+        for (Property p: properties){
+            if (p.key().equals(key)){
+                rm = p;
+                break;
+            }
+        }
+        if (rm != null)
+        properties.remove(rm);
+    }
+
     public ArrayList<String[]> getProperties(){
         ArrayList<String[]> properties = new ArrayList<>();
         for (Property p: this.properties){

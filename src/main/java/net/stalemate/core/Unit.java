@@ -390,6 +390,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
         return properties;
     }
 }

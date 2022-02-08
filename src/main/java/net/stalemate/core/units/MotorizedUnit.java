@@ -47,7 +47,7 @@ public class MotorizedUnit extends Unit implements IMechanized {
         @Override
         public void action(Unit selected_unit, Unit unit, IGameController gameController) {
             if (!unit.hasTurnEnded() && unit != selected_unit){
-                if (selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply() < 10){
+                if (selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply() <= 10){
                     int needed_supply = selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply();
 
                     if (unit.unitStats().getSupply() >= 20+needed_supply){

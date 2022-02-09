@@ -240,7 +240,7 @@ public class EngineerUnit extends Unit {
             buttons.add(new BuildMenuButton());
         }
         else{
-            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 3, 2, false) {
+            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 3, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";

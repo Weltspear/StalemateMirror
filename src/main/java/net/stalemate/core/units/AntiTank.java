@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class AntiTank extends Unit implements IMechanized {
     public AntiTank(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(7, 7, 2, 2, 4, 0, 25, 25, 0), new AnimationController(), "Anti-Tank");
+        super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 25, 25, 0), new AnimationController(), "Anti-Tank");
 
         Animation idle = new Animation(2);
         idle.addFrame("assets/units/anti_tank_idle.png");

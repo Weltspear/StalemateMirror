@@ -74,7 +74,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_infantry";
                 }
             });
-            buttons.set(1, new TrainButton(Artillery.class, 3, 3) {
+            buttons.set(1, new TrainButton(Artillery.class, 3, 4) {
                 @Override
                 public String bind() {
                     return "A";
@@ -90,7 +90,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_artillery";
                 }
             });
-            buttons.set(2, new TrainButton(AntiTank.class, 5, 5) {
+            buttons.set(2, new TrainButton(AntiTank.class, 3, 3) {
                 @Override
                 public String bind() {
                     return "T";

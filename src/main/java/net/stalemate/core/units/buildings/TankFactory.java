@@ -56,7 +56,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
         }
 
         if (!isProductionBlocked){
-            buttons.set(0, new TrainButton(LightTank.class, 4, 6) {
+            buttons.set(0, new TrainButton(LightTank.class, 4, 5) {
                 @Override
                 public String bind() {
                     return "L";
@@ -72,7 +72,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                     return "button_train_light_tank";
                 }
             });
-            buttons.set(1, new TrainButton(HeavyTank.class, 4, 7) {
+            buttons.set(1, new TrainButton(HeavyTank.class, 4, 6) {
                 @Override
                 public String bind() {
                     return "H";

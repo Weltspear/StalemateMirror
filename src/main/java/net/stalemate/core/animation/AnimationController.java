@@ -82,6 +82,10 @@ public class AnimationController {
         return animationMap.containsKey(a);
     }
 
+    public Animation getAnimation(String a){
+        return animationMap.get(a);
+    }
+
     public void tick(){
         if (current_animation != null){
             anim_tick++;

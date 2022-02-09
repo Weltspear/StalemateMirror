@@ -40,7 +40,7 @@ public class Animation {
 
     public void tick(){
         current_frame++;
-        if (!(current_frame+1 == frames.size()) && isLooped){
+        if (current_frame == frames.size() && isLooped){
             current_frame = 0;
         }
     }

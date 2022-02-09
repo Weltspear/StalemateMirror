@@ -73,11 +73,7 @@ public class AnimationController {
             }
         }
         if (current_animation != null) {
-            if (current_animation.current_frame == current_animation.frames.size()) {
-                return null;
-            }
-            else
-                return current_animation.getFrame();
+            return current_animation.getFrame();
         }
         else return null;
     }

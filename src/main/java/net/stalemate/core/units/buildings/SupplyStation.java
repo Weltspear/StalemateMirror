@@ -21,6 +21,7 @@ package net.stalemate.core.units.buildings;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
+import net.stalemate.core.buttons.ResupplyButton;
 import net.stalemate.core.buttons.Scrap;
 import net.stalemate.core.controller.Game;
 import net.stalemate.core.units.util.IBuilding;
@@ -31,69 +32,6 @@ import java.util.ArrayList;
 
 
 public class SupplyStation extends Unit implements IBuilding, IConstructableBuilding {
-
-    public static class ResupplyButton implements ISelectorButtonUnit{
-        @Override
-        public String bind() {
-            return "R";
-        }
-
-        @Override
-        public String texture() {
-            return "assets/ui/buttons/resupply_button.png";
-        }
-
-        @Override
-        public String identifier() {
-            return "button_resupply";
-        }
-
-        @Override
-        public void action(Unit selected_unit, Unit unit, IGameController gameController) {
-            if (!unit.hasTurnEnded() && unit != selected_unit){
-                if (selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply() <= 10){
-                    int needed_supply = selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply();
-
-                    if (unit.unitStats().getSupply() >= needed_supply){
-                        unit.consumeSupply(needed_supply);
-                        selected_unit.consumeSupply(-(needed_supply));
-                        unit.endTurn();
-                    }
-                }
-                else if (unit.unitStats().getSupply() >= 30){
-                    selected_unit.consumeSupply(-10);
-                    unit.consumeSupply(10);
-                    unit.endTurn();
-                }
-            }
-
-        }
-
-        @Override
-        public int selector_range() {
-            return 1;
-        }
-
-        @Override
-        public String selector_texture() {
-            return "assets/ui/selectors/ui_resupply.png";
-        }
-
-        @Override
-        public boolean isUsedOnOurUnit() {
-            return true;
-        }
-
-        @Override
-        public boolean isUsedOnEnemy() {
-            return false;
-        }
-
-        @Override
-        public boolean isUsedOnAlliedUnit() {
-            return true;
-        }
-    }
 
     public SupplyStation(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0), new AnimationController(), "Supply Station");

@@ -249,6 +249,10 @@ public class Game implements IGameControllerGamemode {
 
     @SuppressWarnings("unchecked")
     public synchronized void update(){
+        while(!isAllowedToUpdate){
+            Thread.onSpinWait();
+        }
+
         tbunsafe = true;
         entities.removeAll(to_be_removed);
         to_be_removed.clear();
@@ -429,5 +433,19 @@ public class Game implements IGameControllerGamemode {
             Thread.onSpinWait();
         }
         return mode.getVictoriousTeam(this);
+    }
+
+    private volatile boolean isAllowedToUpdate = true;
+
+    public void pauseUpdate(){
+        isAllowedToUpdate = false;
+    }
+
+    public void unpauseUpdate(){
+        isAllowedToUpdate = true;
+    }
+
+    public boolean isAllowedToUpdate() {
+        return isAllowedToUpdate;
     }
 }

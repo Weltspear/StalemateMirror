@@ -261,6 +261,12 @@ public class Lobby implements Runnable{
             * }
             * */
 
+            while(game.isTeamUpdateUnsafe() && game.isEntityUpdateUnsafe() && !game.isAllowedToUpdate())
+            {
+                Thread.onSpinWait();
+            }
+            game.pauseUpdate();
+
             try {
                 if (camSelMode == 0){
                     selector_x = cam_x + 6;
@@ -538,7 +544,7 @@ public class Lobby implements Runnable{
                     }
                 }
 
-
+                game.unpauseUpdate();
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

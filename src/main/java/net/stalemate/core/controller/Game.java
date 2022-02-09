@@ -239,6 +239,14 @@ public class Game implements IGameControllerGamemode {
         return (ArrayList<Team>) teams.clone();
     }
 
+    public boolean isEntityUpdateUnsafe() {
+        return entity_update_unsafe;
+    }
+
+    public boolean isTeamUpdateUnsafe() {
+        return team_update_unsafe;
+    }
+
     @SuppressWarnings("unchecked")
     public synchronized void update(){
         tbunsafe = true;

@@ -323,6 +323,9 @@ public class Lobby implements Runnable{
                                         if (ibutton != null)
                                             if (ibutton.identifier().equals(params.get("id"))) {
                                                 if (ibutton instanceof Unit.IStandardButton) {
+                                                    while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
+                                                        Thread.onSpinWait();
+                                                    }
                                                     ((Unit.IStandardButton) ibutton).action(selected_unit, game);
                                                     iselectorbuttonid = null;
                                                 }
@@ -334,6 +337,9 @@ public class Lobby implements Runnable{
                                             if (ibutton != null)
                                                 if (ibutton.identifier().equals(params.get("id"))) {
                                                     if (ibutton instanceof Unit.IStandardButton) {
+                                                        while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
+                                                            Thread.onSpinWait();
+                                                        }
                                                         ((Unit.IStandardButton) ibutton).action(selected_unit, game);
                                                         iselectorbuttonid = null;
                                                     }
@@ -398,8 +404,12 @@ public class Lobby implements Runnable{
                                         if (button != null)
                                             if (button.identifier().equals(iselectorbuttonid)) {
                                                 if (button instanceof Unit.ISelectorButton) {
-                                                    if (selector_x >= 0 && selector_y >= 0)
+                                                    if (selector_x >= 0 && selector_y >= 0) {
+                                                        while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
+                                                            Thread.onSpinWait();
+                                                        }
                                                         ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
+                                                    }
                                                     iselectorbuttonid = null;
                                                 } else if (button instanceof Unit.ISelectorButtonUnit) {
                                                     ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
@@ -412,6 +422,9 @@ public class Lobby implements Runnable{
                                                                 iselectorbuttonid = null;
                                                             } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
                                                                     && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
+                                                                while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
+                                                                    Thread.onSpinWait();
+                                                                }
                                                                 if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))

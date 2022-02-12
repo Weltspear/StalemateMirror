@@ -138,6 +138,22 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_motorized_unit_unit";
                 }
             });
+            buttons.set(5, new TrainButton(MachineGunner.class, 2, 3) {
+                @Override
+                public String bind() {
+                    return "G";
+                }
+
+                @Override
+                public String texture() {
+                    return "texture_missing";
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_train_machine_gunner";
+                }
+            });
         }
 
         buttons.set(6, new CancelTrain() {

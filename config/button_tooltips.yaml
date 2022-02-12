@@ -22,6 +22,7 @@ tooltips:
   button_engineer_unit_build_menu_exit: "Exits build menu"
 
   button_train_infantry: "Trains Infantry<br>Production time: 2<br><p color=green>(0/0/2)</p>"
+  button_train_machine_gunner: "Trains Heavy Infantry<br>Production time: 2<br><p color=green>(0/0/3)</p>"
   button_train_artillery: 'Trains Artillery<br>Production time: 3<br><p color=green>(0/0/4)</p>'
   button_train_anti_tank: 'Trains Anti-Tank<br>Production time: 3<br><p color=green>(0/0/3)</p>'
   button_train_engineer_unit: 'Trains Engineer<br>Production time: 1<br><p color=green>(0/0/1)</p>'
@@ -36,6 +37,10 @@ tooltips:
   # For old server
   button_produce_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/6)</p>'
   button_produce_heavy_tank: 'Trains Heavy Tank<br>Production time: 4<br><p color=green>(0/0/7)</p>'
+
+  # Machine Gunner
+  button_machine_gunner_defensive: 'Sets Heavy Infantry on defensive'
+  button_machine_gunner_offensive: 'Sets Heavy Infantry on offensive'
 
 
 

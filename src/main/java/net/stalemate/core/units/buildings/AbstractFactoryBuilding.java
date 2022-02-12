@@ -168,7 +168,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
     }
 
     @Override
-    public void endTurn() {
+    public void turnUpdate() {
         super.endTurn();
         deploy();
     }

@@ -338,11 +338,11 @@ public class Game implements IGameControllerGamemode {
      */
     @GameUnsafe
     @Deprecated
-    public synchronized void forceRemoveEntity(Entity entity){
+    public void forceRemoveEntity(Entity entity){
         entities.remove(entity);
     }
 
-    public synchronized MapObject getMapObject(int x, int y){
+    public MapObject getMapObject(int x, int y){
         try {
             return map.get(y).get(x);
         } catch (Exception e){

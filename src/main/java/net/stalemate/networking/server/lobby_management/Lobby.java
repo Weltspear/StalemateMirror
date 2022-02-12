@@ -265,7 +265,6 @@ public class Lobby implements Runnable{
             {
                 Thread.onSpinWait();
             }
-            game.pauseUpdate();
 
             try {
                 if (camSelMode == 0){
@@ -544,7 +543,6 @@ public class Lobby implements Runnable{
                     }
                 }
 
-                game.unpauseUpdate();
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

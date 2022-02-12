@@ -32,6 +32,7 @@ import net.stalemate.core.gamemode.gamemodes.Versus;
 import net.stalemate.core.units.*;
 import net.stalemate.core.units.buildings.Fortification;
 import net.stalemate.core.units.buildings.MilitaryTent;
+import net.stalemate.core.units.buildings.MilitaryTentBase;
 import net.stalemate.core.units.buildings.TankFactory;
 import net.stalemate.core.util.IGameController;
 import net.stalemate.core.controller.Game;
@@ -88,7 +89,7 @@ public class MapLoader {
     }
 
     static {
-        EntityRegistry.addEntity("base", MilitaryTent.class);
+        EntityRegistry.addEntity("base", MilitaryTentBase.class);
         EntityRegistry.addEntity("fortification", Fortification.class);
         // addEntity("supply_station", SupplyStation.class);
         EntityRegistry.addEntity("tank_factory", TankFactory.class);

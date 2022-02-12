@@ -207,7 +207,7 @@ public class EngineerUnit extends Unit {
     private boolean isInBuildingMode = false;
 
     public EngineerUnit(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 1, 1, 1, 27, 27, 0), new AnimationController(), "Engineer");
+        super(x, y, game, new UnitStats(10, 10, 1, 1, 1, 1, 20, 20, 0), new AnimationController(), "Engineer");
 
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/engineer_idle_1.png");

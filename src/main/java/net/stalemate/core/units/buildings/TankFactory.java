@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class TankFactory extends AbstractFactoryBuilding implements IConstructableBuilding {
     public TankFactory(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, 0, -1, 1), new AnimationController(), "Tank Factory");
+        super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, 6, 6, 1), new AnimationController(), "Tank Factory");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/tank_factory.png");
@@ -130,6 +130,12 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
         buttons.set(8, new Scrap());
 
         return buttons;
+    }
+
+    @Override
+    public void turnUpdate(){
+        super.turnUpdate();
+        this.supply -= 1;
     }
 
     @Override

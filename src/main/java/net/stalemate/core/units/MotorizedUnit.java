@@ -18,11 +18,13 @@
 
 package net.stalemate.core.units;
 
+import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.buttons.ResupplyButton;
+import net.stalemate.core.controller.Game;
 import net.stalemate.core.units.util.IMechanized;
 import net.stalemate.core.util.IGameController;
 
@@ -31,7 +33,7 @@ import java.util.ArrayList;
 public class MotorizedUnit extends Unit implements IMechanized {
 
     public MotorizedUnit(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(5, 5, 0, 4, 0, 0, 60, 60, 0), new AnimationController(), "Motorized Unit");
+        super(x, y, game, new UnitStats(5, 5, 0, 4, 0, 0, 40, 40, 0), new AnimationController(), "Motorized Unit");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");

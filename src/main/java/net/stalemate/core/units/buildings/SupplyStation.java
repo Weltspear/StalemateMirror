@@ -18,6 +18,7 @@
 
 package net.stalemate.core.units.buildings;
 
+import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 
 
 public class SupplyStation extends Unit implements IBuilding, IConstructableBuilding {
-
     public SupplyStation(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0), new AnimationController(), "Supply Station");
 
@@ -45,7 +45,6 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     @Override
     public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new ResupplyButton());
         buttons.add(new Scrap());
         return buttons;
     }
@@ -66,7 +65,31 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         ((Game)game).getUnitsTeamIgnoreSafety(this).setMilitaryPoints(((Game)game).getUnitsTeamIgnoreSafety(this)
                 .getMilitaryPoints()+1);
 
-        supply+=5;
+        ArrayList<Integer[]> coords_to_resupply = new ArrayList<>();
+        coords_to_resupply.add(new Integer[]{x-1, y});
+        coords_to_resupply.add(new Integer[]{x+1, y});
+        coords_to_resupply.add(new Integer[]{x, y+1});
+        coords_to_resupply.add(new Integer[]{x, y-1});
+        coords_to_resupply.add(new Integer[]{x+1, y+1});
+        coords_to_resupply.add(new Integer[]{x-1, y+1});
+        coords_to_resupply.add(new Integer[]{x+1, y-1});
+        coords_to_resupply.add(new Integer[]{x-1, y-1});
+
+        for (Integer[] c: coords_to_resupply){
+            for (Entity e: game.getEntities(c[0], c[1])){
+                if (e instanceof Unit u){
+                    if (((Game) game).getUnitsTeamIgnoreSafety(u) == ((Game) game).getUnitsTeamIgnoreSafety(this)){
+                        int needed_supply = u.unitStats().getMaxSupply() - u.unitStats().getSupply();
+                        if (this.getSupply() - needed_supply > 1){
+                            u.consumeSupply(-needed_supply);
+                            this.consumeSupply(needed_supply);
+                        }
+                    }
+                }
+            }
+        }
+
+        supply+=7;
         if (supply > max_supply){
             supply = max_supply;
         }

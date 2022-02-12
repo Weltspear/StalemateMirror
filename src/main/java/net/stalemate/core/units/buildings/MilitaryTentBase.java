@@ -23,7 +23,7 @@ import net.stalemate.core.util.IGameController;
 public class MilitaryTentBase extends MilitaryTent{
     public MilitaryTentBase(int x, int y, IGameController game) {
         super(x, y, game);
-        this.supply = 15;
-        this.max_supply = 15;
+        this.supply = 0;
+        this.max_supply = -1;
     }
 }

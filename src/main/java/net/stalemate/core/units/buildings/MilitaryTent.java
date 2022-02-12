@@ -146,7 +146,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
 
                 @Override
                 public String texture() {
-                    return "texture_missing";
+                    return "assets/ui/buttons/train_machine_gunner.png";
                 }
 
                 @Override

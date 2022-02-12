@@ -40,7 +40,7 @@ public class MachineGunner extends Unit{
 
         @Override
         public String texture() {
-            return "texture_missing";
+            return "assets/ui/buttons/machine_gunner_offensive.png";
         }
 
         @Override
@@ -65,7 +65,7 @@ public class MachineGunner extends Unit{
 
         @Override
         public String texture() {
-            return "texture_missing";
+            return "assets/ui/buttons/machine_gunner_defensive.png";
         }
 
         @Override

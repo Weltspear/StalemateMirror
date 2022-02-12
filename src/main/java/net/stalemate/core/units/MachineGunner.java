@@ -110,12 +110,12 @@ public class MachineGunner extends Unit{
         super.update();
 
         if (mode){
-            df = 1;
+            df = 0;
             atk = 3;
         }
         else{
             df = 3;
-            atk = 1;
+            atk = 0;
         }
 
     }

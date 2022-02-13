@@ -21,6 +21,7 @@ package net.stalemate.core.buttons;
 import net.stalemate.core.Unit;
 import net.stalemate.core.buttons.util.Invulnerable;
 import net.stalemate.core.buttons.util.Unflippable;
+import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
 
 public class AttackButton implements Unit.ISelectorButtonUnit {
@@ -97,6 +98,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
                 }
 
                 unit.consumeSupply(2);
+                if (!(selected_unit instanceof IBuilding))
                 selected_unit.consumeSupply(2);
 
                 if (selected_unit.getHp() <= 0){

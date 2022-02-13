@@ -36,7 +36,7 @@ public class Chat {
     public ArrayList<Message> read(){
         ArrayList<Message> c1 = (ArrayList<Message>) chat.clone();
         for (Message msg: chat){
-            log = (new StringBuilder(log).append("[").append(msg.author).append("]: ").append(msg.message).append("\n")).toString();
+            log = log + "[" + msg.author + "]: " + msg.message + "\n";
         }
         chat.clear();
         return c1;

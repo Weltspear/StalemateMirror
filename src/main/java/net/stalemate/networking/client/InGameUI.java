@@ -125,7 +125,18 @@ public class InGameUI extends JPanel {
     public static class KeyboardInput implements KeyListener{
 
         private final ConcurrentLinkedQueue<String> keysInQueue = new ConcurrentLinkedQueue<>();
+        private final ConcurrentLinkedQueue<String> chatMSGS = new ConcurrentLinkedQueue<>();
+        private String currentMSG = "";
+        private boolean isTypingChatMessage = false;
         private volatile boolean isBusy = false;
+
+        public String getCurrentMSG(){
+            return currentMSG;
+        }
+
+        public boolean isTypingChatMessage(){
+            return isTypingChatMessage;
+        }
 
         public synchronized ConcurrentLinkedQueue<String> getQueue(){
             while (isBusy) {
@@ -142,35 +153,47 @@ public class InGameUI extends JPanel {
         @Override
         public void keyPressed(KeyEvent e) {
             isBusy = true;
-            if (e.getKeyCode() == KeyEvent.VK_UP){
-                keysInQueue.add("UP");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_DOWN){
-                keysInQueue.add("DOWN");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_LEFT){
-                keysInQueue.add("LEFT");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-                keysInQueue.add("RIGHT");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_ENTER){
-                keysInQueue.add("ENTER");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
-                keysInQueue.add("ESCAPE");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_SPACE){
-                keysInQueue.add("SPACE");
-            }
-            else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))){
-                keysInQueue.add(String.valueOf(e.getKeyChar()));
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_CONTROL){
-                keysInQueue.add("CTRL");
-            }
-            else if (e.getKeyCode() == KeyEvent.VK_SHIFT){
-                keysInQueue.add("SHIFT");
+            if (!isTypingChatMessage) {
+                if (e.getKeyCode() == KeyEvent.VK_UP) {
+                    keysInQueue.add("UP");
+                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                    keysInQueue.add("DOWN");
+                } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                    keysInQueue.add("LEFT");
+                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                    keysInQueue.add("RIGHT");
+                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    keysInQueue.add("ENTER");
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    keysInQueue.add("ESCAPE");
+                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                    keysInQueue.add("SPACE");
+                } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                    keysInQueue.add(String.valueOf(e.getKeyChar()));
+                } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+                    keysInQueue.add("CTRL");
+                } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+                    keysInQueue.add("SHIFT");
+                } else if (e.getKeyCode() == KeyEvent.VK_BACK_SLASH) {
+                    isTypingChatMessage = true;
+                }
+            } else{
+                if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                    currentMSG += String.valueOf(e.getKeyChar());
+                }
+                else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    currentMSG = "";
+                    isTypingChatMessage = false;
+                }
+                else if (e.getKeyCode() == KeyEvent.VK_ENTER){
+                    isTypingChatMessage = false;
+                    System.out.println(currentMSG);
+                    currentMSG = "";
+                }
+                else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
+                    if (currentMSG.length()-1 >= 0)
+                    currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                }
             }
             isBusy = false;
         }
@@ -883,6 +906,15 @@ public class InGameUI extends JPanel {
 
             if (selector != null && do_render_prev){
                 g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev*64,y_prev*64,null);
+            }
+
+            // Render currently written chat message
+            if (in_client.isTypingChatMessage()) {
+                if (basis33 != null)
+                    g.setColor(Color.WHITE);
+                    g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                String m = "[Chat]: " + in_client.getCurrentMSG();
+                g.drawString(m, 640 - 40, 383 - 40);
             }
 
             unsafe_ = false;

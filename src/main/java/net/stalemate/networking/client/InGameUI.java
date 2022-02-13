@@ -934,7 +934,7 @@ public class InGameUI extends JPanel {
                     g.setColor(Color.WHITE);
                     g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
                 }
-                g.drawString(msg, 500, 243 + (y * 10));
+                g.drawString(msg, 500, 233 + (y * 10));
                 y++;
             }
 

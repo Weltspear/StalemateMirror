@@ -86,7 +86,7 @@ public class EngineerUnit extends Unit {
 
         @Override
         public boolean isUsedOnAlliedUnit() {
-            return false;
+            return true;
         }
     }
 

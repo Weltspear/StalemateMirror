@@ -74,6 +74,7 @@ public class InGameUI extends JPanel {
     ArrayList<BufferedImage> queue = null;
     ArrayList<String> binds = new ArrayList<>();
     ArrayList<String> unit_times = new ArrayList<>();
+    ArrayList<String> chat = new ArrayList<>();
     BufferedImage unit_img = null;
     int mp = 0;
     boolean is_it_your_turn = false;
@@ -99,7 +100,7 @@ public class InGameUI extends JPanel {
     public void setRender(ArrayList<ArrayList<BufferedImage>> map_to_render, ArrayList<ArrayList<BufferedImage>> fog_of_war, ArrayList<ArrayList<BufferedImage>> entity_render,
                           ArrayList<BufferedImage> buttons, ArrayList<String> binds, BufferedImage unit_img, PropertiesToRender propertiesToRender, BufferedImage selector,
                           ArrayList<ArrayList<BufferedImage>> unit_data_ar, ArrayList<BufferedImage> unit_queue, ArrayList<String> unit_times,
-                          int mp, boolean is_it_your_turn, String[][] button_ids, int sel_x_frame, int sel_y_frame, int cam_sel_mode){
+                          int mp, boolean is_it_your_turn, String[][] button_ids, int sel_x_frame, int sel_y_frame, int cam_sel_mode, ArrayList<String> chat){
         while (unsafe_) {
             Thread.onSpinWait();
         }
@@ -120,6 +121,7 @@ public class InGameUI extends JPanel {
         this.sel_x_frame = sel_x_frame;
         this.sel_y_frame = sel_y_frame;
         this.cam_sel_mode = cam_sel_mode;
+        this.chat = chat;
     }
 
     public static class KeyboardInput implements KeyListener{
@@ -136,6 +138,10 @@ public class InGameUI extends JPanel {
 
         public boolean isTypingChatMessage(){
             return isTypingChatMessage;
+        }
+
+        public ConcurrentLinkedQueue<String> getChatMSGS(){
+            return chatMSGS;
         }
 
         public synchronized ConcurrentLinkedQueue<String> getQueue(){
@@ -178,7 +184,7 @@ public class InGameUI extends JPanel {
                     isTypingChatMessage = true;
                 }
             } else{
-                if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
                     currentMSG += String.valueOf(e.getKeyChar());
                 }
                 else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
@@ -187,7 +193,7 @@ public class InGameUI extends JPanel {
                 }
                 else if (e.getKeyCode() == KeyEvent.VK_ENTER){
                     isTypingChatMessage = false;
-                    System.out.println(currentMSG);
+                    chatMSGS.add(currentMSG);
                     currentMSG = "";
                 }
                 else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
@@ -246,6 +252,8 @@ public class InGameUI extends JPanel {
 
                    NOTE: -1 means hidden statistic
             }
+
+            "chat" : []
         }
 
 
@@ -274,6 +282,7 @@ public class InGameUI extends JPanel {
                 ArrayList<ArrayList<String>> entity_render = (ArrayList<ArrayList<String>>) data_map.get("entity_render");
                 ArrayList<ArrayList<Integer>> fog_of_war = (ArrayList<ArrayList<Integer>>) data_map.get("fog_of_war");
                 ArrayList<ArrayList<HashMap<String, Object>>> unit_data_ar_ = (ArrayList<ArrayList<HashMap<String, Object>>>) data_map.get("unit_data_ar");
+                ArrayList<String> chat = (ArrayList<String>) data_map.get("chat");
 
                 HashMap<String, Object> selected_unit;
                 ArrayList<BufferedImage> buttons = new ArrayList<>();
@@ -554,7 +563,7 @@ public class InGameUI extends JPanel {
                 int sel_x_frame = (sel_x - ((int)data_map.get("x")+6))*64 + 6*64;
                 int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 3*64;
 
-                interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, propertiesToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode);
+                interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, propertiesToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode, chat);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -910,11 +919,23 @@ public class InGameUI extends JPanel {
 
             // Render currently written chat message
             if (in_client.isTypingChatMessage()) {
-                if (basis33 != null)
+                if (basis33 != null) {
                     g.setColor(Color.WHITE);
                     g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                }
                 String m = "[Chat]: " + in_client.getCurrentMSG();
-                g.drawString(m, 640 - 40, 383 - 40);
+                g.drawString(m, 500, 383 - 40);
+            }
+
+            // Render chat
+            y = 0;
+            for (String msg: chat){
+                if (basis33 != null) {
+                    g.setColor(Color.WHITE);
+                    g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                }
+                g.drawString(msg, 500, 243 + (y * 10));
+                y++;
             }
 
             unsafe_ = false;

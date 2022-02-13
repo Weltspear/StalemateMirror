@@ -227,6 +227,13 @@ public class Client {
             packet.put("sel_x", client_sel_x);
             packet.put("sel_y", client_sel_y);
 
+            while (!in.getChatMSGS().isEmpty()){
+                HashMap<String, String> typechat = new HashMap<>();
+                typechat.put("action", "TypeChat");
+                typechat.put("msg", in.getChatMSGS().poll());
+                actions.add(typechat);
+            }
+
             packet.put("actions", actions);
 
             try {

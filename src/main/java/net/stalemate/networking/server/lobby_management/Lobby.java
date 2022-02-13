@@ -26,6 +26,8 @@ import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.stalemate.core.Entity;
 import net.stalemate.core.MapObject;
 import net.stalemate.core.Unit;
+import net.stalemate.core.communication.chat.Chat;
+import net.stalemate.core.communication.chat.Message;
 import net.stalemate.core.controller.Game;
 import net.stalemate.core.map_system.MapLoader;
 import net.stalemate.core.units.util.IBase;
@@ -39,6 +41,7 @@ public class Lobby implements Runnable{
     Game game;
     ArrayList<Player> players = new ArrayList<>();
     private int max_player_count = 2;
+    Chat chat;
 
     final ArrayList<String> next_maps;
     int current_next_map = 0;
@@ -57,6 +60,7 @@ public class Lobby implements Runnable{
     final String lobby_name = "Lobby";
 
     public void resetLobby(){
+        chat = new Chat();
         game = MapLoader.load(map_path);
         max_player_count = MapLoader.getMapPlayerCount(map_path);
         players = new ArrayList<>();
@@ -103,6 +107,7 @@ public class Lobby implements Runnable{
 
             player.setGame(game);
             player.setMapPath(map_path);
+            player.setChat(chat);
         }
 
         while (!game.hasGameEnded() /* Game isn't ended, true is a placeholder */){ // Hardcoded tick speed: 15
@@ -178,10 +183,15 @@ public class Lobby implements Runnable{
         private Game game = null;
 
         private String iselectorbuttonid = null;
+        private Chat chat;
 
         String nickname;
 
         public Player(){
+        }
+
+        public void setChat(Chat c){
+            chat = c;
         }
 
         public void setMapPath(String map_path){
@@ -256,6 +266,10 @@ public class Lobby implements Runnable{
             *       }
             *       {
             *           "action" : "TeleportCamToBase1"
+            *       },
+            *       {
+            *           "action" : "TypeChat",
+            *           "msg" : msg
             *       }
             *   ]
             * }
@@ -281,6 +295,11 @@ public class Lobby implements Runnable{
                 boolean ignore_cam_set = false;
 
                 for (Map<String, Object> action : actions) {
+                    if (action.get("action").equals("TypeChat")){
+                        String msg = (String) action.get("msg");
+                        chat.pushMsg(new Message(nickname, msg));
+                    }
+
                     if (action.get("action").equals("ChangeCamSelMode")){
                         switch (camSelMode) {
                             case 0 -> camSelMode = 1;
@@ -843,6 +862,10 @@ public class Lobby implements Runnable{
                 else {
                     toBeJsoned.put("selected_unit_data", 0);
                 }
+
+                // Chat
+                ArrayList<String> chat = this.chat.read();
+                toBeJsoned.put("chat", chat);
 
                 try {
                     return (new ObjectMapper()).writeValueAsString(toBeJsoned);

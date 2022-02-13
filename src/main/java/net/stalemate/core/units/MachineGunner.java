@@ -115,7 +115,7 @@ public class MachineGunner extends Unit{
         }
         else{
             df = 3;
-            atk = 0;
+            atk = 2;
         }
 
     }

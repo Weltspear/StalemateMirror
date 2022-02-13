@@ -184,7 +184,7 @@ public class InGameUI extends JPanel {
                     isTypingChatMessage = true;
                 }
             } else{
-                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\".contains(String.valueOf(e.getKeyChar()))) {
                     currentMSG += String.valueOf(e.getKeyChar());
                 }
                 else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){

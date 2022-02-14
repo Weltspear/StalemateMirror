@@ -27,6 +27,7 @@ import net.stalemate.core.event.OnEvent;
 import net.stalemate.core.gamemode.IGamemode;
 import net.stalemate.core.gamemode.gamemodes.Versus;
 import net.stalemate.core.properties.EntryTable;
+import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameControllerGamemode;
 import net.stalemate.core.util.IUnitTeam;
 
@@ -128,6 +129,26 @@ public class Game implements IGameControllerGamemode {
 
         public int getMilitaryPoints() {
             return mp;
+        }
+
+        public int buildingCount(){
+            int bc = 0;
+            for (Unit u: units){
+                if ((u instanceof IBuilding)){
+                    bc++;
+                }
+            }
+            return bc;
+        }
+
+        public int unitCount(){
+            int uc = 0;
+            for (Unit u: units){
+                if (!(u instanceof IBuilding)){
+                    uc++;
+                }
+            }
+            return uc;
         }
     }
 

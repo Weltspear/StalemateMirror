@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class HeavyTank extends Unit implements IMechanized {
     public HeavyTank(int x, int y, IGameController game){
-        super(x, y, game, new Unit.UnitStats(20, 20, 2, 1, 3, 3, 21, 21, 1), new AnimationController(), "Heavy Tank");
+        super(x, y, game, new Unit.UnitStats(20, 20, 1, 1, 3, 3, 21, 21, 1), new AnimationController(), "Heavy Tank");
 
         Animation idle = new Animation(2);
         idle.addFrame("assets/units/heavy_tank_idle.png");

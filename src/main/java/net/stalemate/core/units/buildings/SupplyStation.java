@@ -62,8 +62,6 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     @Override
     public void turnUpdate() {
         super.turnUpdate();
-        ((Game)game).getUnitsTeamIgnoreSafety(this).setMilitaryPoints(((Game)game).getUnitsTeamIgnoreSafety(this)
-                .getMilitaryPoints()+1);
 
         ArrayList<Integer[]> coords_to_resupply = new ArrayList<>();
         coords_to_resupply.add(new Integer[]{x-1, y});
@@ -87,6 +85,12 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
                     }
                 }
             }
+        }
+
+        if (supply - 20 >= 0) {
+            ((Game) game).getUnitsTeamIgnoreSafety(this).setMilitaryPoints(((Game) game).getUnitsTeamIgnoreSafety(this)
+                    .getMilitaryPoints() + 1);
+            supply -= 20;
         }
 
         supply+=7;

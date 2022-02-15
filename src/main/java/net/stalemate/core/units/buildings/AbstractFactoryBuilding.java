@@ -95,6 +95,26 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
         }
     }
 
+    /***
+     * This button uses default texture and bind.
+     */
+    public class DefaultCancelButton extends CancelTrain{
+        @Override
+        public String bind() {
+            return "C";
+        }
+
+        @Override
+        public String texture() {
+            return "assets/ui/buttons/scrap_unit_queue.png";
+        }
+
+        @Override
+        public String identifier() {
+            return "button_cancel_train";
+        }
+    }
+
     public abstract class ChangeDeploymentPoint implements ISelectorButton{
         @Override
         public int selector_range() {
@@ -112,6 +132,31 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
 
             AbstractFactoryBuilding.this.deployment_x = d_x;
             AbstractFactoryBuilding.this.deployment_y = d_y;
+        }
+    }
+
+    /***
+     * This button uses default texture and bind.
+     */
+    public class DefaultChangeDeploymentPointButton extends ChangeDeploymentPoint{
+        @Override
+        public String selector_texture() {
+            return "assets/ui/selectors/ui_move.png";
+        }
+
+        @Override
+        public String bind() {
+            return "D";
+        }
+
+        @Override
+        public String texture() {
+            return "assets/ui/buttons/set_deployment_point.png";
+        }
+
+        @Override
+        public String identifier() {
+            return "button_set_deployment_point";
         }
     }
 
@@ -178,5 +223,29 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
         Properties p = super.getProperties();
         p.rm("ended_turn");
         return p;
+    }
+
+    public boolean checkForBlockage(){
+        boolean isProductionBlocked = false;
+        for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
+            if (entity instanceof Unit){
+                isProductionBlocked = true;
+                break;
+            }
+        }
+        return isProductionBlocked;
+    }
+
+    @Override
+    public UnitQueue getUnitQueue() {
+        UnitQueue queue = new UnitQueue();
+        if (currently_processed_unit != null){
+            queue.addQueueMember(new UnitQueue.QueueMember(currently_processed_unit.unit.getTextureFileName(), currently_processed_unit.time_in_production));
+        }
+        for (UnitProductionTime upt: production_queue) {
+            queue.addQueueMember(new UnitQueue.QueueMember(upt.unit.getTextureFileName(), upt.time_in_production));
+        }
+
+        return queue;
     }
 }

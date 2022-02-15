@@ -42,13 +42,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
 
     @Override
     public ArrayList<IButton> getButtons() {
-        boolean isProductionBlocked = false;
-        for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
-            if (entity instanceof Unit){
-                isProductionBlocked = true;
-                break;
-            }
-        }
+        boolean isProductionBlocked = checkForBlockage();
         ArrayList<IButton> buttons = new ArrayList<>();
 
         for (int i = 0; i < 9; i++){
@@ -90,43 +84,8 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
             });
         }
 
-        buttons.set(6, new CancelTrain() {
-            @Override
-            public String bind() {
-                return "C";
-            }
-
-            @Override
-            public String texture() {
-                return "assets/ui/buttons/scrap_unit_queue.png";
-            }
-
-            @Override
-            public String identifier() {
-                return "button_cancel_train";
-            }
-        });
-        buttons.set(7, new ChangeDeploymentPoint() {
-            @Override
-            public String selector_texture() {
-                return "assets/ui/selectors/ui_move.png";
-            }
-
-            @Override
-            public String bind() {
-                return "D";
-            }
-
-            @Override
-            public String texture() {
-                return "assets/ui/buttons/set_deployment_point.png";
-            }
-
-            @Override
-            public String identifier() {
-                return "button_set_deployment_point";
-            }
-        });
+        buttons.set(6, new DefaultCancelButton());
+        buttons.set(7, new DefaultChangeDeploymentPointButton());
         buttons.set(8, new Scrap());
 
         return buttons;
@@ -136,19 +95,6 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
     public void turnUpdate(){
         super.turnUpdate();
         this.supply -= 1;
-    }
-
-    @Override
-    public UnitQueue getUnitQueue() {
-        UnitQueue queue = new UnitQueue();
-        if (currently_processed_unit != null){
-            queue.addQueueMember(new UnitQueue.QueueMember(currently_processed_unit.unit.getTextureFileName(), currently_processed_unit.time_in_production));
-        }
-        for (UnitProductionTime upt: production_queue) {
-            queue.addQueueMember(new UnitQueue.QueueMember(upt.unit.getTextureFileName(), upt.time_in_production));
-        }
-
-        return queue;
     }
 
     @Override

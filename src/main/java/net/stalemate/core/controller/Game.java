@@ -39,14 +39,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Game implements IGameControllerGamemode {
     final ArrayList<Entity> entities = new ArrayList<>();
-    ArrayList<ArrayList<MapObject>> map = new ArrayList<>();
-    ArrayList<Team> teams = new ArrayList<>();
+    ArrayList<ArrayList<MapObject>> map;
+    ArrayList<Team> teams;
     final ArrayList<Team> already_assigned_teams = new ArrayList<>();
     private int team_doing_turn = 0;
     public ReentrantLock lock = new ReentrantLock();
 
     // Additional map parameters
-    private HashMap<String, Object> aparams = new HashMap<>();
+    private HashMap<String, Object> aparams;
     public HashMap<String, Object> getAparams(){return aparams;}
 
     @Deprecated

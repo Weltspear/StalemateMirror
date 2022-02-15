@@ -424,15 +424,15 @@ public class Client {
                         return;
                     }
 
-                    try {
-                        inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
-                    } catch (ClientMapLoader.ClientMapLoaderException e){
-                        System.err.println("Failed to load map shutting down client...");
+                    Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
+                    if (expect.isNone()){
+                        System.err.println("Failed to read server packet, shutting down client: " + expect.getResult().message());
                         runnable.terminate();
                         client.close();
                         inGameUI.getFrame().dispose();
                         return;
                     }
+
                     controller.receive_packet(json.unwrap());
 
                     String packet = controller.create_json_packet();

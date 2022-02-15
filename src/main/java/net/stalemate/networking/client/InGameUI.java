@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.panic.Expect;
 import net.stalemate.networking.client.config.ButtonTooltips;
 import net.stalemate.networking.client.config.PropertiesMatcher;
 import net.stalemate.networking.client.property.ClientSideProperty;
@@ -269,14 +270,17 @@ public class InGameUI extends JPanel {
         }
 
         @SuppressWarnings("unchecked")
-        public synchronized void change_render_data(String json, int CamSelMode) throws ClientMapLoader.ClientMapLoaderException {
+        public synchronized Expect<String, ?> change_render_data(String json, int CamSelMode) {
             try {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
-                mapLoader.load((String) data_map.get("map_path"));
+                Expect<String, ?> m_ = mapLoader.load((String) data_map.get("map_path"));
+                if (m_.isNone()){
+                    return m_;
+                }
 
                 ArrayList<ArrayList<String>> map_textures = mapLoader.getMap((Integer) data_map.get("x"), (Integer)data_map.get("y"));
                 ArrayList<ArrayList<String>> entity_render = (ArrayList<ArrayList<String>>) data_map.get("entity_render");
@@ -564,10 +568,12 @@ public class InGameUI extends JPanel {
                 int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 3*64;
 
                 interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, propertiesToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode, chat);
-            } catch (JsonProcessingException e) {
+                return new Expect<>("");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
+            return new Expect<>(() -> "Incorrect packet format");
         }
 
     }

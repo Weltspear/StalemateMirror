@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.panic.ErrorResult;
+import net.panic.Expect;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,9 +34,10 @@ public class ClientMapLoader {
     private String map_path = "";
     private ArrayList<ArrayList<String>> map = new ArrayList<>();
 
-    public static class ClientMapLoaderException extends Exception{
-        public ClientMapLoaderException(String message) {
-            super(message);
+    public static class ClientMapLoaderError implements ErrorResult{
+        @Override
+        public String message() {
+            return "Failed to load map";
         }
     }
 
@@ -45,7 +48,7 @@ public class ClientMapLoader {
     private record Tile(String texture_file){};
 
     @SuppressWarnings("unchecked")
-    public void load(String map_path) throws ClientMapLoaderException {
+    public Expect<String, ClientMapLoaderError> load(String map_path) {
         try {
             if (!this.map_path.equals(map_path)) {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
@@ -82,8 +85,9 @@ public class ClientMapLoader {
                     y++;
                 }
             }
+            return new Expect<>("");
         } catch (IOException e){
-            throw new ClientMapLoaderException("Failed to load map, map not found");
+            return new Expect<>(new ClientMapLoaderError());
         }
     }
 

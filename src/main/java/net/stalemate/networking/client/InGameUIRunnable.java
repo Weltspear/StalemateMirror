@@ -18,9 +18,12 @@
 
 package net.stalemate.networking.client;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class InGameUIRunnable implements Runnable {
     private boolean isTerminated = false;
-    private InGameUI g;
+    private final InGameUI g;
+    public ReentrantLock lock = new ReentrantLock();
 
     public InGameUIRunnable(InGameUI g){
         this.g = g;
@@ -32,6 +35,14 @@ public class InGameUIRunnable implements Runnable {
 
     @Override
     public void run() {
-        while (!isTerminated) g.repaint();
+        while (!isTerminated){
+            lock.lock();
+            try {
+                g.repaint();
+            }
+            finally {
+                lock.unlock();
+            }
+        }
     }
 }

@@ -424,7 +424,9 @@ public class Client {
                         return;
                     }
 
+                    runnable.lock.lock();
                     Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
+                    runnable.lock.unlock();
                     if (expect.isNone()){
                         System.err.println("Failed to read server packet, shutting down client: " + expect.getResult().message());
                         runnable.terminate();

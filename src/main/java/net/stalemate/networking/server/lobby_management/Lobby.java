@@ -81,18 +81,9 @@ public class Lobby implements Runnable{
         // Waiting for players
         int i = 0;
         while (players.size() != max_player_count){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (i > 10000){
-                printStatus();
-                i = 0;
-            }
-            i++;
+            Thread.onSpinWait();
         }
-        System.out.print("Game Started!");
+        System.out.print("Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 
         for (Player player: players){
             Game.Team t = game.getUnassignedTeam();
@@ -275,10 +266,7 @@ public class Lobby implements Runnable{
             * }
             * */
 
-            while(game.isTeamUpdateUnsafe() && game.isEntityUpdateUnsafe() && !game.isAllowedToUpdate())
-            {
-                Thread.onSpinWait();
-            }
+            game.lock.lock();
 
             try {
                 if (camSelMode == 0){
@@ -293,6 +281,8 @@ public class Lobby implements Runnable{
                 ArrayList<Map<String, Object>> actions = (ArrayList<Map<String, Object>>) data_map.get("actions");
 
                 boolean ignore_cam_set = false;
+
+                Game.LockGame lgame = game.getLockedGame();
 
                 for (Map<String, Object> action : actions) {
                     if (action.get("action").equals("TypeChat")){
@@ -328,7 +318,7 @@ public class Lobby implements Runnable{
                         iselectorbuttonid = null;
                         selected_unit = null;
 
-                        ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
+                        ArrayList<Entity> entities = lgame.getEntities(selector_x, selector_y);
 
                         for (Entity entity : entities) {
                             if (entity instanceof Unit) {
@@ -338,36 +328,18 @@ public class Lobby implements Runnable{
 
                     }
                     else if (action.get("action").equals("IStandardButtonPress")) {
-                        if (game.getTeamDoingTurn() == team) {
+                        if (lgame.getTeamDoingTurn() == team) {
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
                             if (selected_unit != null) {
                                 if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                     for (Unit.IButton ibutton : selected_unit.getButtons()) {
-                                        if (ibutton != null)
-                                            if (ibutton.identifier().equals(params.get("id"))) {
-                                                if (ibutton instanceof Unit.IStandardButton) {
-                                                    while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
-                                                        Thread.onSpinWait();
-                                                    }
-                                                    ((Unit.IStandardButton) ibutton).action(selected_unit, game);
-                                                    iselectorbuttonid = null;
-                                                }
-                                            }
+                                        doActionIStandardButtonIfCorrect(params, ibutton);
                                     }
                                 } else {
                                     if (selected_unit.getButtonsEnemy() != null) {
                                         for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
-                                            if (ibutton != null)
-                                                if (ibutton.identifier().equals(params.get("id"))) {
-                                                    if (ibutton instanceof Unit.IStandardButton) {
-                                                        while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
-                                                            Thread.onSpinWait();
-                                                        }
-                                                        ((Unit.IStandardButton) ibutton).action(selected_unit, game);
-                                                        iselectorbuttonid = null;
-                                                    }
-                                                }
+                                            doActionIStandardButtonIfCorrect(params, ibutton);
                                         }
                                     }
                                 }
@@ -376,38 +348,18 @@ public class Lobby implements Runnable{
                     }
 
                     else if (action.get("action").equals("ISelectorButtonPress")) {
-                        if (game.getTeamDoingTurn() == team) {
+                        if (lgame.getTeamDoingTurn() == team) {
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
                             if (selected_unit != null & iselectorbuttonid == null) {
                                 if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                     for (Unit.IButton button : selected_unit.getButtons()) {
-                                        if (button != null)
-                                            if (button.identifier().equals(params.get("id"))) {
-                                                if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
-                                                    iselectorbuttonid = (String) params.get("id");
-                                                    cam_x = selected_unit.getX() - 6;
-                                                    cam_y = selected_unit.getY() - 2;
-
-                                                    selector_x = selected_unit.getX();
-                                                    selector_y = selected_unit.getY();
-                                                }
-                                            }
+                                        prepareISelectorButton(params, button);
                                     }
                                 } else {
                                     if (selected_unit.getButtonsEnemy() != null) {
                                         for (Unit.IButton button : selected_unit.getButtonsEnemy()) {
-                                            if (button != null)
-                                                if (button.identifier().equals(params.get("id"))) {
-                                                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
-                                                        iselectorbuttonid = (String) params.get("id");
-                                                        cam_x = selected_unit.getX() - 6;
-                                                        cam_y = selected_unit.getY() - 2;
-
-                                                        selector_x = selected_unit.getX();
-                                                        selector_y = selected_unit.getY();
-                                                    }
-                                                }
+                                            prepareISelectorButton(params, button);
                                         }
                                     }
                                 }
@@ -416,7 +368,7 @@ public class Lobby implements Runnable{
                     }
 
                     else if (action.get("action").equals("ISBSelect")) {
-                        if (game.getTeamDoingTurn() == team) {
+                        if (lgame.getTeamDoingTurn() == team) {
                             if (selected_unit != null && iselectorbuttonid != null) {
                                 if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (!team.getTeamUnits().contains(selected_unit) && selected_unit.getButtonsEnemy() != null)) {
                                     boolean isSelectedUnitEnemyTeam = !(selected_unit.getButtons() != null
@@ -429,9 +381,6 @@ public class Lobby implements Runnable{
                                             if (button.identifier().equals(iselectorbuttonid)) {
                                                 if (button instanceof Unit.ISelectorButton) {
                                                     if (selector_x >= 0 && selector_y >= 0) {
-                                                        while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
-                                                            Thread.onSpinWait();
-                                                        }
                                                         ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
                                                     }
                                                     iselectorbuttonid = null;
@@ -446,9 +395,6 @@ public class Lobby implements Runnable{
                                                                 iselectorbuttonid = null;
                                                             } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
                                                                     && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
-                                                                while (game.isEntityUpdateUnsafe() && game.isTeamUpdateUnsafe()){
-                                                                    Thread.onSpinWait();
-                                                                }
                                                                 if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                 else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))
@@ -477,7 +423,7 @@ public class Lobby implements Runnable{
                     }
 
                     else if (action.get("action").equals("EndTurn")) {
-                        if (game.getTeamDoingTurn() == team) {
+                        if (lgame.getTeamDoingTurn() == team) {
                             if (!team.endedTurn()) {
                                 team.endTurn();
                                 iselectorbuttonid = null;
@@ -521,359 +467,385 @@ public class Lobby implements Runnable{
 
                     if (((selected_unit.getX() - range) <= selector_x_tmp) && ((selected_unit.getX() + range) >= selector_x_tmp)) {
                         if (((selected_unit.getY() - range) <= selector_y_tmp) && ((selected_unit.getY() + range) >= selector_y_tmp)) {
-                            if (camSelMode == 0) {
-                                if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
-                                    if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {
-                                        cam_x = cam_x_tmp;
-                                        cam_y = cam_y_tmp;
-                                    }
-                                }
-                            }
-                            else {
-                                if ((cam_x_tmp >= 0 && cam_y_tmp >= 0) && (cam_y_tmp < game.getSizeY())) {
-                                    if (cam_x_tmp < game.getSizeX(cam_y_tmp)) {
-                                        if (cam_x <= cam_x_tmp && cam_x_tmp <= cam_x+12 && cam_y <= cam_y_tmp && cam_y_tmp <= cam_y+4) {
-                                            selector_x = cam_x_tmp;
-                                            selector_y = cam_y_tmp;
-                                        }
-                                    }
-                                }
-                            }
+                            performCameraMove(cam_y_tmp, cam_x_tmp);
                         }
                     }
                 } else if (!ignore_cam_set){
-                    if (camSelMode == 0) {
-                        if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
-                            if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {
-                                cam_x = cam_x_tmp;
-                                cam_y = cam_y_tmp;
-                            }
-                        }
-                    }
-                    else {
-                        if ((cam_x_tmp >= 0 && cam_y_tmp >= 0) && (cam_y_tmp < game.getSizeY())) {
-                            if (cam_x_tmp < game.getSizeX(cam_y_tmp)) {
-                                if (cam_x <= cam_x_tmp && cam_x_tmp <= cam_x+12 && cam_y <= cam_y_tmp && cam_y_tmp <= cam_y+4) {
-                                    selector_x = cam_x_tmp;
-                                    selector_y = cam_y_tmp;
-                                }
-                            }
-                        }
-                    }
+                    performCameraMove(cam_y_tmp, cam_x_tmp);
                 }
 
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
+            } finally {
+                game.lock.unlock();
             }
 
         }
 
+        /***
+         * Moves camera if several conditions to ensure correct camera position are met
+         * @param cam_y_tmp Camera y which is already moved
+         * @param cam_x_tmp Camera x which is already moved
+         */
+        private void performCameraMove(int cam_y_tmp, int cam_x_tmp) {
+            if (camSelMode == 0) {
+                if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
+                    if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {
+                        cam_x = cam_x_tmp;
+                        cam_y = cam_y_tmp;
+                    }
+                }
+            }
+            else {
+                if ((cam_x_tmp >= 0 && cam_y_tmp >= 0) && (cam_y_tmp < game.getSizeY())) {
+                    if (cam_x_tmp < game.getSizeX(cam_y_tmp)) {
+                        if (cam_x <= cam_x_tmp && cam_x_tmp <= cam_x+12 && cam_y <= cam_y_tmp && cam_y_tmp <= cam_y+4) {
+                            selector_x = cam_x_tmp;
+                            selector_y = cam_y_tmp;
+                        }
+                    }
+                }
+            }
+        }
+
+        /***
+         * Prepares ISelectorButtons to be used, moves camera and selector into correct position
+         * @param params action paramters
+         * @param button button to be checked
+         */
+        private void prepareISelectorButton(Map<String, Object> params, Unit.IButton button) {
+            if (button != null)
+                if (button.identifier().equals(params.get("id"))) {
+                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
+                        iselectorbuttonid = (String) params.get("id");
+                        cam_x = selected_unit.getX() - 6;
+                        cam_y = selected_unit.getY() - 2;
+
+                        selector_x = selected_unit.getX();
+                        selector_y = selected_unit.getY();
+                    }
+                }
+        }
+
+        /***
+         * Performs an action with IStandardButton if params button id equals ibutton id. Resets iselectorbuttonid
+         * @param params action parameters
+         * @param ibutton button to be checked
+         */
+        private void doActionIStandardButtonIfCorrect(Map<String, Object> params, Unit.IButton ibutton) {
+            if (ibutton != null)
+                if (ibutton.identifier().equals(params.get("id"))) {
+                    if (ibutton instanceof Unit.IStandardButton) {
+                        ((Unit.IStandardButton) ibutton).action(selected_unit, game);
+                        iselectorbuttonid = null;
+                    }
+                }
+        }
+
         public synchronized String create_json_packet(){
-            if (game != null && team != null) {
-                // Change selector coordinates to cam if camSelMode is 0
-                if (camSelMode == 0){
-                    selector_x = cam_x + 6;
-                    selector_y = cam_y + 2;
-                }
+            if (game != null)
+            game.lock.lock();
+            try {
+                if (game != null && team != null) {
+                    Game.LockGame lgame = game.getLockedGame();
 
-                // Create entity render
-                ArrayList<ArrayList<Entity>> entity_render = new ArrayList<>();
-                int y2 = 0;
-                for (int y = 0; y < 5; y++){
-                    entity_render.add(new ArrayList<>());
-                    for (int x = 0; x < 13; x++){
-                        boolean has_space_been_filled = false;
-                        for (Entity entity: game.getAllEntitiesCopy()){
-                            if (entity.getX() == cam_x+x & entity.getY() == cam_y+y){
-                                has_space_been_filled = true;
-                                entity_render.get(y2).add(entity);
-                                break;
-                            }
-                        }
-                        if (!has_space_been_filled){
-                            entity_render.get(y2).add(null);
-                        }
+                    // Change selector coordinates to cam if camSelMode is 0
+                    if (camSelMode == 0) {
+                        selector_x = cam_x + 6;
+                        selector_y = cam_y + 2;
                     }
-                    y2++;
-                }
 
-                // Create entity fog-of-war render
-
-                ArrayList<Unit> ally_units = new ArrayList<>();
-                for (Entity entity: game.getAllEntitiesCopy()){
-                    if (entity instanceof Unit){
-                        if (team.getTeamUnits().contains(entity)){
-                            ally_units.add((Unit) entity);
-                        }
-                    }
-                }
-
-                // Remove out of range in-fog entities
-
-                ArrayList<Entity> to_remove_entities = new ArrayList<>();
-
-                for (int y = 0; y < 5; y++){
-                    for (int x = 0; x < 13; x++){
-                        Entity entity = entity_render.get(y).get(x);
-
-                        boolean is_in_fog_of_war_range = false;
-
-                        if (entity != null) {
-                            for (Unit unit : ally_units) {
-                                if (unit.isEntityInFogOfWarRange(entity)) {
-                                    is_in_fog_of_war_range = true;
+                    // Create entity render
+                    ArrayList<ArrayList<Entity>> entity_render = new ArrayList<>();
+                    int y2 = 0;
+                    for (int y = 0; y < 5; y++) {
+                        entity_render.add(new ArrayList<>());
+                        for (int x = 0; x < 13; x++) {
+                            boolean has_space_been_filled = false;
+                            for (Entity entity : game.getAllEntitiesCopy()) {
+                                if (entity.getX() == cam_x + x & entity.getY() == cam_y + y) {
+                                    has_space_been_filled = true;
+                                    entity_render.get(y2).add(entity);
                                     break;
                                 }
                             }
-                            if (!is_in_fog_of_war_range || entity.isInvisible())
-                            to_remove_entities.add(entity);
+                            if (!has_space_been_filled) {
+                                entity_render.get(y2).add(null);
+                            }
+                        }
+                        y2++;
+                    }
 
-                            if (ally_units.isEmpty()){
-                                to_remove_entities.add(entity);
+                    // Create entity fog-of-war render
+
+                    ArrayList<Unit> ally_units = new ArrayList<>();
+                    for (Entity entity : game.getAllEntitiesCopy()) {
+                        if (entity instanceof Unit) {
+                            if (team.getTeamUnits().contains(entity)) {
+                                ally_units.add((Unit) entity);
                             }
                         }
                     }
-                }
 
-                for (Entity entity: to_remove_entities){
-                    entity_render.get(entity.getY()-cam_y).set(entity.getX()-cam_x, null);
-                }
+                    // Remove out of range in-fog entities
 
-                // Final Entity render
+                    ArrayList<Entity> to_remove_entities = new ArrayList<>();
 
-                ArrayList<ArrayList<String>> entity_render_final = new ArrayList<>();
+                    for (int y = 0; y < 5; y++) {
+                        for (int x = 0; x < 13; x++) {
+                            Entity entity = entity_render.get(y).get(x);
 
-                y2 = 0;
-                for (int y = 0; y < 5; y++){
-                    entity_render_final.add(new ArrayList<>());
-                    for (int x = 0; x < 13; x++){
-                        String entity = entity_render.get(y).get(x) != null ? entity_render.get(y).get(x).getTextureFileName() : null;
-                        entity_render_final.get(y).add(entity);
-                    }
-                    y2++;
-                }
+                            boolean is_in_fog_of_war_range = false;
 
-                // Fog of war creation
-
-                ArrayList<ArrayList<Integer>> fog_of_war = new ArrayList<>();
-
-                y2 = 0;
-                for (int y = 0; y < 5; y++){
-                    fog_of_war.add(new ArrayList<>());
-                    for (int x = 0; x < 13; x++){
-                        fog_of_war.get(y2).add(1);
-                    }
-                    y2++;
-                }
-
-                for (Unit ally_unit: ally_units){
-                    for (int y = -ally_unit.getFogOfWarRange(); y < ally_unit.getFogOfWarRange()+1; y++){
-                        for (int x = -ally_unit.getFogOfWarRange(); x < ally_unit.getFogOfWarRange()+1; x++){
-                            int x1 = (ally_unit.getX()-cam_x)+x;
-                            int y1 = (ally_unit.getY()-cam_y)+y;
-
-                            if ((x1 >= 0 && y1 >= 0)){
-                                if (y1 < fog_of_war.size()){
-                                    if (x1 < fog_of_war.get(y1).size()){
-                                        fog_of_war.get(y1).set(x1, 0);
+                            if (entity != null) {
+                                for (Unit unit : ally_units) {
+                                    if (unit.isEntityInFogOfWarRange(entity)) {
+                                        is_in_fog_of_war_range = true;
+                                        break;
                                     }
                                 }
+                                if (!is_in_fog_of_war_range || entity.isInvisible())
+                                    to_remove_entities.add(entity);
 
+                                if (ally_units.isEmpty()) {
+                                    to_remove_entities.add(entity);
+                                }
                             }
                         }
                     }
-                }
 
-                // Making it a json string
-                HashMap<String, Object> toBeJsoned = new HashMap<>();
-                toBeJsoned.put("x", cam_x);
-                toBeJsoned.put("y", cam_y);
-
-                toBeJsoned.put("map_path", map_path);
-
-                toBeJsoned.put("sel_x", selector_x);
-                toBeJsoned.put("sel_y", selector_y);
-
-                toBeJsoned.put("entity_render", entity_render_final);
-                toBeJsoned.put("fog_of_war", fog_of_war);
-                toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
-
-                // tiles
-                ArrayList<ArrayList<Boolean>> map_tiles = new ArrayList<>();
-                int y = 0;
-                for (ArrayList<MapObject> mapObjects: game.getMap()){
-                    map_tiles.add(new ArrayList<>());
-                    for (MapObject tile: mapObjects){
-                        map_tiles.get(y).add(tile.isPassable);
+                    for (Entity entity : to_remove_entities) {
+                        entity_render.get(entity.getY() - cam_y).set(entity.getX() - cam_x, null);
                     }
-                    y++;
-                }
 
-                // Create unit_data_ar
+                    // Final Entity render
 
-                ArrayList<ArrayList<HashMap<String, Object>>> unit_data_ar = new ArrayList<>();
-                y2 = 0;
-                for (ArrayList<Entity> ent_row : entity_render){
-                    unit_data_ar.add(new ArrayList<>());
-                    for (Entity entity : ent_row){
-                        if (entity != null) {
-                            if (entity instanceof Unit unit) {
-                                HashMap<String, Object> unit_data = new HashMap<>();
-                                for (Game.Team team : game.getTeams()) {
-                                    if (team.getTeamUnits().contains(unit)) {
-                                        ArrayList<Integer> rgb = new ArrayList<>();
-                                        rgb.add(team.getTeamColor().getRed());
-                                        rgb.add(team.getTeamColor().getGreen());
-                                        rgb.add(team.getTeamColor().getBlue());
-                                        unit_data.put("rgb", rgb);
+                    ArrayList<ArrayList<String>> entity_render_final = new ArrayList<>();
+
+                    y2 = 0;
+                    for (int y = 0; y < 5; y++) {
+                        entity_render_final.add(new ArrayList<>());
+                        for (int x = 0; x < 13; x++) {
+                            String entity = entity_render.get(y).get(x) != null ? entity_render.get(y).get(x).getTextureFileName() : null;
+                            entity_render_final.get(y).add(entity);
+                        }
+                        y2++;
+                    }
+
+                    // Fog of war creation
+
+                    ArrayList<ArrayList<Integer>> fog_of_war = new ArrayList<>();
+
+                    y2 = 0;
+                    for (int y = 0; y < 5; y++) {
+                        fog_of_war.add(new ArrayList<>());
+                        for (int x = 0; x < 13; x++) {
+                            fog_of_war.get(y2).add(1);
+                        }
+                        y2++;
+                    }
+
+                    for (Unit ally_unit : ally_units) {
+                        for (int y = -ally_unit.getFogOfWarRange(); y < ally_unit.getFogOfWarRange() + 1; y++) {
+                            for (int x = -ally_unit.getFogOfWarRange(); x < ally_unit.getFogOfWarRange() + 1; x++) {
+                                int x1 = (ally_unit.getX() - cam_x) + x;
+                                int y1 = (ally_unit.getY() - cam_y) + y;
+
+                                if ((x1 >= 0 && y1 >= 0)) {
+                                    if (y1 < fog_of_war.size()) {
+                                        if (x1 < fog_of_war.get(y1).size()) {
+                                            fog_of_war.get(y1).set(x1, 0);
+                                        }
                                     }
+
                                 }
-                                ArrayList<Integer> stats = new ArrayList<>();
-                                stats.add(unit.unitStats().getHp());
-                                stats.add(unit.unitStats().getMaxHp());
-                                stats.add(unit.unitStats().getSupply());
-                                stats.add(unit.unitStats().getMaxSupply());
-                                unit_data.put("flip", unit.isFlipped());
-                                unit_data.put("stats", stats);
-                                unit_data_ar.get(y2).add(unit_data);
                             }
-                            else {
+                        }
+                    }
+
+                    // Making it a json string
+                    HashMap<String, Object> toBeJsoned = new HashMap<>();
+                    toBeJsoned.put("x", cam_x);
+                    toBeJsoned.put("y", cam_y);
+
+                    toBeJsoned.put("map_path", map_path);
+
+                    toBeJsoned.put("sel_x", selector_x);
+                    toBeJsoned.put("sel_y", selector_y);
+
+                    toBeJsoned.put("entity_render", entity_render_final);
+                    toBeJsoned.put("fog_of_war", fog_of_war);
+                    toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
+
+                    // tiles
+                    ArrayList<ArrayList<Boolean>> map_tiles = new ArrayList<>();
+                    int y = 0;
+                    for (ArrayList<MapObject> mapObjects : lgame.getMap()) {
+                        map_tiles.add(new ArrayList<>());
+                        for (MapObject tile : mapObjects) {
+                            map_tiles.get(y).add(tile.isPassable);
+                        }
+                        y++;
+                    }
+
+                    // Create unit_data_ar
+
+                    ArrayList<ArrayList<HashMap<String, Object>>> unit_data_ar = new ArrayList<>();
+                    y2 = 0;
+                    for (ArrayList<Entity> ent_row : entity_render) {
+                        unit_data_ar.add(new ArrayList<>());
+                        for (Entity entity : ent_row) {
+                            if (entity != null) {
+                                if (entity instanceof Unit unit) {
+                                    HashMap<String, Object> unit_data = new HashMap<>();
+                                    for (Game.Team team : lgame.getTeams()) {
+                                        if (team.getTeamUnits().contains(unit)) {
+                                            ArrayList<Integer> rgb = new ArrayList<>();
+                                            rgb.add(team.getTeamColor().getRed());
+                                            rgb.add(team.getTeamColor().getGreen());
+                                            rgb.add(team.getTeamColor().getBlue());
+                                            unit_data.put("rgb", rgb);
+                                        }
+                                    }
+                                    ArrayList<Integer> stats = new ArrayList<>();
+                                    stats.add(unit.unitStats().getHp());
+                                    stats.add(unit.unitStats().getMaxHp());
+                                    stats.add(unit.unitStats().getSupply());
+                                    stats.add(unit.unitStats().getMaxSupply());
+                                    unit_data.put("flip", unit.isFlipped());
+                                    unit_data.put("stats", stats);
+                                    unit_data_ar.get(y2).add(unit_data);
+                                } else {
+                                    unit_data_ar.get(y2).add(null);
+                                }
+                            } else {
                                 unit_data_ar.get(y2).add(null);
                             }
+                        }
+                        y2++;
+                    }
+
+                    toBeJsoned.put("unit_data_ar", unit_data_ar);
+                    toBeJsoned.put("mp", team.getMilitaryPoints());
+
+                    // Deselect a unit if it is in fog of war and if it is removed or dead
+                    if (selected_unit != null) {
+                        if (selected_unit.getY() - cam_y >= 0 && selected_unit.getX() - cam_x >= 0)
+                            if (selected_unit.getY() - cam_y < 5 && selected_unit.getX() - cam_x < 13)
+                                if (fog_of_war.get(selected_unit.getY() - cam_y).get(selected_unit.getX() - cam_x) == 1) {
+                                    selected_unit = null;
+                                    iselectorbuttonid = null;
+                                } else if (selected_unit.unitStats().getHp() <= 0) {
+                                    selected_unit = null;
+                                    iselectorbuttonid = null;
+                                } else if (!game.getAllEntities().contains(selected_unit)) {
+                                    selected_unit = null;
+                                }
+                    }
+
+                    if (selected_unit != null) {
+                        HashMap<String, Object> selected_unit_data = new HashMap<>();
+                        selected_unit_data.put("properties", selected_unit.getProperties().getProperties());
+                        selected_unit_data.put("texture", selected_unit.getTextureFileName());
+
+                        ArrayList<Object> buttons = new ArrayList<>();
+                        Unit.IButton iselectorbutton_used = null;
+
+                        if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
+                            for (Unit.IButton button : selected_unit.getButtons()) {
+                                iselectorbutton_used = buildButtonAndGetISelectorButtonUsed(buttons, iselectorbutton_used, button);
+                            }
+                        } else if (!team.getTeamUnits().contains(selected_unit)) {
+                            if (selected_unit.getButtonsEnemy() != null)
+                                for (Unit.IButton button : selected_unit.getButtonsEnemy()) {
+                                    iselectorbutton_used = buildButtonAndGetISelectorButtonUsed(buttons, iselectorbutton_used, button);
+                                }
+                        }
+
+                        selected_unit_data.put("buttons", buttons);
+
+                        ArrayList<Object> queue = new ArrayList<>();
+
+                        boolean is_queue_valid = false;
+
+                        if (team.getTeamUnits().contains(selected_unit) && selected_unit != null) {
+                            if (selected_unit.getUnitQueue() != null) {
+                                if (!selected_unit.getUnitQueue().getQueueMembers().isEmpty()) {
+                                    ArrayList<Unit.UnitQueue.QueueMember> members = selected_unit.getUnitQueue().getQueueMembers();
+                                    for (Unit.UnitQueue.QueueMember queueMember : members) {
+                                        HashMap<String, Object> member = new HashMap<>();
+                                        member.put("texture", queueMember.texture());
+                                        member.put("turn_time", queueMember.turn_time());
+                                        queue.add(member);
+                                    }
+                                }
+                                is_queue_valid = true;
+                            }
+
+                        }
+
+                        if (!is_queue_valid) {
+                            selected_unit_data.put("queue", 0);
                         } else {
-                            unit_data_ar.get(y2).add(null);
-                        }
-                    }
-                    y2++;
-                }
-
-                toBeJsoned.put("unit_data_ar", unit_data_ar);
-                toBeJsoned.put("mp", team.getMilitaryPoints());
-
-                // Deselect a unit if it is in fog of war and if it is removed or dead
-                if (selected_unit != null){
-                    if (selected_unit.getY()-cam_y >= 0 && selected_unit.getX()-cam_x >= 0)
-                        if (selected_unit.getY()-cam_y < 5 && selected_unit.getX()-cam_x < 13)
-                            if (fog_of_war.get(selected_unit.getY()-cam_y).get(selected_unit.getX()-cam_x) == 1){
-                                selected_unit = null;
-                                iselectorbuttonid = null;
-                            }
-
-                    else if (selected_unit.unitStats().getHp() <= 0){
-                        selected_unit = null;
-                        iselectorbuttonid = null;
-                    }
-                    else if (!game.getAllEntities().contains(selected_unit)){
-                        selected_unit = null;
-                    }
-                }
-
-                if (selected_unit != null) {
-                    HashMap<String, Object> selected_unit_data = new HashMap<>();
-                    selected_unit_data.put("properties", selected_unit.getProperties().getProperties());
-                    selected_unit_data.put("texture", selected_unit.getTextureFileName());
-
-                    ArrayList<Object> buttons = new ArrayList<>();
-                    Unit.IButton iselectorbutton_used = null;
-
-                    if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null){
-                        for (Unit.IButton button : selected_unit.getButtons()){
-                            if (button != null){
-                                HashMap<String, Object> button_ = new HashMap<>();
-                                button_.put("id", button.identifier());
-                                button_.put("bind", button.bind());
-                                button_.put("texture", button.texture());
-                                button_.put("mode", button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit ? 2 : 1);
-                                buttons.add(button_);
-
-                                if (iselectorbuttonid != null)
-                                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit)
-                                        if (button.identifier().equals(iselectorbuttonid))
-                                            iselectorbutton_used = button;
-                            }
-                            else{
-                                buttons.add(0);
-                            }
-                        }
-                    } else if (!team.getTeamUnits().contains(selected_unit)) {
-                        if (selected_unit.getButtonsEnemy() != null)
-                            for (Unit.IButton button : selected_unit.getButtonsEnemy()){
-                                if (button != null){
-                                    HashMap<String, Object> button_ = new HashMap<>();
-                                    button_.put("id", button.identifier());
-                                    button_.put("bind", button.bind());
-                                    button_.put("texture", button.texture());
-                                    button_.put("mode", button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit ? 2 : 1);
-                                    buttons.add(button_);
-
-                                    if (iselectorbuttonid != null)
-                                        if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit)
-                                            if (button.identifier().equals(iselectorbuttonid))
-                                                iselectorbutton_used = button;
-                                }
-                                else{
-                                    buttons.add(0);
-                                }
-                            }
-                    }
-
-                    selected_unit_data.put("buttons", buttons);
-
-                    ArrayList<Object> queue = new ArrayList<>();
-
-                    boolean is_queue_valid = false;
-
-                    if (team.getTeamUnits().contains(selected_unit) && selected_unit != null){
-                        if (selected_unit.getUnitQueue() != null){
-                            if (!selected_unit.getUnitQueue().getQueueMembers().isEmpty()) {
-                                ArrayList<Unit.UnitQueue.QueueMember> members = selected_unit.getUnitQueue().getQueueMembers();
-                                for (Unit.UnitQueue.QueueMember queueMember : members) {
-                                    HashMap<String, Object> member = new HashMap<>();
-                                    member.put("texture", queueMember.texture());
-                                    member.put("turn_time", queueMember.turn_time());
-                                    queue.add(member);
-                                }
-                            }
-                            is_queue_valid = true;
+                            selected_unit_data.put("queue", queue);
                         }
 
+                        if (iselectorbuttonid != null) {
+                            selected_unit_data.put("iselectorbutton_press", true);
+                            if (iselectorbutton_used instanceof Unit.ISelectorButton)
+                                selected_unit_data.put("iselectorbutton_data_selector_texture", ((Unit.ISelectorButton) iselectorbutton_used).selector_texture());
+                            if (iselectorbutton_used instanceof Unit.ISelectorButtonUnit)
+                                selected_unit_data.put("iselectorbutton_data_selector_texture", ((Unit.ISelectorButtonUnit) iselectorbutton_used).selector_texture());
+                        } else {
+                            selected_unit_data.put("iselectorbutton_press", false);
+                        }
+
+                        toBeJsoned.put("selected_unit_data", selected_unit_data);
+                    } else {
+                        toBeJsoned.put("selected_unit_data", 0);
                     }
 
-                    if (!is_queue_valid){
-                        selected_unit_data.put("queue", 0);
-                    }
-                    else {
-                        selected_unit_data.put("queue", queue);
-                    }
+                    // Chat
+                    ArrayList<String> chat = this.chat.read();
+                    toBeJsoned.put("chat", chat);
 
-                    if (iselectorbuttonid != null){
-                        selected_unit_data.put("iselectorbutton_press", true);
-                        if (iselectorbutton_used instanceof Unit.ISelectorButton)
-                        selected_unit_data.put("iselectorbutton_data_selector_texture", ((Unit.ISelectorButton) iselectorbutton_used).selector_texture());
-                        if (iselectorbutton_used instanceof Unit.ISelectorButtonUnit)
-                            selected_unit_data.put("iselectorbutton_data_selector_texture", ((Unit.ISelectorButtonUnit) iselectorbutton_used).selector_texture());
+                    try {
+                        return (new ObjectMapper()).writeValueAsString(toBeJsoned);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
                     }
-                    else {
-                        selected_unit_data.put("iselectorbutton_press", false);
-                    }
-
-                    toBeJsoned.put("selected_unit_data", selected_unit_data);
                 }
-                else {
-                    toBeJsoned.put("selected_unit_data", 0);
-                }
-
-                // Chat
-                ArrayList<String> chat = this.chat.read();
-                toBeJsoned.put("chat", chat);
-
-                try {
-                    return (new ObjectMapper()).writeValueAsString(toBeJsoned);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
+            } finally {
+                if (game != null)
+                game.lock.unlock();
             }
             return null;
+        }
+
+        /***
+         * This method creates HashMap from button and returns ISelectorButton used by player
+         * @param buttons Button ArrayList
+         * @param iselectorbutton_used Currently used selector button if null it will replace it if button checked is used
+         * @param button Button to be converted
+         * @return selector button used
+         */
+        private Unit.IButton buildButtonAndGetISelectorButtonUsed(ArrayList<Object> buttons, Unit.IButton iselectorbutton_used, Unit.IButton button) {
+            if (button != null) {
+                HashMap<String, Object> button_ = new HashMap<>();
+                button_.put("id", button.identifier());
+                button_.put("bind", button.bind());
+                button_.put("texture", button.texture());
+                button_.put("mode", button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit ? 2 : 1);
+                buttons.add(button_);
+
+                if (iselectorbuttonid != null)
+                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit)
+                        if (button.identifier().equals(iselectorbuttonid))
+                            iselectorbutton_used = button;
+            } else {
+                buttons.add(0);
+            }
+            return iselectorbutton_used;
         }
 
         protected String endOfAGameMessage = null;

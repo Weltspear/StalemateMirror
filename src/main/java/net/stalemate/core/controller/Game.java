@@ -28,12 +28,14 @@ import net.stalemate.core.gamemode.IGamemode;
 import net.stalemate.core.gamemode.gamemodes.Versus;
 import net.stalemate.core.properties.EntryTable;
 import net.stalemate.core.units.util.IBuilding;
+import net.stalemate.core.util.IGameController;
 import net.stalemate.core.util.IGameControllerGamemode;
 import net.stalemate.core.util.IUnitTeam;
 
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Game implements IGameControllerGamemode {
     final ArrayList<Entity> entities = new ArrayList<>();
@@ -41,9 +43,7 @@ public class Game implements IGameControllerGamemode {
     ArrayList<Team> teams = new ArrayList<>();
     final ArrayList<Team> already_assigned_teams = new ArrayList<>();
     private int team_doing_turn = 0;
-    private volatile boolean entity_update_unsafe = false;
-    private volatile boolean team_update_unsafe = false;
-    private volatile boolean tbunsafe; // to be added / to be removed unsafe
+    public ReentrantLock lock = new ReentrantLock();
 
     // Additional map parameters
     private HashMap<String, Object> aparams = new HashMap<>();
@@ -74,6 +74,7 @@ public class Game implements IGameControllerGamemode {
         protected final Color teamColor;
         protected final ArrayList<Unit> units = new ArrayList<>();
         protected final ArrayList<Unit> to_be_added = new ArrayList<>();
+        protected final ArrayList<Unit> to_be_removed = new ArrayList<>();
         protected final boolean isTeamUncontrolled;
         protected boolean hasEndedItsTurn = false;
         protected EntryTable additional_params = new EntryTable();
@@ -112,9 +113,15 @@ public class Game implements IGameControllerGamemode {
             to_be_added.add(u);
         }
 
+        public synchronized void rmUnit(Unit u){
+            to_be_removed.add(u);
+        }
+
         public synchronized void update(){
             units.addAll(to_be_added);
             to_be_added.clear();
+            units.removeAll(to_be_removed);
+            to_be_removed.clear();
         }
 
         public Color getTeamColor() {
@@ -233,9 +240,6 @@ public class Game implements IGameControllerGamemode {
 
     @GameUnsafe
     public synchronized ArrayList<Entity> getAllEntities(){
-        while (entity_update_unsafe) {
-            Thread.onSpinWait();
-        }
         return entities;
     }
 
@@ -246,103 +250,78 @@ public class Game implements IGameControllerGamemode {
 
     @SuppressWarnings("unchecked")
     public synchronized ArrayList<Entity> getAllEntitiesCopy(){
-        while (entity_update_unsafe) {
-            Thread.onSpinWait();
-        }
         return (ArrayList<Entity>) entities.clone();
     }
 
     @SuppressWarnings("unchecked")
     public ArrayList<Team> getTeams(){
-        while (entity_update_unsafe) {
-            Thread.onSpinWait();
-        }
         return (ArrayList<Team>) teams.clone();
     }
 
-    public boolean isEntityUpdateUnsafe() {
-        return entity_update_unsafe;
-    }
-
-    public boolean isTeamUpdateUnsafe() {
-        return team_update_unsafe;
-    }
-
     @SuppressWarnings("unchecked")
-    public synchronized void update(){
-        while(!isAllowedToUpdate){
-            Thread.onSpinWait();
-        }
-
-        tbunsafe = true;
-        entities.removeAll(to_be_removed);
-        to_be_removed.clear();
-        entities.addAll(to_be_added);
-        to_be_added.clear();
-        tbunsafe = true;
-
-        entity_update_unsafe = true;
-        for (Entity entity: entities){
-            if (entity instanceof Entity.ServerUpdateTick){
-                ((Entity.ServerUpdateTick) entity).update();
-            }
-        }
-        entity_update_unsafe = false;
-
-        team_update_unsafe = true;
-        if (teams.get(team_doing_turn).endedTurn() || teams.get(team_doing_turn).AUTO_SKIP_TURN){
-            ArrayList<Unit> to_remove_dead = new ArrayList<>();
-
-            for (Unit unit : teams.get(team_doing_turn).units){
-                if (unit.unitStats().getHp() > 0) {
-                    if (((ArrayList<Entity>)(entities.clone())).contains(unit)) {
-                        unit.endTurn();
-                        unit.turnUpdate();
-                    }
-                } else {
-                    to_remove_dead.add(unit);
-                }
-            }
-            teams.get(team_doing_turn).units.removeAll(to_remove_dead);
-            teams.get(team_doing_turn).setMilitaryPoints(teams.get(team_doing_turn).getMilitaryPoints() + 1);
-            team_doing_turn++;
-        }
-
-        if (team_doing_turn == teams.size()){
-            for (Team team : teams){
-                team.hasEndedItsTurn = false;
-                for (Unit unit: team.getTeamUnits()){
-                    unit.resetTurn();
-                }
-            }
-            team_doing_turn = 0;
-        }
+    public void update(){
+        lock.lock();
         try {
-            Thread.sleep(3);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            entities.removeAll(to_be_removed);
+            to_be_removed.clear();
+            entities.addAll(to_be_added);
+            to_be_added.clear();
 
-        for (Team team: teams){
-            team.update();
-        }
-        team_update_unsafe = false;
+            for (Entity entity : entities) {
+                if (entity instanceof Entity.ServerUpdateTick) {
+                    ((Entity.ServerUpdateTick) entity).update();
+                }
+            }
 
-        mode.tick(this);
+            if (teams.get(team_doing_turn).endedTurn() || teams.get(team_doing_turn).AUTO_SKIP_TURN) {
+                ArrayList<Unit> to_remove_dead = new ArrayList<>();
+
+                for (Unit unit : teams.get(team_doing_turn).units) {
+                    if (unit.unitStats().getHp() > 0) {
+                        if (((ArrayList<Entity>) (entities.clone())).contains(unit)) {
+                            unit.endTurn();
+                            unit.turnUpdate();
+                        }
+                    } else {
+                        to_remove_dead.add(unit);
+                    }
+                }
+                teams.get(team_doing_turn).units.removeAll(to_remove_dead);
+                teams.get(team_doing_turn).setMilitaryPoints(teams.get(team_doing_turn).getMilitaryPoints() + 1);
+                team_doing_turn++;
+            }
+
+            if (team_doing_turn == teams.size()) {
+                for (Team team : teams) {
+                    team.hasEndedItsTurn = false;
+                    for (Unit unit : team.getTeamUnits()) {
+                        unit.resetTurn();
+                    }
+                }
+                team_doing_turn = 0;
+            }
+            try {
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            for (Team team : teams) {
+                team.update();
+            }
+
+            mode.tick(this);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public synchronized void rmEntity(Entity entity) {
-        while (!tbunsafe) {
-            Thread.onSpinWait();
-        }
         to_be_removed.add(entity);
     }
 
     public synchronized void addEntity(Entity entity){
-        while (!tbunsafe) {
-            Thread.onSpinWait();
-        }
         to_be_added.add(entity);
     }
 
@@ -373,9 +352,6 @@ public class Game implements IGameControllerGamemode {
 
     @Override
     public synchronized ArrayList<Entity> getEntities(int x, int y) {
-        while (entity_update_unsafe) {
-            Thread.onSpinWait();
-        }
         ArrayList<Entity> ent_clone = this.getAllEntitiesCopy();
         ArrayList<Entity> ent = new ArrayList<>();
 
@@ -389,9 +365,6 @@ public class Game implements IGameControllerGamemode {
     }
 
     public synchronized Team getUnassignedTeam(){
-        while (team_update_unsafe) {
-            Thread.onSpinWait();
-        }
         for (Team team : teams){
             if (!already_assigned_teams.contains(team) && !(team instanceof NeutralTeam)){
                 already_assigned_teams.add(team);
@@ -410,18 +383,6 @@ public class Game implements IGameControllerGamemode {
     }
 
     public Team getUnitsTeam(Unit u){
-        while (team_update_unsafe) {
-            Thread.onSpinWait();
-        }
-        for (Team team: teams){
-            if (team.getTeamUnits().contains(u)){
-                return team;
-            }
-        }
-        return null;
-    }
-
-    public Team getUnitsTeamIgnoreSafety(Unit u){
         for (Team team: teams){
             if (team.getTeamUnits().contains(u)){
                 return team;
@@ -450,23 +411,140 @@ public class Game implements IGameControllerGamemode {
     }
 
     public Team getVictoriousTeam(){
-        while (team_update_unsafe) {
-            Thread.onSpinWait();
-        }
         return mode.getVictoriousTeam(this);
     }
 
-    private volatile boolean isAllowedToUpdate = true;
+    /***
+     * Thread safe Game class using lock
+     */
+    public class LockGame implements IGameController {
 
-    public void pauseUpdate(){
-        isAllowedToUpdate = false;
+        @Override
+        public void addEntity(Entity entity) {
+            try {
+                lock.lock();
+                Game.this.addEntity(entity);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void rmEntity(Entity entity) {
+            try {
+                lock.lock();
+                Game.this.rmEntity(entity);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public ArrayList<Entity> getEntities(int x, int y) {
+            try {
+                lock.lock();
+                return Game.this.getEntities(x, y);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public MapObject getMapObject(int x, int y) {
+            return Game.this.getMapObject(x, y);
+        }
+
+        @Override
+        public ArrayList<Entity> getAllEntitiesCopy() {
+            try {
+                lock.lock();
+                return Game.this.getAllEntitiesCopy();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public ArrayList<Entity> getAllEntities() {
+            try{
+                lock.lock();
+                return Game.this.getAllEntities();
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public Team getUnitsTeam(Unit u) {
+            try{
+                lock.lock();
+                return Game.this.getUnitsTeam(u);
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public int getMapWidth() {
+            return Game.this.getMapHeight();
+        }
+
+        @Override
+        public int getMapHeight() {
+            return Game.this.getMapWidth();
+        }
+
+        @Override
+        public EventListenerRegistry getEvReg() {
+            try{
+                lock.lock();
+                return Game.this.getEvReg();
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public StandardNeutralTeam getNeutralTeam() {
+            try{
+                lock.lock();
+                return Game.this.getNeutralTeam();
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        public ArrayList<ArrayList<MapObject>> getMap() {
+            return Game.this.map;
+        }
+
+        public ArrayList<Team> getTeams() {
+            try{
+                lock.lock();
+                return Game.this.getTeams();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public Team getTeamDoingTurn() {
+            try {
+                lock.lock();
+                return Game.this.getTeamDoingTurn();
+            } finally {
+                lock.unlock();
+            }
+        }
     }
 
-    public void unpauseUpdate(){
-        isAllowedToUpdate = true;
-    }
-
-    public boolean isAllowedToUpdate() {
-        return isAllowedToUpdate;
+    /***
+     * Gets thread safe game
+     */
+    public LockGame getLockedGame(){
+        return new LockGame();
     }
 }

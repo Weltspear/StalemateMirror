@@ -150,7 +150,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
                 }
 
                 if (!isBlocked && game.getUnitsTeam(this).unitCount() < 25) {
-                    ((Game)game).getUnitsTeamIgnoreSafety(this).addUnit(currently_processed_unit.unit);
+                    game.getUnitsTeam(this).addUnit(currently_processed_unit.unit);
                     game.addEntity(currently_processed_unit.unit);
                     currently_processed_unit = null;
                 }

@@ -76,7 +76,7 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         for (Integer[] c: coords_to_resupply){
             for (Entity e: game.getEntities(c[0], c[1])){
                 if (e instanceof Unit u){
-                    if (((Game) game).getUnitsTeamIgnoreSafety(u) == ((Game) game).getUnitsTeamIgnoreSafety(this)){
+                    if ((game.getUnitsTeam(u) == game.getUnitsTeam(this))){
                         int needed_supply = u.unitStats().getMaxSupply() - u.unitStats().getSupply();
                         if (this.getSupply() - needed_supply > 1){
                             u.consumeSupply(-needed_supply);
@@ -88,7 +88,7 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         }
 
         if (supply - 20 >= 0) {
-            ((Game) game).getUnitsTeamIgnoreSafety(this).setMilitaryPoints(((Game) game).getUnitsTeamIgnoreSafety(this)
+            game.getUnitsTeam(this).setMilitaryPoints(game.getUnitsTeam(this)
                     .getMilitaryPoints() + 1);
             supply -= 20;
         }

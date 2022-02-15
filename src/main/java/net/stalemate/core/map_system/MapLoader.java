@@ -193,7 +193,9 @@ public class MapLoader {
     @SuppressWarnings("unchecked")
     public static int getMapPlayerCount(String map_path){
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
+            PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                    .build();
+            ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
             HashMap<String, Object> map = null;
             try {
                 map = objectMapper.readValue(new File(map_path), HashMap.class);
@@ -218,7 +220,9 @@ public class MapLoader {
     }
 
     public static String getMapName(String map_path){
-        ObjectMapper objectMapper = new ObjectMapper();
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .build();
+        ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
         HashMap<String, Object> map = null;
         try {
             map = objectMapper.readValue(new File(map_path), HashMap.class);

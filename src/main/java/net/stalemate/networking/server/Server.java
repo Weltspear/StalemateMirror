@@ -23,6 +23,8 @@ import net.stalemate.networking.server.lobby_management.LobbyHandler;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static net.panic.Panic.panic;
+
 public class Server {
 
     protected ServerSocket serverSocket;
@@ -49,6 +51,7 @@ public class Server {
         }
         catch (Exception e){
             e.printStackTrace();
+            panic("Failed to start server!");
         }
     }
 

@@ -4,3 +4,20 @@ config:
     # Timeouts in seconds
     timeout: 30
     lobby_timeout: 120
+
+    controls:
+      keyb:
+        # Camera movement
+        "move_up": "UP"
+        "move_down": "DOWN"
+        "move_left": "LEFT"
+        "move_right": "RIGHT"
+
+        "confirm": "ENTER"
+        "escape": "ESCAPE"
+        "finish_turn": "SPACE"
+
+        "change_cam_sel_mode": "CONTROL"
+        "goto_first_built_base": "SHIFT"
+        "chat": "BACK_SLASH"
+

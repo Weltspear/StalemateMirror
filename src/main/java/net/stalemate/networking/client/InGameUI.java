@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.panic.Expect;
 import net.stalemate.networking.client.config.ButtonTooltips;
+import net.stalemate.networking.client.config.KeyboardBindMapper;
 import net.stalemate.networking.client.config.PropertiesMatcher;
 import net.stalemate.networking.client.property.ClientSideProperty;
 
@@ -161,34 +162,34 @@ public class InGameUI extends JPanel {
         public void keyPressed(KeyEvent e) {
             isBusy = true;
             if (!isTypingChatMessage) {
-                if (e.getKeyCode() == KeyEvent.VK_UP) {
+                if (e.getKeyCode() == KeyboardBindMapper.move_up) {
                     keysInQueue.add("UP");
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
                     keysInQueue.add("DOWN");
-                } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
                     keysInQueue.add("LEFT");
-                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
                     keysInQueue.add("RIGHT");
-                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
                     keysInQueue.add("ENTER");
-                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
                     keysInQueue.add("ESCAPE");
-                } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
                     keysInQueue.add("SPACE");
                 } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
                     keysInQueue.add(String.valueOf(e.getKeyChar()));
-                } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
                     keysInQueue.add("CTRL");
-                } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
                     keysInQueue.add("SHIFT");
-                } else if (e.getKeyCode() == KeyEvent.VK_BACK_SLASH) {
+                } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
                     isTypingChatMessage = true;
                 }
             } else{
                 if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
                     currentMSG += String.valueOf(e.getKeyChar());
                 }
-                else if (e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                else if (e.getKeyCode() == KeyboardBindMapper.escape){
                     currentMSG = "";
                     isTypingChatMessage = false;
                 }

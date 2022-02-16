@@ -44,8 +44,13 @@ public class Grass32ConfigClient {
             timeout = (int) client_config.get("timeout");
             lobby_timeout = (int) client_config.get("lobby_timeout");
 
+            HashMap<String, HashMap<String, String>> controls = (HashMap<String, HashMap<String, String>>) client_config.get("controls");
+
+            KeyboardBindMapper.makeBinds(controls.get("keyb"));
+
         } catch (Exception e){
             System.err.println("Failed to load grass32.");
+            e.printStackTrace();
         }
     }
 

@@ -184,10 +184,10 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
                         break;
                     }
                 }
-                if (x+deployment_x > game.getMapWidth()-1 || x+deployment_x < 0){
+                if (!(x+deployment_x < game.getMapWidth()) || x+deployment_x < 0){
                     isBlocked = true;
                 }
-                if (y+deployment_y > game.getMapHeight()-1 || y+deployment_y < 0){
+                if (!(y+deployment_y < game.getMapHeight()) || y+deployment_y < 0){
                     isBlocked = true;
                 }
                 if (!game.getMapObject(x+deployment_x, y+deployment_y).isPassable){

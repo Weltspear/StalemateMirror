@@ -19,45 +19,44 @@
 package net.stalemate.core.communication.chat;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Chat {
     private final ArrayList<Message> chat = new ArrayList<>();
-    private volatile boolean chatUnsafe = false;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public Chat(){
 
     }
 
     public void pushMsg(Message msg){
-        while (chatUnsafe){
-            Thread.onSpinWait();
-        }
+        lock.lock();
         chat.add(msg);
+        lock.unlock();
     }
 
     public ArrayList<String> read(){
-        while(chatUnsafe){
-            Thread.onSpinWait();
-        }
-        chatUnsafe = true;
-        if (chat.size() > 0) {
-            ArrayList<String> c1 = new ArrayList<>();
-            for (int i = 0; i < 10 && i < chat.size(); i++) {
-                if (chat.get(i).getTimesRead() >= 200) {
-                    chat.remove(chat.get(i));
-                    if (i > chat.size()) {
-                        break;
+        lock.lock();
+        try {
+            if (chat.size() > 0) {
+                ArrayList<String> c1 = new ArrayList<>();
+                for (int i = 0; i < 10 && i < chat.size(); i++) {
+                    if (chat.get(i).getTimesRead() >= 200) {
+                        chat.remove(chat.get(i));
+                        if (i > chat.size()) {
+                            break;
+                        }
+                        if (i == 0 && chat.size() == 0) {
+                            break;
+                        }
                     }
-                    if (i == 0 && chat.size() == 0){
-                        break;
-                    }
+                    c1.add(chat.get(i).read());
                 }
-                c1.add(chat.get(i).read());
+                return c1;
             }
-            chatUnsafe = false;
-            return c1;
+            return new ArrayList<>();
+        } finally {
+            lock.unlock();
         }
-        chatUnsafe = false;
-        return new ArrayList<>();
     }
 }

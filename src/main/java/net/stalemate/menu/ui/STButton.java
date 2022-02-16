@@ -16,34 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate;
+package net.stalemate.menu.ui;
 
 import net.stalemate.menu.MainMenu;
-import net.stalemate.networking.client.Client;
-import net.stalemate.networking.server.Server;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Scanner;
+public interface STButton {
 
-public class Main {
-    public static void main(String[] args) throws IllegalAccessException {
-        File f = new File("grass32");
-        if (!f.exists()){
-            throw new IllegalAccessException("grass32 doesn't exist");
-        }
+    String text();
+    void action(MainMenu m);
 
-        if (args.length > 0){
-            if (args[0].equals("--serv")){
-                Server server = new Server();
-                server.start_server();
-            }
-        }
-        else {
-            MainMenu mm = new MainMenu();
-            while (true) {
-                mm.update();
-            }
-        }
-    }
 }

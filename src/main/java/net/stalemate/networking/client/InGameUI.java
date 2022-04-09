@@ -39,6 +39,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class InGameUI extends JPanel {
     private final ClientDataRenderer renderer;
@@ -49,6 +50,9 @@ public class InGameUI extends JPanel {
     private final JFrame frame;
     public JFrame getFrame(){return frame;}
 
+    /***
+     * Ids of buttons to be rendered
+     */
     String[][] id_array = {{null, null, null},
                         {null, null, null},
                         {null, null, null}};
@@ -66,7 +70,7 @@ public class InGameUI extends JPanel {
 
     private PropertiesToRender propertiesToRender = null;
 
-    protected volatile boolean unsafe_;
+    private ReentrantLock unsafeLock = new ReentrantLock();
 
     ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
@@ -97,34 +101,6 @@ public class InGameUI extends JPanel {
     int x_prev = 0;
     int y_prev = 0;
     boolean do_render_prev = false;
-
-
-    public void setRender(ArrayList<ArrayList<BufferedImage>> map_to_render, ArrayList<ArrayList<BufferedImage>> fog_of_war, ArrayList<ArrayList<BufferedImage>> entity_render,
-                          ArrayList<BufferedImage> buttons, ArrayList<String> binds, BufferedImage unit_img, PropertiesToRender propertiesToRender, BufferedImage selector,
-                          ArrayList<ArrayList<BufferedImage>> unit_data_ar, ArrayList<BufferedImage> unit_queue, ArrayList<String> unit_times,
-                          int mp, boolean is_it_your_turn, String[][] button_ids, int sel_x_frame, int sel_y_frame, int cam_sel_mode, ArrayList<String> chat){
-        while (unsafe_) {
-            Thread.onSpinWait();
-        }
-        this.map_to_render = map_to_render;
-        this.fog_of_war = fog_of_war;
-        this.entity_render = entity_render;
-        this.buttons = buttons;
-        this.binds = binds;
-        this.unit_img = unit_img;
-        this.propertiesToRender = propertiesToRender;
-        this.selector = selector;
-        this.unit_data_ar = unit_data_ar;
-        this.queue = unit_queue;
-        this.unit_times = unit_times;
-        this.mp = mp;
-        this.is_it_your_turn = is_it_your_turn;
-        this.id_array = button_ids;
-        this.sel_x_frame = sel_x_frame;
-        this.sel_y_frame = sel_y_frame;
-        this.cam_sel_mode = cam_sel_mode;
-        this.chat = chat;
-    }
 
     public static class KeyboardInput implements KeyListener{
 
@@ -569,7 +545,27 @@ public class InGameUI extends JPanel {
                 int sel_x_frame = (sel_x - ((int)data_map.get("x")+6))*64 + 6*64;
                 int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 3*64;
 
-                interface_.setRender(map, fog_of_war_, entities, buttons, binds, selected_unit_image, propertiesToRender, selector, unit_data_ar, unit_queue, unit_queue_turn_time, mp, is_it_your_turn, button_ids, sel_x_frame, sel_y_frame, CamSelMode, chat);
+                this.interface_.unsafeLock.lock();
+                this.interface_.map_to_render = map;
+                this.interface_.fog_of_war = fog_of_war_;
+                this.interface_.entity_render = entities;
+                this.interface_.buttons = buttons;
+                this.interface_.binds = binds;
+                this.interface_.unit_img = selected_unit_image;
+                this.interface_.propertiesToRender = propertiesToRender;
+                this.interface_.selector = selector;
+                this.interface_.unit_data_ar = unit_data_ar;
+                this.interface_.queue = unit_queue;
+                this.interface_.unit_times = unit_queue_turn_time;
+                this.interface_.mp = mp;
+                this.interface_.is_it_your_turn = is_it_your_turn;
+                this.interface_.id_array = button_ids;
+                this.interface_.sel_x_frame = sel_x_frame;
+                this.interface_.sel_y_frame = sel_y_frame;
+                this.interface_.cam_sel_mode = CamSelMode;
+                this.interface_.chat = chat;
+                this.interface_.unsafeLock.unlock();
+
                 return new Expect<>("");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -743,8 +739,8 @@ public class InGameUI extends JPanel {
     public void paint(Graphics g)
     {
         g.clearRect(0, 0, 900, 900);
+        unsafeLock.lock();
         try {
-            unsafe_ = true;
             g.drawImage(placeholder_ui, 0, 384, null);
             g.drawImage(placeholder_ui_2, 0, 0, null);
             g.drawImage(panel, 640, 384, null);
@@ -761,40 +757,9 @@ public class InGameUI extends JPanel {
                 y++;
             }
 
-            y = 0;
-            for (ArrayList<BufferedImage> row_x: entity_render){
-                int x_count = 0;
-                for (BufferedImage x : row_x){
-                    if (x != null)
-                    g.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
-                    x_count++;
-                }
-                y++;
-            }
-
-            y = 0;
-            for (ArrayList<BufferedImage> row_x_: fog_of_war){
-                int x_count = 0;
-                for (BufferedImage x : row_x_){
-                    if (x != null) {
-                        g.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64 * x_count, 64 + 64 * y, null);
-                    }
-                    x_count++;
-                }
-                y++;
-            }
-
-            // Render unit_data_ar
-            y = 0;
-            for (ArrayList<BufferedImage> row_x: unit_data_ar){
-                int x_count = 0;
-                for (BufferedImage x_ : row_x){
-                    if (x_ != null)
-                        g.drawImage(x_.getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
-                    x_count++;
-                }
-                y++;
-            }
+            renderImages(g, entity_render);
+            renderImages(g, fog_of_war);
+            renderImages(g, unit_data_ar);
 
             if (selector != null)
             g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame,sel_y_frame, null);
@@ -925,10 +890,8 @@ public class InGameUI extends JPanel {
                 g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev*64,y_prev*64,null);
             }
 
-            while(in_client == null){
-                Thread.onSpinWait();
-            }
             // Render currently written chat message
+            if (in_client != null)
             if (in_client.isTypingChatMessage()) {
                 if (basis33 != null) {
                     g.setColor(Color.WHITE);
@@ -949,13 +912,24 @@ public class InGameUI extends JPanel {
                 y++;
             }
 
-            unsafe_ = false;
             g.dispose();
         } catch (Exception e){
             e.printStackTrace();
-            unsafe_ = false;
         }
+        unsafeLock.unlock();
+    }
 
-
+    private void renderImages(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
+        int y;
+        y = 0;
+        for (ArrayList<BufferedImage> row_x: buffered_images){
+            int x_count = 0;
+            for (BufferedImage x : row_x){
+                if (x != null)
+                graphics.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                x_count++;
+            }
+            y++;
+        }
     }
 }

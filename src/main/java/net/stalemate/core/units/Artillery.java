@@ -23,6 +23,7 @@ import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.AttackButton;
+import net.stalemate.core.buttons.Motorize;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.units.util.IMechanized;
 import net.stalemate.core.util.IGameController;
@@ -101,7 +102,7 @@ public class Artillery extends Unit implements IMechanized {
     }
 
     public Artillery(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(5, 5, 4, 1, 2, 0, 15, 15, 0), new AnimationController(), "Artillery");
+        super(x, y, game, new UnitStats(5, 5, 3, 1, 2, 0, 15, 15, 0), new AnimationController(), "Artillery");
 
         Animation idle = new Animation(15);
         idle.addFrame("assets/units/artillery_idle.png");
@@ -118,7 +119,7 @@ public class Artillery extends Unit implements IMechanized {
 
         anim.setCurrentAnimation("idle");
 
-        fog_of_war_range = 4;
+        fog_of_war_range = 3;
     }
 
     @Override
@@ -126,6 +127,7 @@ public class Artillery extends Unit implements IMechanized {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new AttackButton(attack_range));
         buttons.add(new MoveButton(movement_range));
+        buttons.add(new Motorize());
         // buttons.add(new ShellingButton(attack_range));
         return buttons;
     }

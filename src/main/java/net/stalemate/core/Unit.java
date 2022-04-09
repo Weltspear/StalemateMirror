@@ -210,14 +210,20 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         if (hp <= 0){
             game.rmEntity(this);
             game.getEvReg().triggerUnitDeathEvent(this);
+            onDeath();
         }
 
         if (max_supply != -1){
             if (supply <= 0){
                 game.rmEntity(this);
                 game.getEvReg().triggerUnitDeathEvent(this);
+                onDeath();
             }
         }
+    }
+
+    public void onDeath(){
+
     }
 
     @Override

@@ -66,8 +66,7 @@ public class Fortification extends Unit implements IBuilding, Unflippable {
     public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new AttackButton(attack_range));
-        buttons.add(new ScrapFortification());
-
+        buttons.add(new Scrap());
         return buttons;
     }
 
@@ -76,39 +75,14 @@ public class Fortification extends Unit implements IBuilding, Unflippable {
     }
 
     @Override
-    public void update() {
-        super.update();
-
-        if (this.hp <= 0 && !isScrapped){
-            unitInside.setSupply(
-                    (int) (((float)getSupply()/(float)getMaxSupply())
-                            * (float)unitInside.getMaxSupply()));
-            unitInside.setX(x);
-            unitInside.setY(y);
-            game.addEntity(unitInside);
-        }
-    }
-
-    public class ScrapFortification extends Scrap{
-        ScrapFortification(){
-
-        }
-
-        @Override
-        public void action(Unit unit, IGameController gameController) {
-            isScrapped = true;
-            super.action(unit, gameController);
-
-            if (!unit.hasTurnEnded()){
-                unitInside.setSupply(
-                        (int) (((float)getSupply()/(float)getMaxSupply())
-                                * (float)unitInside.getMaxSupply()));
-                unitInside.setX(x);
-                unitInside.setY(y);
-                gameController.addEntity(unitInside);
-            }
-
-        }
+    public void onDeath() {
+        unitInside.setSupply(
+                (int) (((float)getSupply()/(float)getMaxSupply())
+                        * (float)unitInside.getMaxSupply()));
+        unitInside.setX(x);
+        unitInside.setY(y);
+        unitInside.endTurn();
+        game.addEntity(unitInside);
     }
 
 

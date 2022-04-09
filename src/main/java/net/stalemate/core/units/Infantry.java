@@ -23,6 +23,7 @@ import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.AttackButton;
 import net.stalemate.core.buttons.HPSacrificeSU;
+import net.stalemate.core.buttons.Motorize;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.util.IGameController;
 
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 
 public class Infantry extends Unit {
     public Infantry(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 2, 2, 1, 20, 20, 0), new AnimationController(), "Infantry");
+        super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/rifleman_idle_1.png");
         idle.addFrame("assets/units/rifleman_idle_2.png");
@@ -55,6 +56,7 @@ public class Infantry extends Unit {
         if (supply > 5) {
             buttons.add(new AttackButton(attack_range));
             buttons.add(new MoveButton(movement_range));
+            buttons.add(new Motorize());
         }
         else {
             buttons.add(new AttackButton(attack_range));

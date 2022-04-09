@@ -18,25 +18,56 @@
 
 package net.stalemate.core.units;
 
-import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.MoveButton;
-import net.stalemate.core.buttons.ResupplyButton;
-import net.stalemate.core.controller.Game;
-import net.stalemate.core.units.util.IMechanized;
 import net.stalemate.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class MotorizedUnit extends Unit implements IMechanized {
+public class MotorizedUnitOther extends Unit{
+    private final Unit contained_unit;
 
-    public MotorizedUnit(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 40, 40, 0), new AnimationController(), "Motorized Unit");
+    public class Demotorize implements IStandardButton{
+        @Override
+        public String bind() {
+            return "Q";
+        }
+
+        @Override
+        public String texture() {
+            return "texture_missing";
+        }
+
+        @Override
+        public String identifier() {
+            return "button_motorized_unit_other_demotorize";
+        }
+
+        @Override
+        public void action(Unit unit, IGameController gameController) {
+            if (!hasTurnEnded){
+                gameController.rmEntity(MotorizedUnitOther.this);
+                contained_unit.setHp(hp);
+                contained_unit.setSupply(supply);
+                contained_unit.setX(x);
+                contained_unit.setY(y);
+                contained_unit.endTurn();
+                gameController.addEntity(contained_unit);
+                MotorizedUnitOther.this.setHp(-1);
+            }
+        }
+    }
+
+    public MotorizedUnitOther(int x, int y, IGameController game, Unit other) {
+        super(x, y, game, new UnitStats(other.getHp(), other.getMaxHp(), 0, 3,0,0,
+                        other.getSupply(), other.getMaxSupply(),0), new AnimationController(), other.getName());
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");
+
+        contained_unit = other;
 
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
@@ -48,7 +79,12 @@ public class MotorizedUnit extends Unit implements IMechanized {
     public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new MoveButton(movement_range));
-        buttons.add(new ResupplyButton());
+        buttons.add(new Demotorize());
         return buttons;
+    }
+
+    @Override
+    public void onDeath() {
+        contained_unit.setHp(-1);
     }
 }

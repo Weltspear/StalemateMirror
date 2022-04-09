@@ -138,7 +138,6 @@ public class MachineGunner extends Unit{
 
         if (!mode){
             buttons.set(2, new OffensiveModeButton());
-            buttons.set(0, null);
             buttons.set(1, null);
         }
         else{

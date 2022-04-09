@@ -90,6 +90,9 @@ public class ClientMenu extends JPanel implements Menu {
     }
 
     public class ClientMenuMouse extends MouseAdapter{
+        /***
+         * Char width in basis33
+         */
         private final int width_f;
         private int height_f;
 

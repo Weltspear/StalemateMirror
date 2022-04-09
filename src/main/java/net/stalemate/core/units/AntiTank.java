@@ -65,13 +65,38 @@ public class AntiTank extends Unit implements IMechanized {
         properties.put("name", this.getName());
         properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
         properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
-        properties.put("df", "" + this.unitStats().getDf());
-        properties.put("atk", "" + (this.unitStats().getAtk() - 3));
-        properties.put("atk_ar_1", "" + (this.unitStats().getAtk() + 1));
-        properties.put("atk_ar_2", "" + (this.unitStats().getAtk() + 3));
+        properties.put("df", "" + this.unitStats().getDf() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk", "" + (this.unitStats().getAtk() - 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk_ar_1", "" + (this.unitStats().getAtk() + 1) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk_ar_2", "" + (this.unitStats().getAtk() + 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
         return properties;
+    }
+
+    private int has_not_moved = 0;
+
+    @Override
+    public void update() {
+        super.update();
+        if (hasMoved){
+            has_not_moved = 0;
+            entrenchment = 0;
+        }
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        if (!hasMoved){
+            has_not_moved += 1;
+        }
+
+        if (has_not_moved == 3){
+            if (entrenchment < 2)
+                entrenchment+=1;
+            has_not_moved = 0;
+        }
     }
 }

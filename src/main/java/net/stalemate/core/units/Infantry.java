@@ -67,4 +67,29 @@ public class Infantry extends Unit {
         }
         return buttons;
     }
+
+    private int has_not_moved = 0;
+
+    @Override
+    public void update() {
+        super.update();
+        if (hasMoved){
+            has_not_moved = 0;
+            entrenchment = 0;
+        }
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        if (!hasMoved){
+            has_not_moved += 1;
+        }
+
+        if (has_not_moved == 3){
+            if (entrenchment < 3)
+            entrenchment+=1;
+            has_not_moved = 0;
+        }
+    }
 }

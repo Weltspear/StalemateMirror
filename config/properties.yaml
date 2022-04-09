@@ -8,3 +8,4 @@ properties:
   atk_ar_2: "ATK (vs Armor: 2)"
   ended_turn: "Has ended it's turn"
   construction_time: "Construction time"
+  et: "ET"

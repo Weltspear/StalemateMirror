@@ -59,14 +59,14 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
                 unit.getAnimationController().setCurrentAnimation("attack");
                 if (anti_tank_mode){
                     if (selected_unit.unitStats().getArmor() == 1){
-                        selected_unit.damage(unit.unitStats().getAtk() + 1);
+                        selected_unit.damage(unit.getAtk() + 1);
                     } else if (selected_unit.unitStats().getArmor() == 2){
-                        selected_unit.damage(unit.unitStats().getAtk() + 3);
+                        selected_unit.damage(unit.getAtk() + 3);
                     } else{
-                        selected_unit.damage(unit.unitStats().getAtk()-3);
+                        selected_unit.damage(unit.getAtk()-3);
                     }
                 } else {
-                    selected_unit.damage(unit.unitStats().getAtk());
+                    selected_unit.damage(unit.getAtk());
                 }
 
                 gameController.getEvReg().triggerUnitAttackEvent(unit, selected_unit);
@@ -75,8 +75,8 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
                         (selected_unit.getX()+selected_unit.unitStats().getAttackRange() >= unit.getX())) {
                     if ((selected_unit.getY()-selected_unit.unitStats().getAttackRange() <= unit.getY()) &&
                             (selected_unit.getY()+selected_unit.unitStats().getAttackRange() >= unit.getY())) {
-                        if (selected_unit.unitStats().getDf() > 0) {
-                            unit.damage(selected_unit.unitStats().getDf());
+                        if (selected_unit.getDf() > 0) {
+                            unit.damage(selected_unit.getDf());
                             selected_unit.getAnimationController().setCurrentAnimation("attack");
                         }
                     }
@@ -100,6 +100,9 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
                 unit.consumeSupply(2);
                 if (!(selected_unit instanceof IBuilding))
                 selected_unit.consumeSupply(2);
+
+                if (selected_unit.getEntrenchment()>0)
+                selected_unit.setEntrenchment(selected_unit.getEntrenchment()-1);
 
                 if (selected_unit.getHp() <= 0){
                     gameController.rmEntity(selected_unit);

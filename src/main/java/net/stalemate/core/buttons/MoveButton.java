@@ -70,6 +70,7 @@ public class MoveButton implements Unit.ISelectorButton {
                     unit.setY(y);
                     unit.endTurn();
                     unit.consumeSupply(1);
+                    unit.move();
                 }
             }
         }

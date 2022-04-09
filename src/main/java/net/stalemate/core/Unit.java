@@ -39,6 +39,16 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     protected int supply;
     protected int max_supply;
 
+    protected int entrenchment = 0;
+    /***
+     * Tracks MoveButton usage
+     */
+    protected boolean hasMoved = false;
+
+    public void move(){
+        hasMoved = true;
+    }
+
     protected int armor;
 
     protected int fog_of_war_range = 2;
@@ -74,6 +84,14 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
             }
         }
         return false;
+    }
+
+    public void setEntrenchment(int i) {
+        entrenchment = i;
+    }
+
+    public int getEntrenchment() {
+        return entrenchment;
     }
 
     public interface IButton{
@@ -197,6 +215,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     @Override
     public void turnUpdate() {
         hasTurnEnded = false;
+        hasMoved = false;
     }
 
     private volatile boolean isAnimationUnsafe = false;
@@ -338,7 +357,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     }
 
     public int getAtk() {
-        return atk;
+        return atk + (int)(0.5*entrenchment);
     }
 
     public void setAtk(int atk) {
@@ -346,7 +365,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     }
 
     public int getDf() {
-        return df;
+        return df + (int)(0.5*entrenchment);
     }
 
     public void setDf(int df) {
@@ -387,11 +406,13 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         if (this.unitStats().max_supply != -1)
         properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
         if (this.unitStats().getAtk() > 0)
-        properties.put("atk", "" + this.unitStats().getAtk());
-        if (this.unitStats().getDf() > 0)
-        properties.put("df", "" + this.unitStats().getDf());
+        properties.put("atk", "" + this.unitStats().getAtk() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        if (this.getDf() > 0)
+        properties.put("df", "" + this.unitStats().getDf() + (entrenchment>1?"(+"+ (int)(0.5*entrenchment) +")":""));
         if (this.unitStats().armor > 0)
         properties.put("ar", "" + this.unitStats().getArmor());
+        if (this.entrenchment > 0)
+        properties.put("et", "" + this.entrenchment);
         properties.put("name", this.getName());
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());

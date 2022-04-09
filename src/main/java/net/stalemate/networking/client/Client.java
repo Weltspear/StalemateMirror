@@ -25,11 +25,13 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.panic.ErrorResult;
 import net.panic.Expect;
+import net.stalemate.menu.ClientMenu;
 import net.stalemate.networking.client.config.Grass32ConfigClient;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.*;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.ConnectException;
@@ -43,6 +45,8 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class Client {
 
+    private final String ip;
+    private final ClientMenu clientMenu;
     private Socket client;
 
     private KeyPair keyPair;
@@ -53,8 +57,17 @@ public class Client {
     private PrintWriter output;
     private BufferedReader input;
 
-    public Client(){
+    private JFrame frame;
 
+    public Client(JFrame frame){
+        this.frame = frame;
+
+        clientMenu = new ClientMenu(frame);
+        while (clientMenu.status == 0){
+            clientMenu.update();
+        }
+
+        ip = clientMenu.getTxt();
     }
 
     public static class GameControllerClient{
@@ -251,19 +264,30 @@ public class Client {
 
     public void start_client(){
         try {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Enter IP: ");
-
-            // InetAddress.getByName(sc.next())
-            String ip = sc.next();
-
             client = new Socket(InetAddress.getByName(ip).getHostAddress(), 59657);
+
+            clientMenu.setStatus(3);
+            clientMenu.update();
+            clientMenu.clFrame();
+            frame.setVisible(false);
 
             handle_connection();
         } catch (ConnectException e){
-            System.out.println("Connection refused");
+            clientMenu.setStatus(4);
+            clientMenu.setError("Connection refused");
+
+            while (clientMenu.status != -1){
+                clientMenu.update();
+            }
+            clientMenu.clFrame();
         } catch (IOException e){
-            System.out.println("Unknown host");
+            clientMenu.setStatus(4);
+            clientMenu.setError("Unknown host");
+
+            while (clientMenu.status != -1){
+                clientMenu.update();
+            }
+            clientMenu.clFrame();
         }
     }
 

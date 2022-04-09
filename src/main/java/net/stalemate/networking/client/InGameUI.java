@@ -925,6 +925,9 @@ public class InGameUI extends JPanel {
                 g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev*64,y_prev*64,null);
             }
 
+            while(in_client == null){
+                Thread.onSpinWait();
+            }
             // Render currently written chat message
             if (in_client.isTypingChatMessage()) {
                 if (basis33 != null) {

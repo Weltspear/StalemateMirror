@@ -18,11 +18,5 @@
 
 package net.stalemate.menu.ui;
 
-import net.stalemate.menu.MainMenu;
-
-public interface STButton {
-
-    String text();
-    void action();
-
+public interface Menu {
 }

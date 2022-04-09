@@ -18,6 +18,7 @@
 
 package net.stalemate.menu;
 
+import net.stalemate.menu.ui.Menu;
 import net.stalemate.menu.ui.STButton;
 import net.stalemate.networking.client.Client;
 import net.stalemate.networking.server.Server;
@@ -31,11 +32,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MainMenu extends JPanel {
+public class MainMenu extends JPanel implements Menu {
 
     private JFrame frame;
     private volatile Font basis33;
     private ReentrantLock lock = new ReentrantLock();
+    private MouseAdapter mouseAdapter;
 
     private ArrayList<STButton> buttons = new ArrayList<>();
 
@@ -45,7 +47,7 @@ public class MainMenu extends JPanel {
     private final static Color StalemateGreen = new Color(35, 115, 0);
 
     public class MainMenuMouse extends MouseAdapter{
-        private int width_f;
+        private final int width_f;
         private int height_f;
 
         public MainMenuMouse(){
@@ -96,7 +98,7 @@ public class MainMenu extends JPanel {
                 if (e.getX() >= half && e.getX() <= half_end &&
                         e.getY() >= 20+y && e.getY() <= 20+y+10){
                     buttonToBeHighlighted = button_num;
-                    b.action(MainMenu.this);
+                    b.action();
                 }
 
                 y += 20;
@@ -124,7 +126,7 @@ public class MainMenu extends JPanel {
             }
 
             @Override
-            public void action(MainMenu m) {
+            public void action() {
                 status = 1;
             }
         });
@@ -136,7 +138,7 @@ public class MainMenu extends JPanel {
             }
 
             @Override
-            public void action(MainMenu m) {
+            public void action() {
                 status = 2;
             }
         });
@@ -148,7 +150,7 @@ public class MainMenu extends JPanel {
             }
 
             @Override
-            public void action(MainMenu m) {
+            public void action() {
                 System.exit(0);
             }
         });
@@ -160,8 +162,10 @@ public class MainMenu extends JPanel {
             e.printStackTrace();
         }
 
-        frame.addMouseMotionListener(new MainMenuMouse());
-        frame.addMouseListener(new MainMenuMouse());
+        mouseAdapter = new MainMenuMouse();
+
+        frame.addMouseMotionListener(mouseAdapter);
+        frame.addMouseListener(mouseAdapter);
     }
 
     public void update(){
@@ -169,9 +173,15 @@ public class MainMenu extends JPanel {
         this.repaint();
 
         if (status == 1){
-            frame.setVisible(false);
-            Client client = new Client();
+            // frame.setVisible(false);
+            this.frame.remove(this);
+            this.frame.removeMouseListener(mouseAdapter);
+            this.frame.removeMouseMotionListener(mouseAdapter);
+            Client client = new Client(this.frame);
             client.start_client();
+            this.frame.add(this);
+            this.frame.addMouseListener(mouseAdapter);
+            this.frame.addMouseMotionListener(mouseAdapter);
             status = 0;
             frame.setVisible(true);
         }

@@ -18,11 +18,28 @@
 
 package net.stalemate.menu.ui;
 
-import net.stalemate.menu.MainMenu;
+public class STEntry {
+    private final String label;
+    private String txt = "";
 
-public interface STButton {
+    public STEntry(String label){
+        this.label = label;
+    }
 
-    String text();
-    void action();
+    public void write(String t){
+        txt += t;
+    }
 
+    public void backspace(){
+        if (txt.length() > 0)
+        txt = txt.substring(0, txt.length() - 1);
+    }
+
+    public String getFullTxt(){
+        return label + txt;
+    }
+
+    public String getTxt(){
+        return txt;
+    }
 }

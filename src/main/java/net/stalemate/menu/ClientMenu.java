@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static net.stalemate.menu.MainMenu.*;
+
 public class ClientMenu extends JPanel implements Menu {
 
     private JFrame frame;
@@ -105,25 +107,7 @@ public class ClientMenu extends JPanel implements Menu {
             if (status == 0 || status == 4) {
                 // select button to be highlighted
                 int y = 276 + 20;
-                int button_num = 0;
-                boolean isHighlighting = false;
-                for (STButton b : buttons) {
-                    int half = ((832 + 14) - width_f * b.text().length()) / 2;
-                    int half_end = half + (b.text().length() * width_f);
-
-                    if (e.getX() >= half && e.getX() <= half_end &&
-                            e.getY() >= 20 + y && e.getY() <= 20 + y + 10) {
-                        buttonToBeHighlighted = button_num;
-                        isHighlighting = true;
-                    }
-
-                    y += 20;
-                    button_num++;
-                }
-
-                if (!isHighlighting) {
-                    buttonToBeHighlighted = -1;
-                }
+                commonMouseMovedProcedure(buttons, width_f, e, y);
             }
 
             lock.unlock();
@@ -134,20 +118,7 @@ public class ClientMenu extends JPanel implements Menu {
             lock.lock();
             System.out.println(e.getX() + "," + e.getY());
             int y = 276 + 20; // 276
-            int button_num = 0;
-            for (STButton b: buttons){
-                int half = ((832+14) - width_f*b.text().length())/2;
-                int half_end = half+(b.text().length()*width_f);
-
-                if (e.getX() >= half && e.getX() <= half_end &&
-                        e.getY() >= 20+y && e.getY() <= 20+y+10){
-                    buttonToBeHighlighted = button_num;
-                    b.action();
-                }
-
-                y += 20;
-                button_num++;
-            }
+            buttonToBeHighlighted = commonMouseClickProcedure(buttonToBeHighlighted, buttons, width_f, e, y);
 
             lock.unlock();
         }
@@ -237,30 +208,7 @@ public class ClientMenu extends JPanel implements Menu {
 
             // Render button text
             int y = 276 + 20;
-            int button_num = 0;
-            g.setFont(basis33.deriveFont((float) (25)));
-            g.setColor(Color.white);
-            for (STButton b : buttons) {
-                int half = ((832 + 14) - width * b.text().length()) / 2;
-                if (button_num == buttonToBeHighlighted)
-                    g.setColor(Color.GRAY);
-                g.drawString(b.text(), half, y);
-                g.setColor(Color.WHITE);
-                y += 20;
-                button_num++;
-            }
-
-            // Render title
-            g.setFont(basis33.deriveFont((float) (30)));
-            g.setColor(Color.white);
-
-            // title char size
-            metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
-            width = metrics.stringWidth("A");
-
-            y = 230;
-            int half = ((832 + 14) - width * "Stalemate".length()) / 2;
-            g.drawString("Stalemate", half, y);
+            renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted);
          } if (status == 3){
              FontMetrics metrics;
              int width;

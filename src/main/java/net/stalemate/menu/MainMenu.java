@@ -63,25 +63,7 @@ public class MainMenu extends JPanel implements Menu {
 
             // select button to be highlighted
             int y = 276; // 276
-            int button_num = 0;
-            boolean isHighlighting = false;
-            for (STButton b: buttons){
-                int half = ((832+14) - width_f*b.text().length())/2;
-                int half_end = half+(b.text().length()*width_f);
-
-                if (e.getX() >= half && e.getX() <= half_end &&
-                    e.getY() >= 20+y && e.getY() <= 20+y+10){
-                    buttonToBeHighlighted = button_num;
-                    isHighlighting = true;
-                }
-
-                y += 20;
-                button_num++;
-            }
-
-            if (!isHighlighting){
-                buttonToBeHighlighted = -1;
-            }
+            buttonToBeHighlighted = commonMouseMovedProcedure(buttons, width_f, e, y);
 
             lock.unlock();
         }
@@ -90,21 +72,7 @@ public class MainMenu extends JPanel implements Menu {
         public void mouseClicked(MouseEvent e) {
             lock.lock();
             int y = 276; // 276
-            int button_num = 0;
-            for (STButton b: buttons){
-                int half = ((832+14) - width_f*b.text().length())/2;
-                int half_end = half+(b.text().length()*width_f);
-
-                if (e.getX() >= half && e.getX() <= half_end &&
-                        e.getY() >= 20+y && e.getY() <= 20+y+10){
-                    buttonToBeHighlighted = button_num;
-                    b.action();
-                }
-
-                y += 20;
-                button_num++;
-            }
-
+            buttonToBeHighlighted = commonMouseClickProcedure(buttonToBeHighlighted, buttons, width_f, e, y);
             lock.unlock();
         }
     }
@@ -203,17 +171,20 @@ public class MainMenu extends JPanel implements Menu {
             Thread.onSpinWait();
         }
 
-        // get char size
+        // Render button text
+        int y = 276;
+        renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted);
+    }
+
+    public static void renderTitleAndButtons(Graphics g, int y, Font basis33, ArrayList<STButton> buttons, int buttonToBeHighlighted){
         FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float)(25)).deriveFont(Font.BOLD));
         int width = metrics.stringWidth("A");
 
-        // Render button text
-        int y = 276;
         int button_num = 0;
-        g.setFont(basis33.deriveFont((float)(25)));
+        g.setFont(basis33.deriveFont((float) (25)));
         g.setColor(Color.white);
-        for (STButton b: buttons){
-            int half = ((832+14) - width*b.text().length())/2;
+        for (STButton b : buttons) {
+            int half = ((832 + 14) - width * b.text().length()) / 2;
             if (button_num == buttonToBeHighlighted)
                 g.setColor(Color.GRAY);
             g.drawString(b.text(), half, y);
@@ -223,15 +194,53 @@ public class MainMenu extends JPanel implements Menu {
         }
 
         // Render title
-        g.setFont(basis33.deriveFont((float)(30)));
+        g.setFont(basis33.deriveFont((float) (30)));
         g.setColor(Color.white);
 
         // title char size
-        metrics = g.getFontMetrics(basis33.deriveFont((float)(30)).deriveFont(Font.BOLD));
+        metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
         width = metrics.stringWidth("A");
 
         y = 230;
-        int half = ((832+14) - width*"Stalemate".length())/2;
+        int half = ((832 + 14) - width * "Stalemate".length()) / 2;
         g.drawString("Stalemate", half, y);
+    }
+
+    public static int commonMouseMovedProcedure(ArrayList<STButton> buttons, int width_f, MouseEvent e, int y){
+        int buttonToBeHighlighted = -1;
+        int button_num = 0;
+
+        for (STButton b: buttons){
+            int half = ((832+14) - width_f*b.text().length())/2;
+            int half_end = half+(b.text().length()*width_f);
+
+            if (e.getX() >= half && e.getX() <= half_end &&
+                    e.getY() >= 20+y && e.getY() <= 20+y+10){
+                buttonToBeHighlighted = button_num;
+            }
+
+            y += 20;
+            button_num++;
+        }
+
+        return buttonToBeHighlighted;
+    }
+
+    public static int commonMouseClickProcedure(int buttonToBeHighlighted, ArrayList<STButton> buttons, int width_f, MouseEvent e, int y){
+        int button_num = 0;
+        for (STButton b: buttons){
+            int half = ((832+14) - width_f*b.text().length())/2;
+            int half_end = half+(b.text().length()*width_f);
+
+            if (e.getX() >= half && e.getX() <= half_end &&
+                    e.getY() >= 20+y && e.getY() <= 20+y+10){
+                buttonToBeHighlighted = button_num;
+                b.action();
+            }
+
+            y += 20;
+            button_num++;
+        }
+        return buttonToBeHighlighted;
     }
 }

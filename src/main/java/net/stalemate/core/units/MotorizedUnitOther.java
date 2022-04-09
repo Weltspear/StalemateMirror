@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class MotorizedUnitOther extends Unit{
     private final Unit contained_unit;
 
-    public class Demotorize implements IStandardButton{
+    public class DemotorizeButton implements IStandardButton{
         @Override
         public String bind() {
             return "Q";
@@ -79,7 +79,7 @@ public class MotorizedUnitOther extends Unit{
     public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new MoveButton(movement_range));
-        buttons.add(new Demotorize());
+        buttons.add(new DemotorizeButton());
         return buttons;
     }
 

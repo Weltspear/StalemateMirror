@@ -22,7 +22,7 @@ import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.AttackButton;
-import net.stalemate.core.buttons.Motorize;
+import net.stalemate.core.buttons.MotorizeButton;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.properties.Properties;
 import net.stalemate.core.units.util.IMechanized;
@@ -55,7 +55,7 @@ public class AntiTank extends Unit implements IMechanized {
 
         buttons.add((new AttackButton(attack_range)).enableAT());
         buttons.add(new MoveButton(movement_range));
-        buttons.add(new Motorize());
+        buttons.add(new MotorizeButton());
         return buttons;
     }
 

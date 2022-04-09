@@ -23,9 +23,8 @@ import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.AttackButton;
-import net.stalemate.core.buttons.Motorize;
+import net.stalemate.core.buttons.MotorizeButton;
 import net.stalemate.core.buttons.MoveButton;
-import net.stalemate.core.units.buildings.*;
 import net.stalemate.core.units.buildings.*;
 import net.stalemate.core.units.util.IConstructableBuilding;
 import net.stalemate.core.units.util.IMechanized;
@@ -233,7 +232,7 @@ public class EngineerUnit extends Unit {
         if (!isInBuildingMode) {
             buttons.add(new MoveButton(movement_range));
             buttons.add(new AttackButton(attack_range));
-            buttons.add(new Motorize());
+            buttons.add(new MotorizeButton());
             buttons.add(new RepairButton());
 
             for (int i = 0; i < 4; i++){

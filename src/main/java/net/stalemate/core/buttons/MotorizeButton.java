@@ -22,7 +22,7 @@ import net.stalemate.core.Unit;
 import net.stalemate.core.units.MotorizedUnitOther;
 import net.stalemate.core.util.IGameController;
 
-public class Motorize implements Unit.IStandardButton {
+public class MotorizeButton implements Unit.IStandardButton {
     @Override
     public String bind() {
         return "Q";
@@ -42,6 +42,7 @@ public class Motorize implements Unit.IStandardButton {
     public void action(Unit unit, IGameController gameController) {
         if (!unit.hasTurnEnded() && unit.getSupply()-3>0){
             unit.setSupply(unit.getSupply()-3);
+            unit.setEntrenchment(0);
             gameController.rmEntity(unit);
             MotorizedUnitOther u = new MotorizedUnitOther(unit.getX(), unit.getY(), gameController, unit);
             gameController.getUnitsTeam(unit).addUnit(u);

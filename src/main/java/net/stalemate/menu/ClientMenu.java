@@ -119,7 +119,6 @@ public class ClientMenu extends JPanel implements Menu {
         @Override
         public void mouseClicked(MouseEvent e) {
             lock.lock();
-            System.out.println(e.getX() + "," + e.getY());
             int y = 276 + 20; // 276
             buttonToBeHighlighted = commonMouseClickProcedure(buttonToBeHighlighted, buttons, width_f, e, y);
 
@@ -194,7 +193,7 @@ public class ClientMenu extends JPanel implements Menu {
         this.setBackground(StalemateGreen);
 
         lock.lock();
-         if (status == 0){
+        if (status == 0) {
             while (basis33 == null) {
                 Thread.onSpinWait();
             }
@@ -212,41 +211,32 @@ public class ClientMenu extends JPanel implements Menu {
             // Render button text
             int y = 276 + 20;
             renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted);
-         } if (status == 3){
-             FontMetrics metrics;
-             int width;
-             int y;
-             // Render title
-             g.setFont(basis33.deriveFont((float) (30)));
-             g.setColor(Color.white);
 
-             // title char size
-             metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
-             width = metrics.stringWidth("A");
+            lock.unlock();
+            return;
+        }
 
-             y = 230;
-             int half = ((832 + 14) - width * "Stalemate".length()) / 2;
-             g.drawString("Stalemate", half, y);
+        FontMetrics metrics;
+        int width;
+        int y;
+        // Render title
+        g.setFont(basis33.deriveFont((float) (30)));
+        g.setColor(Color.white);
 
-             // Render connecting
-             half = ((832 + 14) - width * "Connecting...".length()) / 2;
-             g.drawString("Connecting...", half, 296);
-         } if (status == 4){
-            FontMetrics metrics;
-            int width;
-            int y;
-            // Render title
-            g.setFont(basis33.deriveFont((float) (30)));
-            g.setColor(Color.white);
+        // title char size
+        metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
+        width = metrics.stringWidth("A");
 
-            // title char size
-            metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
-            width = metrics.stringWidth("A");
+        y = 230;
+        int half = ((832 + 14) - width * "Stalemate".length()) / 2;
+        g.drawString("Stalemate", half, y);
 
-            y = 230;
-            int half = ((832 + 14) - width * "Stalemate".length()) / 2;
-            g.drawString("Stalemate", half, y);
-
+        if (status == 3) {
+            // Render connecting
+            half = ((832 + 14) - width * "Connecting...".length()) / 2;
+            g.drawString("Connecting...", half, 296);
+        }
+        if (status == 4) {
             // Render error
             half = ((832 + 14) - width * error.length()) / 2;
             g.drawString(error, half, 276);

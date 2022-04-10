@@ -37,7 +37,7 @@ public class MotorizedUnitOther extends Unit{
 
         @Override
         public String texture() {
-            return "texture_missing";
+            return "assets/ui/buttons/demotorize.png";
         }
 
         @Override

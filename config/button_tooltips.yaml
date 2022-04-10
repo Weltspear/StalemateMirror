@@ -12,6 +12,9 @@ tooltips:
   button_artillery_shelling: "Shells 3x3 area (50% chance to hit one tile) <br><p color=green>(0/5/0)</p>"
   button_fortification_load_infantry: "Loads infantry unit into fortification"
 
+  button_motorize: "Transforms a unit into a Motorized Unit which can be<br>transformed back into it's original form<br><p color=green>(0/3/0)</p>"
+  button_motorized_unit_other_demotorize: "Transforms a unit back into it's original form"
+
   button_repair: "Repairs mechanized units<br><p color=green>(0/4/0)</p>"
   button_engineer_unit_build_menu_build_military_tent: "Constructs Base<br>Construction Time: 3<br><p color=green>(0/0/3)</p>"
   button_engineer_unit_build_menu_build_tank_factory: "Constructs Tank Factory<br>Construction Time: 4<br><p color=green>(0/0/3)</p>" # 3

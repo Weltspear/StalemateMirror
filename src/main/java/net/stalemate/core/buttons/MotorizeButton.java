@@ -30,7 +30,7 @@ public class MotorizeButton implements Unit.IStandardButton {
 
     @Override
     public String texture() {
-        return "texture_missing";
+        return "assets/ui/buttons/motorize.png";
     }
 
     @Override

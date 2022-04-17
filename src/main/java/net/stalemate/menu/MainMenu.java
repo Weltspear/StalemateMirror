@@ -23,10 +23,12 @@ import net.stalemate.menu.ui.STButton;
 import net.stalemate.networking.client.Client;
 import net.stalemate.networking.server.Server;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -45,6 +47,8 @@ public class MainMenu extends JPanel implements Menu {
     private int buttonToBeHighlighted = -1;
 
     private final static Color StalemateGreen = new Color(35, 115, 0);
+
+    private BufferedImage background;
 
     public class MainMenuMouse extends MouseAdapter{
         private final int width_f;
@@ -134,6 +138,13 @@ public class MainMenu extends JPanel implements Menu {
 
         frame.addMouseMotionListener(mouseAdapter);
         frame.addMouseListener(mouseAdapter);
+
+        try {
+            background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
+        }
+        catch (IOException e) {
+            background = null;
+        }
     }
 
     public void update(){
@@ -166,6 +177,7 @@ public class MainMenu extends JPanel implements Menu {
     public void paint(Graphics g) {
         super.paint(g);
         this.setBackground(StalemateGreen);
+        g.drawImage(background, 0, 0, null);
 
         while (basis33 == null){
             Thread.onSpinWait();

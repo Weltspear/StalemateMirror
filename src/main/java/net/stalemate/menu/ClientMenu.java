@@ -23,12 +23,14 @@ import net.stalemate.menu.ui.STButton;
 import net.stalemate.menu.ui.STEntry;
 import net.stalemate.networking.client.config.KeyboardBindMapper;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -42,6 +44,8 @@ public class ClientMenu extends JPanel implements Menu {
     private volatile Font basis33;
     private ReentrantLock lock = new ReentrantLock();
     private MouseAdapter mouseAdapter;
+
+    private BufferedImage background;
 
     private ArrayList<STButton> buttons = new ArrayList<>();
 
@@ -165,6 +169,13 @@ public class ClientMenu extends JPanel implements Menu {
         frame.addMouseMotionListener(mouseAdapter);
         frame.addMouseListener(mouseAdapter);
         frame.addKeyListener(keyListener);
+
+        try {
+            background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
+        }
+        catch (IOException e) {
+            background = null;
+        }
     }
 
     public void update(){
@@ -191,6 +202,7 @@ public class ClientMenu extends JPanel implements Menu {
     public void paint(Graphics g) {
         super.paint(g);
         this.setBackground(StalemateGreen);
+        g.drawImage(background, 0, 0, null);
 
         lock.lock();
         if (status == 0) {

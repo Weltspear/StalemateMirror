@@ -88,6 +88,7 @@ public class InGameUI extends JPanel {
     BufferedImage placeholder_ui;
     BufferedImage placeholder_ui_2;
     BufferedImage panel;
+    BufferedImage military_points;
 
     BufferedImage selector;
 
@@ -727,12 +728,14 @@ public class InGameUI extends JPanel {
             placeholder_ui_2 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/placeholder_ui_2.png")));
             panel = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/panel.png")));
             selector = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/ui/selectors/ui_select.png")));
+            military_points = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/mp.png")));
         }
         catch (IOException e) {
             placeholder_ui = texture_missing;
             placeholder_ui_2 = texture_missing;
             panel = texture_missing;
             selector = texture_missing;
+            military_points = texture_missing;
         }
     }
 
@@ -882,7 +885,9 @@ public class InGameUI extends JPanel {
             g.setColor(Color.BLACK);
             if (basis33 != null)
             g.setFont(basis33.deriveFont((float)(15)));
-            g.drawString("Military Points: " + mp, 20, 20);
+            if (military_points != null)
+            g.drawImage(military_points.getScaledInstance(17,17,Image.SCALE_FAST), 20, 10, null);
+            g.drawString(""+mp, 40, 22);
             g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
 
 

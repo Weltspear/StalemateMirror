@@ -49,6 +49,7 @@ public class MainMenu extends JPanel implements Menu {
     private final static Color StalemateGreen = new Color(35, 115, 0);
 
     private BufferedImage background;
+    private BufferedImage title;
 
     public class MainMenuMouse extends MouseAdapter{
         private final int width_f;
@@ -141,9 +142,11 @@ public class MainMenu extends JPanel implements Menu {
 
         try {
             background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
+            title = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/stalemate.png")));
         }
         catch (IOException e) {
             background = null;
+            title = null;
         }
     }
 
@@ -185,10 +188,10 @@ public class MainMenu extends JPanel implements Menu {
 
         // Render button text
         int y = 276;
-        renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted);
+        renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted, title);
     }
 
-    public static void renderTitleAndButtons(Graphics g, int y, Font basis33, ArrayList<STButton> buttons, int buttonToBeHighlighted){
+    public static void renderTitleAndButtons(Graphics g, int y, Font basis33, ArrayList<STButton> buttons, int buttonToBeHighlighted, BufferedImage title){
         FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float)(25)).deriveFont(Font.BOLD));
         int width = metrics.stringWidth("A");
 
@@ -215,7 +218,9 @@ public class MainMenu extends JPanel implements Menu {
 
         y = 230;
         int half = ((832 + 14) - width * "Stalemate".length()) / 2;
-        g.drawString("Stalemate", half, y);
+        // g.drawString("Stalemate", half, y);
+        if (title!=null)
+        g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 230-60, null);
     }
 
     public static int commonMouseMovedProcedure(ArrayList<STButton> buttons, int width_f, MouseEvent e, int y){

@@ -46,6 +46,7 @@ public class ClientMenu extends JPanel implements Menu {
     private MouseAdapter mouseAdapter;
 
     private BufferedImage background;
+    private BufferedImage title;
 
     private ArrayList<STButton> buttons = new ArrayList<>();
 
@@ -172,9 +173,11 @@ public class ClientMenu extends JPanel implements Menu {
 
         try {
             background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
+            title = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/stalemate.png")));
         }
         catch (IOException e) {
             background = null;
+            title = null;
         }
     }
 
@@ -222,7 +225,7 @@ public class ClientMenu extends JPanel implements Menu {
 
             // Render button text
             int y = 276 + 20;
-            renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted);
+            renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted, title);
 
             lock.unlock();
             return;
@@ -239,18 +242,17 @@ public class ClientMenu extends JPanel implements Menu {
         metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
         width = metrics.stringWidth("A");
 
-        y = 230;
-        int half = ((832 + 14) - width * "Stalemate".length()) / 2;
-        g.drawString("Stalemate", half, y);
+        if (title!=null)
+            g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 230-60, null);
 
         if (status == 3) {
             // Render connecting
-            half = ((832 + 14) - width * "Connecting...".length()) / 2;
+            int half = ((832 + 14) - width * "Connecting...".length()) / 2;
             g.drawString("Connecting...", half, 296);
         }
         if (status == 4) {
             // Render error
-            half = ((832 + 14) - width * error.length()) / 2;
+            int half = ((832 + 14) - width * error.length()) / 2;
             g.drawString(error, half, 276);
 
             // Render button text

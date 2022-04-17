@@ -325,8 +325,29 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_fortification";
                 }
             });
+            buttons.add(new ConstructBuildingButton(Radar.class, 4, 4, false) {
+                @Override
+                public String selector_texture() {
+                    return "assets/ui/selectors/ui_repair.png";
+                }
 
-            for (int i = 0; i < 4; i++){
+                @Override
+                public String bind() {
+                    return "A";
+                }
+
+                @Override
+                public String texture() {
+                    return null;
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_engineer_unit_build_menu_build_radar";
+                }
+            });
+
+            for (int i = 0; i < 3; i++){
                 buttons.add(null);
             }
             buttons.add(new ExitBuildMenuButton());

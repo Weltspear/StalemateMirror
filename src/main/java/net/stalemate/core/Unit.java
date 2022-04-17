@@ -20,7 +20,6 @@ package net.stalemate.core;
 
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.properties.Properties;
-import net.stalemate.core.upgrade.Upgrade;
 import net.stalemate.core.util.IGameController;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,21 +68,6 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     public void endTurn() {
         this.hasTurnEnded = true;
-    }
-
-    private final ArrayList<Upgrade<?>> applied_upgrades = new ArrayList<>();
-
-    public void addUpgrade(Upgrade<?> u){
-        applied_upgrades.add(u);
-    }
-
-    public boolean hasUpgradeBeenApplied(Upgrade<?> u){
-        for (Upgrade<?> u2: applied_upgrades){
-            if (u2.id() == u.id()){
-                return true;
-            }
-        }
-        return false;
     }
 
     public void setEntrenchment(int i) {
@@ -144,7 +128,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     }
 
     /***
-     * Unit statistics
+     * Base Unit statistics
      */
     public record UnitStats(int hp, int max_hp, int attack_range, int movement_range, int atk, int df, int supply,
                             int max_supply, int armor) {
@@ -336,40 +320,12 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         return max_hp;
     }
 
-    public void setMaxHp(int max_hp) {
-        this.max_hp = max_hp;
-    }
-
-    public int getAttackRange() {
-        return attack_range;
-    }
-
-    public void setAttackRange(int attack_range) {
-        this.attack_range = attack_range;
-    }
-
-    public int getMovementRange() {
-        return movement_range;
-    }
-
-    public void setMovementRange(int movement_range) {
-        this.movement_range = movement_range;
-    }
-
     public int getAtk() {
         return atk + (int)(0.5*entrenchment);
     }
 
-    public void setAtk(int atk) {
-        this.atk = atk;
-    }
-
     public int getDf() {
         return df + (int)(0.5*entrenchment);
-    }
-
-    public void setDf(int df) {
-        this.df = df;
     }
 
     public int getSupply() {
@@ -382,22 +338,6 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     public int getMaxSupply() {
         return max_supply;
-    }
-
-    public void setMaxSupply(int max_supply) {
-        this.max_supply = max_supply;
-    }
-
-    public int getArmor() {
-        return armor;
-    }
-
-    public void setArmor(int armor) {
-        this.armor = armor;
-    }
-
-    public void setFogOfWarRange(int fog_of_war_range) {
-        this.fog_of_war_range = fog_of_war_range;
     }
 
     public Properties getProperties(){

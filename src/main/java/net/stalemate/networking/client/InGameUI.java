@@ -18,7 +18,6 @@
 
 package net.stalemate.networking.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
@@ -31,19 +30,28 @@ import net.stalemate.networking.client.property.ClientSideProperty;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InGameUI extends JPanel {
     private final ClientDataRenderer renderer;
     private final KeyboardInput in_client;
+    private final JDesktopPane p;
     @SuppressWarnings("FieldCanBeLocal") private Font basis33;
     private Font basis33_button;
 
@@ -670,6 +678,7 @@ public class InGameUI extends JPanel {
     }
 
     public InGameUI(){
+        super(null);
         ButtonTooltips.init();
         PropertiesMatcher.loadPropertyMatcher();
         renderer = new ClientDataRenderer(this);
@@ -681,6 +690,16 @@ public class InGameUI extends JPanel {
 
         this.addMouseMotionListener(m);
         this.addMouseListener(m);
+        // Add DesktopPane for later use
+        p = new JDesktopPane();
+        p.setBackground(new Color(0x00FFFFFF, true));
+        p.setVisible(true);
+        p.setSize(new Dimension(832+14,576));
+        p.setPreferredSize(new Dimension(832+14,576));
+        this.add(p);
+
+        this.setMinimumSize(new Dimension(832+14,576+32+6));
+        this.setSize(new Dimension(832+32,576+32+6));
 
         frame.setResizable(false);
         frame.add(this);
@@ -917,6 +936,15 @@ public class InGameUI extends JPanel {
                 y++;
             }
 
+            if (p != null){
+                // Evil things to get JDesktopPanel to work
+                BufferedImage clone = new BufferedImage(832+32,576+32+6, BufferedImage.TYPE_INT_ARGB_PRE);
+                Graphics2D graphics = clone.createGraphics();
+                p.printAll(graphics);
+                graphics.dispose();
+                g.drawImage(clone, 0, 0, null);
+            }
+
             g.dispose();
         } catch (Exception e){
             e.printStackTrace();
@@ -936,5 +964,16 @@ public class InGameUI extends JPanel {
             }
             y++;
         }
+    }
+
+    public void simplifyJInternalFrame(JInternalFrame s){
+        s.setSize(250, 250);
+        s.setVisible(true);
+        s.setMaximizable(false);
+        s.setBounds(0, 0, 250, 250);
+        s.setBackground(new Color(66, 40, 14));
+        s.setBorder(new LineBorder(Color.BLACK, 1));
+        JComponent c = ((BasicInternalFrameUI) s.getUI()).getNorthPane();
+        c.setPreferredSize(new Dimension(c.getPreferredSize().width, 0));
     }
 }

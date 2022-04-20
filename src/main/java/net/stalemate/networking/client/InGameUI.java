@@ -54,6 +54,7 @@ public class InGameUI extends JPanel {
     private final JDesktopPane p;
     @SuppressWarnings("FieldCanBeLocal") private Font basis33;
     private Font basis33_button;
+    private boolean focus_desktop_pane = false;
 
     private final JFrame frame;
     public JFrame getFrame(){return frame;}
@@ -111,13 +112,13 @@ public class InGameUI extends JPanel {
     int y_prev = 0;
     boolean do_render_prev = false;
 
-    public static class KeyboardInput implements KeyListener{
+    public class KeyboardInput implements KeyListener{
 
         private final ConcurrentLinkedQueue<String> keysInQueue = new ConcurrentLinkedQueue<>();
         private final ConcurrentLinkedQueue<String> chatMSGS = new ConcurrentLinkedQueue<>();
         private String currentMSG = "";
         private boolean isTypingChatMessage = false;
-        private volatile boolean isBusy = false;
+        private volatile ReentrantLock lock = new ReentrantLock();
 
         public String getCurrentMSG(){
             return currentMSG;
@@ -132,10 +133,12 @@ public class InGameUI extends JPanel {
         }
 
         public synchronized ConcurrentLinkedQueue<String> getQueue(){
-            while (isBusy) {
-                Thread.onSpinWait();
+            lock.lock();
+            try {
+                return keysInQueue;
+            } finally {
+                lock.unlock();
             }
-            return keysInQueue;
         }
 
         @Override
@@ -145,51 +148,50 @@ public class InGameUI extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            isBusy = true;
-            if (!isTypingChatMessage) {
-                if (e.getKeyCode() == KeyboardBindMapper.move_up) {
-                    keysInQueue.add("UP");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
-                    keysInQueue.add("DOWN");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
-                    keysInQueue.add("LEFT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
-                    keysInQueue.add("RIGHT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
-                    keysInQueue.add("ENTER");
-                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                    keysInQueue.add("ESCAPE");
-                } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
-                    keysInQueue.add("SPACE");
-                } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
-                    keysInQueue.add(String.valueOf(e.getKeyChar()));
-                } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
-                    keysInQueue.add("CTRL");
-                } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
-                    keysInQueue.add("SHIFT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
-                    isTypingChatMessage = true;
+            if (!focus_desktop_pane) {
+                lock.lock();
+                if (!isTypingChatMessage) {
+                    if (e.getKeyCode() == KeyboardBindMapper.move_up) {
+                        keysInQueue.add("UP");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
+                        keysInQueue.add("DOWN");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
+                        keysInQueue.add("LEFT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
+                        keysInQueue.add("RIGHT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
+                        keysInQueue.add("ENTER");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                        keysInQueue.add("ESCAPE");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
+                        keysInQueue.add("SPACE");
+                    } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                        keysInQueue.add(String.valueOf(e.getKeyChar()));
+                    } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
+                        keysInQueue.add("CTRL");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
+                        keysInQueue.add("SHIFT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
+                        isTypingChatMessage = true;
+                    }
+                } else {
+                    if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
+                        currentMSG += String.valueOf(e.getKeyChar());
+                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                        currentMSG = "";
+                        isTypingChatMessage = false;
+                    } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        isTypingChatMessage = false;
+                        if (!currentMSG.isEmpty())
+                            chatMSGS.add(currentMSG);
+                        currentMSG = "";
+                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                        if (currentMSG.length() - 1 >= 0)
+                            currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                    }
                 }
-            } else{
-                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
-                    currentMSG += String.valueOf(e.getKeyChar());
-                }
-                else if (e.getKeyCode() == KeyboardBindMapper.escape){
-                    currentMSG = "";
-                    isTypingChatMessage = false;
-                }
-                else if (e.getKeyCode() == KeyEvent.VK_ENTER){
-                    isTypingChatMessage = false;
-                    if (!currentMSG.isEmpty())
-                    chatMSGS.add(currentMSG);
-                    currentMSG = "";
-                }
-                else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
-                    if (currentMSG.length()-1 >= 0)
-                    currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
-                }
+                lock.unlock();
             }
-            isBusy = false;
         }
 
         @Override
@@ -588,91 +590,92 @@ public class InGameUI extends JPanel {
     class MListener extends MouseAdapter{
         @Override
         public void mouseClicked(MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON1) {
-                int y = 0;
-                int x = 0;
-                for (String bind : binds) {
-                    if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
-                            && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
-                        if (bind != null) {
-                            in_client.keysInQueue.add(bind);
+            if (!focus_desktop_pane) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    int y = 0;
+                    int x = 0;
+                    for (String bind : binds) {
+                        if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
+                                && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
+                            if (bind != null) {
+                                in_client.keysInQueue.add(bind);
+                            }
+                        }
+                        x++;
+                        if (x == 3) {
+                            x = 0;
+                            y++;
                         }
                     }
-                    x++;
-                    if (x == 3) {
-                        x = 0;
-                        y++;
+
+                    // Move cam
+                    if ((e.getX() >= 0 && e.getX() <= 832) &&
+                            (e.getY() >= 64 && e.getY() <= 384)) {
+                        int x_selector = 448;
+                        int y_selector = 256;
+
+                        int x_diff = cam_sel_mode == 0 ? e.getX() - x_selector : sel_x_frame - e.getX();
+                        int y_diff = cam_sel_mode == 0 ? e.getY() - y_selector : sel_y_frame - e.getY();
+
+                        int right_mv = (int) Math.ceil((float) x_diff / 64);
+                        int down_mv = (int) Math.ceil((float) y_diff / 64);
+
+                        for (int m1 = 0; m1 < Math.abs(right_mv); m1++) {
+                            if (right_mv > 0) {
+                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "RIGHT" : "LEFT");
+                            } else if (right_mv < 0) {
+                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "LEFT" : "RIGHT");
+                            }
+                        }
+
+                        for (int m2 = 0; m2 < Math.abs(down_mv); m2++) {
+                            if (down_mv > 0) {
+                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "DOWN" : "UP");
+                            } else if (down_mv < 0) {
+                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "UP" : "DOWN");
+                            }
+                        }
                     }
+                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                    in_client.keysInQueue.add("ESCAPE");
+                } else {
+                    in_client.keysInQueue.add("ENTER");
                 }
-
-                // Move cam
-                if ((e.getX() >= 0 && e.getX() <= 832) &&
-                        (e.getY() >= 64 && e.getY() <= 384)){
-                    int x_selector = 448;
-                    int y_selector = 256;
-
-                    int x_diff = cam_sel_mode == 0 ? e.getX() - x_selector: sel_x_frame - e.getX();
-                    int y_diff = cam_sel_mode == 0 ? e.getY() - y_selector: sel_y_frame - e.getY();
-
-                    int right_mv = (int)Math.ceil((float)x_diff/64);
-                    int down_mv = (int)Math.ceil((float) y_diff/64);
-
-                    for (int m1 = 0; m1 < Math.abs(right_mv); m1++){
-                        if (right_mv > 0){
-                            in_client.keysInQueue.add(cam_sel_mode == 0 ? "RIGHT": "LEFT");
-                        }
-                        else if (right_mv < 0){
-                            in_client.keysInQueue.add(cam_sel_mode == 0 ? "LEFT": "RIGHT");
-                        }
-                    }
-
-                    for (int m2 = 0; m2 < Math.abs(down_mv); m2++){
-                        if (down_mv > 0){
-                            in_client.keysInQueue.add(cam_sel_mode == 0 ? "DOWN": "UP");
-                        }
-                        else if (down_mv < 0){
-                            in_client.keysInQueue.add(cam_sel_mode == 0 ? "UP": "DOWN");
-                        }
-                    }
-                }
-            } else if (e.getButton() == MouseEvent.BUTTON2){
-                in_client.keysInQueue.add("ESCAPE");
-            } else {
-                in_client.keysInQueue.add("ENTER");
             }
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            boolean clearTooltip = false;
-            int y = 0;
-            for (String[] row: id_array) {
-                int x = 0;
-                for (String point: row) {
-                    if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
-                        && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
-                        if (ButtonTooltips.getTooltip(point) != null)
-                            InGameUI.this.setToolTipText("<html><font face=\"basis33\" size=4>" + ButtonTooltips.getTooltip(point) + "</font></html>");
-                        else
-                            InGameUI.this.setToolTipText(null);
-                        clearTooltip = true;
+            if (!focus_desktop_pane) {
+                boolean clearTooltip = false;
+                int y = 0;
+                for (String[] row : id_array) {
+                    int x = 0;
+                    for (String point : row) {
+                        if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
+                                && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
+                            if (ButtonTooltips.getTooltip(point) != null)
+                                InGameUI.this.setToolTipText("<html><font face=\"basis33\" size=4>" + ButtonTooltips.getTooltip(point) + "</font></html>");
+                            else
+                                InGameUI.this.setToolTipText(null);
+                            clearTooltip = true;
+                        }
+                        x++;
                     }
-                    x++;
+                    y++;
                 }
-                y++;
-            }
 
-            if ((((64 < e.getY())&&( e.getY() < 6 * 64)) && ((0 < e.getX())&&(e.getX() < 13 * 64))) || (((10 * 64 < e.getX())&&(e.getX() < 13 * 64)) && ((6 * 64 < e.getY())&&( e.getY() < 9 * 64)))){
-                InGameUI.this.x_prev = e.getX() / 64;
-                InGameUI.this.y_prev = e.getY() / 64;
-                InGameUI.this.do_render_prev = true;
-            }
-            else {
-                InGameUI.this.do_render_prev = false;
-            }
+                if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
+                    InGameUI.this.x_prev = e.getX() / 64;
+                    InGameUI.this.y_prev = e.getY() / 64;
+                    InGameUI.this.do_render_prev = true;
+                } else {
+                    InGameUI.this.do_render_prev = false;
+                }
 
-            if (!clearTooltip) {
-                InGameUI.this.setToolTipText(null);
+                if (!clearTooltip) {
+                    InGameUI.this.setToolTipText(null);
+                }
             }
         }
     }
@@ -940,6 +943,10 @@ public class InGameUI extends JPanel {
                 // Evil things to get JDesktopPanel to work
                 BufferedImage clone = new BufferedImage(832+32,576+32+6, BufferedImage.TYPE_INT_ARGB_PRE);
                 Graphics2D graphics = clone.createGraphics();
+                if (focus_desktop_pane) {
+                    graphics.setColor(new Color(0, 0, 0, 0.5F));
+                    graphics.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
+                }
                 p.printAll(graphics);
                 graphics.dispose();
                 g.drawImage(clone, 0, 0, null);

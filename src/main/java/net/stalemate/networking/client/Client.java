@@ -460,6 +460,7 @@ public class Client {
                     }
 
                     controller.receive_packet(json.unwrap());
+                    inGameUI.inGameUIUpdate();
 
                     String packet = controller.create_json_packet();
                     writeSafely(packet);

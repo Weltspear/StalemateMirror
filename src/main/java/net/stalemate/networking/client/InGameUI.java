@@ -30,8 +30,6 @@ import net.stalemate.networking.client.property.ClientSideProperty;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -75,11 +73,11 @@ public class InGameUI extends JPanel {
         return in_client;
     }
 
-    public record PropertiesToRender(ArrayList<ClientSideProperty> properties){};
+    public record PropertiesToRender(ArrayList<ClientSideProperty> properties){}
 
     private PropertiesToRender propertiesToRender = null;
 
-    private ReentrantLock unsafeLock = new ReentrantLock();
+    private final ReentrantLock unsafeLock = new ReentrantLock();
 
     ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
@@ -112,27 +110,29 @@ public class InGameUI extends JPanel {
     int y_prev = 0;
     boolean do_render_prev = false;
 
-    public class KeyboardInput implements KeyListener{
+    private EscapeMenu escapeMenu = null;
+
+    public class KeyboardInput implements KeyListener {
 
         private final ConcurrentLinkedQueue<String> keysInQueue = new ConcurrentLinkedQueue<>();
         private final ConcurrentLinkedQueue<String> chatMSGS = new ConcurrentLinkedQueue<>();
         private String currentMSG = "";
         private boolean isTypingChatMessage = false;
-        private volatile ReentrantLock lock = new ReentrantLock();
+        private final ReentrantLock lock = new ReentrantLock();
 
-        public String getCurrentMSG(){
+        public String getCurrentMSG() {
             return currentMSG;
         }
 
-        public boolean isTypingChatMessage(){
+        public boolean isTypingChatMessage() {
             return isTypingChatMessage;
         }
 
-        public ConcurrentLinkedQueue<String> getChatMSGS(){
+        public ConcurrentLinkedQueue<String> getChatMSGS() {
             return chatMSGS;
         }
 
-        public synchronized ConcurrentLinkedQueue<String> getQueue(){
+        public synchronized ConcurrentLinkedQueue<String> getQueue() {
             lock.lock();
             try {
                 return keysInQueue;
@@ -148,50 +148,52 @@ public class InGameUI extends JPanel {
 
         @Override
         public void keyPressed(KeyEvent e) {
-            if (!focus_desktop_pane) {
-                lock.lock();
-                if (!isTypingChatMessage) {
-                    if (e.getKeyCode() == KeyboardBindMapper.move_up) {
-                        keysInQueue.add("UP");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
-                        keysInQueue.add("DOWN");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
-                        keysInQueue.add("LEFT");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
-                        keysInQueue.add("RIGHT");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
-                        keysInQueue.add("ENTER");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                        keysInQueue.add("ESCAPE");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
-                        keysInQueue.add("SPACE");
-                    } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
-                        keysInQueue.add(String.valueOf(e.getKeyChar()));
-                    } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
-                        keysInQueue.add("CTRL");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
-                        keysInQueue.add("SHIFT");
-                    } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
-                        isTypingChatMessage = true;
-                    }
-                } else {
-                    if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
-                        currentMSG += String.valueOf(e.getKeyChar());
-                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                        currentMSG = "";
-                        isTypingChatMessage = false;
-                    } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                        isTypingChatMessage = false;
-                        if (!currentMSG.isEmpty())
-                            chatMSGS.add(currentMSG);
-                        currentMSG = "";
-                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                        if (currentMSG.length() - 1 >= 0)
-                            currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
-                    }
+            lock.lock();
+
+            if (!isTypingChatMessage) {
+                if (e.getKeyCode() == KeyboardBindMapper.move_up) {
+                    keysInQueue.add("UP");
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
+                    keysInQueue.add("DOWN");
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
+                    keysInQueue.add("LEFT");
+                } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
+                    keysInQueue.add("RIGHT");
+                } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
+                    keysInQueue.add("ENTER");
+                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                    keysInQueue.add("ESCAPE");
+                } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
+                    keysInQueue.add("SPACE");
+                } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                    keysInQueue.add(String.valueOf(e.getKeyChar()));
+                } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
+                    keysInQueue.add("CTRL");
+                } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
+                    keysInQueue.add("SHIFT");
+                } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
+                    isTypingChatMessage = true;
+                } else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
+                    spawnEscapeMenu();
                 }
-                lock.unlock();
+            } else {
+                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
+                    currentMSG += String.valueOf(e.getKeyChar());
+                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                    currentMSG = "";
+                    isTypingChatMessage = false;
+                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    isTypingChatMessage = false;
+                    if (!currentMSG.isEmpty())
+                        chatMSGS.add(currentMSG);
+                    currentMSG = "";
+                } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    if (currentMSG.length() - 1 >= 0)
+                        currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                }
             }
+
+            lock.unlock();
         }
 
         @Override
@@ -759,6 +761,38 @@ public class InGameUI extends JPanel {
             selector = texture_missing;
             military_points = texture_missing;
         }
+        frame.setIconImage(selector);
+    }
+
+    private volatile boolean spawnEscapeMenu = false;
+
+    public void spawnEscapeMenu(){
+        unsafeLock.lock();
+        spawnEscapeMenu = true;
+        unsafeLock.unlock();
+    }
+
+    public void inGameUIUpdate(){
+        unsafeLock.lock();
+        if (spawnEscapeMenu){
+            escapeMenu = new EscapeMenu(basis33.deriveFont(12f));
+            escapeMenu.setLocation((frame.getWidth()-escapeMenu.getWidth())/2, (frame.getHeight()-escapeMenu.getHeight())/2);
+            p.add(escapeMenu);
+            focus_desktop_pane = true;
+            spawnEscapeMenu = false;
+            frame.removeKeyListener(in_client);
+        }
+
+        if (escapeMenu != null){
+            if (escapeMenu.getStatus() == 3){
+                p.remove(escapeMenu);
+                escapeMenu = null;
+                focus_desktop_pane = false;
+                frame.addKeyListener(in_client);
+                frame.requestFocus();
+            }
+        }
+        unsafeLock.unlock();
     }
 
     public void paint(Graphics g)
@@ -889,6 +923,10 @@ public class InGameUI extends JPanel {
                 FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
                 int width = metrics.stringWidth("A");
 
+                if (name == null){
+                    name = new ClientSideProperty("name", "");
+                }
+
                 int h = ((224 - (name.value().length() * width))/2);
 
                 g.drawString(name.value(),192+32+64+128+h, 384+30); // 416-640
@@ -971,16 +1009,5 @@ public class InGameUI extends JPanel {
             }
             y++;
         }
-    }
-
-    public void simplifyJInternalFrame(JInternalFrame s){
-        s.setSize(250, 250);
-        s.setVisible(true);
-        s.setMaximizable(false);
-        s.setBounds(0, 0, 250, 250);
-        s.setBackground(new Color(66, 40, 14));
-        s.setBorder(new LineBorder(Color.BLACK, 1));
-        JComponent c = ((BasicInternalFrameUI) s.getUI()).getNorthPane();
-        c.setPreferredSize(new Dimension(c.getPreferredSize().width, 0));
     }
 }

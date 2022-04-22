@@ -81,7 +81,11 @@ public class Lobby implements Runnable{
         // Waiting for players
         int i = 0;
         while (players.size() != max_player_count){
-            Thread.onSpinWait();
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         System.out.print("Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 

@@ -772,6 +772,12 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
+    private volatile boolean termicon = false;
+
+    public boolean isTermicon(){
+        return termicon;
+    }
+
     public void inGameUIUpdate(){
         unsafeLock.lock();
         if (spawnEscapeMenu){
@@ -790,6 +796,9 @@ public class InGameUI extends JPanel {
                 focus_desktop_pane = false;
                 frame.addKeyListener(in_client);
                 frame.requestFocus();
+            }
+            if (escapeMenu.getStatus() == 1){
+                termicon = true;
             }
         }
         unsafeLock.unlock();

@@ -470,6 +470,13 @@ public class Client {
                     controller.receive_packet(json.unwrap());
                     inGameUI.inGameUIUpdate();
 
+                    if (inGameUI.isTermicon()){
+                        runnable.terminate();
+                        client.close();
+                        inGameUI.getFrame().dispose();
+                        return;
+                    }
+
                     String packet = controller.create_json_packet();
                     writeSafely(packet);
                 }

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.panic.ErrorResult;
 import net.panic.Expect;
 import net.stalemate.menu.ClientMenu;
+import net.stalemate.menu.LobbySelectMenu;
 import net.stalemate.networking.client.config.Grass32ConfigClient;
 
 import javax.crypto.*;
@@ -356,37 +357,22 @@ public class Client {
 
             sendEncryptedData(Grass32ConfigClient.getNickname());
 
-            boolean lobby_invalid = true;
-            while (lobby_invalid) {
-                Scanner lobby = new Scanner(System.in);
-                StringBuilder lobbies_available = new StringBuilder("Lobbies: \n");
-                int i = 1;
-                for (String lobby_data : (ArrayList<String>)(lobby_map.get("lobbies"))){
-                    lobbies_available.append(i).append(". ").append(lobby_data).append("\n");
-                    i++;
-                }
-                System.out.println(lobbies_available);
-                System.out.print(">");
-                String lobby_selected = lobby.next();
-                if (Integer.parseInt(lobby_selected) > ((ArrayList<String>)(lobby_map.get("lobbies"))).size() | Integer.parseInt(lobby_selected) < 0 | Integer.parseInt(lobby_selected) == 0){
-                    System.out.print("Incorrect lobby number\n");
-                    continue;
-                }
-                sendEncryptedData(lobby_selected);
+            frame.setVisible(true);
+            LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame);
 
-                Expect<String, ?> status = readEncryptedData();
-                if (status.isNone()){
-                    client.close();
-                    System.out.println("Failed to read lobby selection status: " + status.getResult().message());
-                    return;
+            boolean has_connected_to_lb = false;
+            while (!has_connected_to_lb){
+                ArrayList<String> lblist = (ArrayList<String>)(lobby_map.get("lobbies"));
+                lobbySelectMenu.setLobbies(lblist);
+                while(lobbySelectMenu.getStatus() == 0){
+                    Thread.onSpinWait();
                 }
 
-                if (status.unwrap().equals("OK")){
-                    lobby_invalid = false;
-                }
-                else{
-                    System.out.println("Can't connect to lobby because " + (status.unwrap().equals("INCORRECT_LOBBY") ? "incorrect lobby number was provided" :
-                            status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN") );
+                if (lobbySelectMenu.getStatus() == 2){
+                    sendEncryptedData("-1");
+                    readEncryptedData();
+
+                    // get lobby list
                     lobby_list = readEncryptedData();
                     if (lobby_list.isNone()){
                         client.close();
@@ -397,8 +383,30 @@ public class Client {
                             .build();
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                     lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
+                    lobbySelectMenu.setStatus(0);
+                }
+                else if (lobbySelectMenu.getStatus() == 1){
+                    sendEncryptedData(""+(lobbySelectMenu.getIndex()+1));
+                    Expect<String, ?> status = readEncryptedData();
+                    if (status.unwrap().equals("OK")){
+                        has_connected_to_lb = true;
+                    }
+                    else {
+                        lobbySelectMenu.setText("Can't connect to lobby because " + (status.unwrap().equals("INCORRECT_LOBBY") ? "incorrect lobby was chosen" :
+                                status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN") );
+                        lobby_list = readEncryptedData();
+                        if (lobby_list.isNone()){
+                            client.close();
+                            System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
+                            return;
+                        }
+                    }
+                    lobbySelectMenu.setStatus(0);
                 }
             }
+            frame.setVisible(false);
+            lobbySelectMenu.clFrame();
+
             System.out.println("Connected to lobby!");
 
             Expect<String, ?> data = readEncryptedData();

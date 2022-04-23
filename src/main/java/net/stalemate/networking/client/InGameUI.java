@@ -797,9 +797,10 @@ public class InGameUI extends JPanel {
                 frame.addKeyListener(in_client);
                 frame.requestFocus();
             }
-            if (escapeMenu.getStatus() == 1){
-                termicon = true;
-            }
+        }
+        if (escapeMenu != null){
+            if (escapeMenu.getStatus() == 1)
+            termicon = true;
         }
         unsafeLock.unlock();
     }

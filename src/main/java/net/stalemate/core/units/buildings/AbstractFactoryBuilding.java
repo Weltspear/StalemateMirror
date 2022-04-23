@@ -25,6 +25,7 @@ import net.stalemate.core.controller.Game;
 import net.stalemate.core.properties.Properties;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
+import net.stalemate.core.util.PriorityTurnUpdate;
 import net.stalemate.core.util.PriorityUpdate;
 
 import java.lang.reflect.InvocationTargetException;
@@ -33,7 +34,7 @@ import java.util.ArrayDeque;
 /***
  * This building produces other units
  */
-public abstract class AbstractFactoryBuilding extends Unit implements IBuilding, PriorityUpdate {
+public abstract class AbstractFactoryBuilding extends Unit implements IBuilding, PriorityTurnUpdate {
     public static class UnitProductionTime{
         public final Unit unit;
         public int time_in_production;

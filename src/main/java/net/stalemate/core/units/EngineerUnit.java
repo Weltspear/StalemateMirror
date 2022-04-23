@@ -338,7 +338,7 @@ public class EngineerUnit extends Unit {
 
                 @Override
                 public String texture() {
-                    return null;
+                    return "assets/ui/buttons/build_radar.png";
                 }
 
                 @Override

@@ -31,6 +31,7 @@ import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
 import net.stalemate.core.util.IGameControllerGamemode;
 import net.stalemate.core.util.IUnitTeam;
+import net.stalemate.core.util.PriorityUpdate;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -258,6 +259,23 @@ public class Game implements IGameControllerGamemode {
         return (ArrayList<Team>) teams.clone();
     }
 
+    private ArrayList<Entity> getPrioritizedList(){
+        ArrayList<Entity> prior = new ArrayList<>();
+        for (Entity e : entities){
+            if (e instanceof PriorityUpdate){
+                prior.add(e);
+            }
+        }
+
+        for (Entity e : entities){
+            if (!(e instanceof PriorityUpdate)){
+                prior.add(e);
+            }
+        }
+
+        return prior;
+    }
+
     @SuppressWarnings("unchecked")
     public void update(){
         lock.lock();
@@ -267,7 +285,7 @@ public class Game implements IGameControllerGamemode {
             entities.addAll(to_be_added);
             to_be_added.clear();
 
-            for (Entity entity : entities) {
+            for (Entity entity : getPrioritizedList()) {
                 if (entity instanceof Entity.ServerUpdateTick) {
                     ((Entity.ServerUpdateTick) entity).update();
                 }

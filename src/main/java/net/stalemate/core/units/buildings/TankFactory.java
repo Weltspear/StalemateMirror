@@ -18,8 +18,6 @@
 
 package net.stalemate.core.units.buildings;
 
-import net.stalemate.core.Entity;
-import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.Scrap;

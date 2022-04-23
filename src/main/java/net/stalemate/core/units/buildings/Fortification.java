@@ -27,10 +27,11 @@ import net.stalemate.core.buttons.util.Unflippable;
 import net.stalemate.core.units.Infantry;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
+import net.stalemate.core.util.PriorityUpdate;
 
 import java.util.ArrayList;
 
-public class Fortification extends Unit implements IBuilding, Unflippable {
+public class Fortification extends Unit implements IBuilding, Unflippable, PriorityUpdate {
     private Infantry unitInside;
 
     private boolean isScrapped = false;

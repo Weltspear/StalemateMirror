@@ -18,16 +18,13 @@
 
 package net.stalemate.core.units.buildings;
 
-import net.stalemate.core.Entity;
-import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.Scrap;
 import net.stalemate.core.units.*;
-import net.stalemate.core.units.*;
+import net.stalemate.core.units.util.IBase;
 import net.stalemate.core.units.util.IConstructableBuilding;
 import net.stalemate.core.util.IGameController;
-import net.stalemate.core.units.util.IBase;
 
 import java.util.ArrayList;
 

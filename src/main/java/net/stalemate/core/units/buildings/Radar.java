@@ -24,11 +24,12 @@ import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.units.util.IConstructableBuilding;
 import net.stalemate.core.util.IGameController;
+import net.stalemate.core.util.PriorityUpdate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-public class Radar extends Unit implements IConstructableBuilding, IBuilding {
+public class Radar extends Unit implements IConstructableBuilding, IBuilding, PriorityUpdate {
     public Radar(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 7, 7, 1), new AnimationController(), "Radar");
 

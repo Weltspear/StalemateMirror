@@ -27,7 +27,7 @@ tooltips:
 
   button_train_infantry: "Trains Infantry<br>Production time: 2<br><p color=green>(0/0/2)</p>"
   button_train_machine_gunner: "Trains Heavy Infantry<br>Production time: 2<br><p color=green>(0/0/3)</p>"
-  button_train_artillery: 'Trains Artillery<br>Production time: 3<br><p color=green>(0/0/4)</p>'
+  button_train_artillery: 'Trains Artillery<br>Production time: 3<br><p color=green>(0/0/3)</p>'
   button_train_anti_tank: 'Trains Anti-Tank<br>Production time: 3<br><p color=green>(0/0/3)</p>'
   button_train_engineer_unit: 'Trains Engineer<br>Production time: 1<br><p color=green>(0/0/1)</p>'
   button_train_motorized_unit_unit: 'Trains Motorized Unit<br>Production time: 2<br><p color=green>(0/0/2)</p>'
@@ -35,8 +35,8 @@ tooltips:
   button_set_deployment_point: "Sets unit deployment point"
   button_cancel_train: "Cancels training of a unit without returning it's cost"
 
-  button_train_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/5)</p>'
-  button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 4<br><p color=green>(0/0/6)</p>'
+  button_train_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/4)</p>'
+  button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 4<br><p color=green>(0/0/5)</p>'
 
   # For old server
   button_produce_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/6)</p>'

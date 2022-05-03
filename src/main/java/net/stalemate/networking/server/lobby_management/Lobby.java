@@ -716,6 +716,7 @@ public class Lobby implements Runnable{
                                     stats.add(unit.unitStats().getMaxHp());
                                     stats.add(unit.unitStats().getSupply());
                                     stats.add(unit.unitStats().getMaxSupply());
+                                    stats.add(unit.getEntrenchment());
                                     unit_data.put("flip", unit.isFlipped());
                                     unit_data.put("stats", stats);
                                     unit_data_ar.get(y2).add(unit_data);

@@ -40,6 +40,22 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     protected int entrenchment = 0;
     /***
+     * Entrenchment gain
+     */
+    protected int et_gain = 0;
+    /***
+     * Entrenchment max
+     */
+    protected int et_max = 0;
+
+    public void setEtStats(int et_gain, int et_max){
+        this.et_gain = et_gain;
+        this.et_max = et_max;
+    }
+
+    protected int has_not_moved = 0;
+
+    /***
      * Tracks MoveButton usage
      */
     protected boolean hasMoved = false;
@@ -200,6 +216,15 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     public void turnUpdate() {
         hasTurnEnded = false;
         hasMoved = false;
+
+        has_not_moved += 1;
+
+        if (et_max != 0 && et_gain != 0)
+        if (has_not_moved == 3){
+            if (entrenchment < et_max)
+                entrenchment+=et_gain;
+            has_not_moved = 0;
+        }
     }
 
     private volatile boolean isAnimationUnsafe = false;
@@ -222,6 +247,11 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
                 game.getEvReg().triggerUnitDeathEvent(this);
                 onDeath();
             }
+        }
+
+        if (hasMoved){
+            has_not_moved = 0;
+            entrenchment = 0;
         }
     }
 

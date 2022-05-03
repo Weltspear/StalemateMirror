@@ -207,6 +207,8 @@ public class InGameUI extends JPanel {
         private final BufferedImage fog_of_war;
         private final HashMap<String, BufferedImage> loaded_images = new HashMap<>();
         private final ClientMapLoader mapLoader = new ClientMapLoader();
+        private BufferedImage skull;
+        private BufferedImage shovel;
 
         /*
         {
@@ -258,6 +260,14 @@ public class InGameUI extends JPanel {
             graphics2D.fillRect(0, 0, 32, 32);
             graphics2D.dispose();
             this.interface_ = interface_;
+
+            try {
+                shovel = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/shovel.png")));
+                skull = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/skull.png")));
+            } catch (IOException e) {
+                shovel = null;
+                skull = null;
+            }
         }
 
         @SuppressWarnings("unchecked")
@@ -536,12 +546,62 @@ public class InGameUI extends JPanel {
                             graphics.setColor(Color.YELLOW);
                             int su = stats.get(2);
                             int max_su = stats.get(3);
+                            boolean has_unit_su_enabled = su != -1 && max_su != -1 && su != 0 && max_su != 0;
 
-                            if (su != -1 && max_su != -1 && su != 0 && max_su != 0){
+                            if (has_unit_su_enabled){
                                 graphics.drawLine(22, 31, 22+(int)(9f*((float)(su)/(float)(max_su))), 31);
                             }
 
                             graphics.dispose();
+
+                            int et = stats.get(4);
+                            // draw shovel
+                            BufferedImage shovel_col = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB_PRE);
+                            if (et>0) {
+                                Graphics2D shovel_graphics = shovel_col.createGraphics();
+                                graphics.setBackground(new Color(0x00FFFFFF, true));
+                                shovel_graphics.drawImage(shovel, 0, 0, null);
+
+                                for (int y_ = 0; y_ < 16; y_++) {
+                                    for (int x_ = 0; x_ < 16; x_++) {
+                                        if (shovel_col.getRGB(x_, y_) == Color.BLACK.getRGB()) {
+                                            shovel_col.setRGB(x_, y_, et == 1?Color.RED.getRGB() :
+                                                    et == 2? Color.YELLOW.getRGB() : et == 3 ? Color.GREEN.getRGB() : 0)
+                                            ;
+                                        }
+                                    }
+                                }
+                                shovel_graphics.dispose();
+                            }
+
+                            // draw the shovel
+                            Image scaled = clone.getScaledInstance(64, 64, Image.SCALE_FAST);
+                            clone = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB_PRE);
+                            graphics = clone.createGraphics();
+                            graphics.setBackground(new Color(0x00FFFFFF, true));
+                            graphics.drawImage(scaled, 0, 0, null);
+                            // render the skull to indicate that unit is under supplied
+                            if (su < max_su*0.4 && has_unit_su_enabled){
+                                BufferedImage skull_col = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB_PRE);
+                                Graphics2D skull_graphics = skull_col.createGraphics();
+                                skull_graphics.setBackground(new Color(0x00FFFFFF, true));
+                                skull_graphics.drawImage(skull, 0, 0, null);
+
+                                for (int y_ = 0; y_ < 16; y_++) {
+                                    for (int x_ = 0; x_ < 16; x_++) {
+                                        if (skull_col.getRGB(x_, y_) == Color.BLACK.getRGB()) {
+                                            skull_col.setRGB(x_, y_, Color.RED.getRGB());
+                                        }
+                                    }
+                                }
+                                skull_graphics.dispose();
+                                graphics.drawImage(skull_col, 0, 0, null);
+                            }
+
+                            if (et>0 && !(su < max_su*0.4 && has_unit_su_enabled))
+                            graphics.drawImage(shovel_col, 0, 0, null);
+                            graphics.dispose();
+
 
                             unit_data_ar.get(y).add(clone);
                         }
@@ -826,8 +886,8 @@ public class InGameUI extends JPanel {
                 y++;
             }
 
-            renderImages(g, entity_render);
-            renderImages(g, fog_of_war);
+            renderImagesScaled(g, entity_render);
+            renderImagesScaled(g, fog_of_war);
             renderImages(g, unit_data_ar);
 
             if (selector != null)
@@ -1007,7 +1067,7 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
-    private void renderImages(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
+    private void renderImagesScaled(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
         int y;
         y = 0;
         for (ArrayList<BufferedImage> row_x: buffered_images){
@@ -1015,6 +1075,20 @@ public class InGameUI extends JPanel {
             for (BufferedImage x : row_x){
                 if (x != null)
                 graphics.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                x_count++;
+            }
+            y++;
+        }
+    }
+
+    private void renderImages(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
+        int y;
+        y = 0;
+        for (ArrayList<BufferedImage> row_x: buffered_images){
+            int x_count = 0;
+            for (BufferedImage x : row_x){
+                if (x != null)
+                    graphics.drawImage(x, 64*x_count, 64+64*y, null);
                 x_count++;
             }
             y++;

@@ -23,6 +23,7 @@ import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.Scrap;
 import net.stalemate.core.units.HeavyTank;
 import net.stalemate.core.units.LightTank;
+import net.stalemate.core.units.Tankette;
 import net.stalemate.core.units.util.IConstructableBuilding;
 import net.stalemate.core.util.IGameController;
 
@@ -48,7 +49,23 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
         }
 
         if (!isProductionBlocked){
-            buttons.set(0, new TrainButton(LightTank.class, 4, 4) {
+            buttons.set(0, new TrainButton(Tankette.class, 3, 3) {
+                @Override
+                public String bind() {
+                    return "T";
+                }
+
+                @Override
+                public String texture() {
+                    return "assets/ui/buttons/train_tankette.png";
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_train_tankette";
+                }
+            });
+            buttons.set(1, new TrainButton(LightTank.class, 4, 4) {
                 @Override
                 public String bind() {
                     return "L";
@@ -64,7 +81,7 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                     return "button_train_light_tank";
                 }
             });
-            buttons.set(1, new TrainButton(HeavyTank.class, 4, 5) {
+            buttons.set(2, new TrainButton(HeavyTank.class, 4, 5) {
                 @Override
                 public String bind() {
                     return "H";

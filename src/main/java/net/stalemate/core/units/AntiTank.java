@@ -47,6 +47,7 @@ public class AntiTank extends Unit implements IMechanized {
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
         anim.setCurrentAnimation("idle");
+        setEtStats(1, 2);
     }
 
     @Override
@@ -73,30 +74,5 @@ public class AntiTank extends Unit implements IMechanized {
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
         return properties;
-    }
-
-    private int has_not_moved = 0;
-
-    @Override
-    public void update() {
-        super.update();
-        if (hasMoved){
-            has_not_moved = 0;
-            entrenchment = 0;
-        }
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        if (!hasMoved){
-            has_not_moved += 1;
-        }
-
-        if (has_not_moved == 3){
-            if (entrenchment < 2)
-                entrenchment+=1;
-            has_not_moved = 0;
-        }
     }
 }

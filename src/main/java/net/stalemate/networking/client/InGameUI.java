@@ -528,7 +528,7 @@ public class InGameUI extends JPanel {
                             ArrayList<Integer> rgb_team = (ArrayList<Integer>) unit_data.get("rgb");
                             ArrayList<Integer> stats = (ArrayList<Integer>) unit_data.get("stats");
                             boolean has_unit_su_enabled = stats.get(2) != -1 && stats.get(3) != -1 && stats.get(2) != 0 && stats.get(3) != 0;
-                            Object[] hash_ar = new Object[]{rgb_team.get(0), rgb_team.get(1), rgb_team.get(2),
+                            Object[] hash_ar = new Object[]{new Color(rgb_team.get(0), rgb_team.get(1), rgb_team.get(2)),
                                     ((float)stats.get(0))/((float)stats.get(1)),
                                     (has_unit_su_enabled) ? ((float)stats.get(2))/((float)stats.get(3)): -1,
                                     0};
@@ -538,7 +538,7 @@ public class InGameUI extends JPanel {
                                 hash_ar[3] = -1;
                             }
                             else if (stats.get(4) > 0 && !(stats.get(2) < stats.get(3) * 0.4 && has_unit_su_enabled)){
-                                hash_ar[4] = stats.get(4);
+                                hash_ar[3] = stats.get(4);
                             }
 
                             if (!cachedUnitDataArImgs.containsKey(Arrays.hashCode(hash_ar))) {

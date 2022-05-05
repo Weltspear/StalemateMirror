@@ -186,6 +186,30 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
     }
 
+    public interface Buff {
+        UnitStats modStats(UnitStats ustats);
+
+        /***
+         * This method should also reduce turnTime
+         * @param u Unit which has this Buff
+         */
+        void turnAction(Unit u);
+
+        /***
+         * Amount of ticks during which the buff is active
+         */
+        int getTurnTime();
+    }
+
+    /***
+     * Buffs which Unit currently has
+     */
+    private final ArrayList<Buff> buffs = new ArrayList<>();
+
+    public ArrayList<Buff> getBuffs(){
+        return buffs;
+    }
+
     /***
      * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
      */
@@ -224,6 +248,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
             if (entrenchment < et_max)
                 entrenchment+=et_gain;
             has_not_moved = 0;
+        }
+
+        for (Buff buff: buffs){
+            buff.turnAction(this);
         }
     }
 

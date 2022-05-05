@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class Tankette extends Unit implements IMechanized {
     public Tankette(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 2, 2, 1, 20, 20, 1), new AnimationController(), "Tankette");
+        super(x, y, game, new UnitStats(10, 10, 1, 2, 2, 1, 20, 20, 1, 0, 0), new AnimationController(), "Tankette");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/tankette_idle.png");
 

@@ -35,7 +35,7 @@ public class Fortification extends Unit implements IBuilding, Unflippable, Prior
     private final Infantry unitInside;
 
     public Fortification(int x, int y, IGameController game, Infantry unit) {
-        super(x, y, game, new UnitStats(15, 15, 2, 0, 2, 1, 30, 30, 2), new AnimationController(), "Fortification");
+        super(x, y, game, new UnitStats(15, 15, 2, 0, 2, 1, 30, 30, 2, 0, 0), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/fortification.png");

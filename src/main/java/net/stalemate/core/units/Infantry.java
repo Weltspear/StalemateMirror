@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class Infantry extends Unit {
     public Infantry(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0), new AnimationController(), "Infantry");
+        super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0, 1, 3), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/rifleman_idle_1.png");
         idle.addFrame("assets/units/rifleman_idle_2.png");
@@ -48,7 +48,6 @@ public class Infantry extends Unit {
 
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
-        setEtStats(1, 3);
     }
 
     @Override

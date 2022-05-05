@@ -33,7 +33,7 @@ import java.util.ArrayList;
 public class MotorizedUnit extends Unit implements IMechanized {
 
     public MotorizedUnit(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 40, 40, 0), new AnimationController(), "Motorized Unit");
+        super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 40, 40, 0, 0, 0), new AnimationController(), "Motorized Unit");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 public class SupplyStation extends Unit implements IBuilding, IConstructableBuilding {
     public SupplyStation(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0), new AnimationController(), "Supply Station");
+        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0, 0, 0), new AnimationController(), "Supply Station");
 
         Animation a = new Animation(5);
         a.addFrame("assets/units/supply_station.png");

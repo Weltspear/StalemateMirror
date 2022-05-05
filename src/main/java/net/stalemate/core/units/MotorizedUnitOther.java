@@ -62,7 +62,7 @@ public class MotorizedUnitOther extends Unit{
 
     public MotorizedUnitOther(int x, int y, IGameController game, Unit other) {
         super(x, y, game, new UnitStats(other.getHp(), other.getMaxHp(), 0, 3,0,0,
-                        other.getSupply(), other.getMaxSupply(),0), new AnimationController(), other.getName());
+                        other.getSupply(), other.getMaxSupply(),0, 0, 0), new AnimationController(), other.getName());
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");

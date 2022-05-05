@@ -31,7 +31,7 @@ import java.util.ArrayList;
 public class MilitaryTent extends AbstractFactoryBuilding implements IConstructableBuilding, IBase {
 
     public MilitaryTent(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(13, 13, 0, 0, 0, 0, 5, 5, 0), new AnimationController(), "Base");
+        super(x, y, game, new UnitStats(13, 13, 0, 0, 0, 0, 5, 5, 0, 0, 0), new AnimationController(), "Base");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/building_military_tent.png");

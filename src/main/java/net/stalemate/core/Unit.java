@@ -42,16 +42,11 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * Entrenchment gain
      */
-    protected int et_gain = 0;
+    protected int et_gain;
     /***
      * Entrenchment max
      */
-    protected int et_max = 0;
-
-    public void setEtStats(int et_gain, int et_max){
-        this.et_gain = et_gain;
-        this.et_max = et_max;
-    }
+    protected int et_max;
 
     protected int has_not_moved = 0;
 
@@ -147,7 +142,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * Base Unit statistics
      */
     public record UnitStats(int hp, int max_hp, int attack_range, int movement_range, int atk, int df, int supply,
-                            int max_supply, int armor) {
+                            int max_supply, int armor, int et_gain, int et_max) {
 
         public int getAtk() {
             return atk;
@@ -183,6 +178,14 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         public int getArmor() {
             return armor;
+        }
+
+        public int getEtMax() {
+            return et_max;
+        }
+
+        public int getEtGain() {
+            return et_gain;
         }
     }
 
@@ -230,6 +233,8 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         supply = unitStats.getSupply();
         max_supply = unitStats.getMaxSupply();
         armor = unitStats.getArmor();
+        et_max = unitStats.getEtMax();
+        et_gain = unitStats.getEtGain();
     }
 
     public String getName() {
@@ -250,9 +255,16 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
             has_not_moved = 0;
         }
 
+        ArrayList<Buff> to_be_removed_b = new ArrayList<>();
+
         for (Buff buff: buffs){
-            buff.turnAction(this);
+            if (buff.getTurnTime() == 0)
+                to_be_removed_b.add(buff);
+            else
+                buff.turnAction(this);
         }
+
+        buffs.removeAll(to_be_removed_b);
     }
 
     private volatile boolean isAnimationUnsafe = false;
@@ -310,7 +322,19 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     public ArrayList<IButton> getButtonsEnemy(){return null;}
 
     public UnitStats unitStats(){
-        return new UnitStats(hp, max_hp, attack_range, movement_range, atk, df, supply, max_supply, armor);
+        return new UnitStats(hp, max_hp, attack_range, movement_range, atk, df, supply, max_supply, armor, et_gain, et_max);
+    }
+
+    /***
+     * Calculate UnitStats with all buffs taken into account
+     * @return unitStats
+     */
+    public UnitStats unitStatsBuff(){
+        UnitStats unitStats = unitStats();
+        for (Buff b: buffs){
+            unitStats = b.modStats(unitStats);
+        }
+        return unitStats;
     }
 
     /***

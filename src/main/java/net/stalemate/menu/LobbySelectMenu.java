@@ -64,7 +64,6 @@ public class LobbySelectMenu extends JPanel {
         list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
         list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
         list.setFont(basis33.deriveFont(16f));
-        System.out.println(list.getSelectedIndex());
         list.setSize(400, 300);
         list.setVisible(true);
         list.setLocation((this.getWidth()-list.getWidth()-50)/2, (this.getHeight()-list.getHeight())/2);
@@ -94,7 +93,6 @@ public class LobbySelectMenu extends JPanel {
         frame.add(this);
 
         label = new JLabel();
-        System.out.println(label.getFont());
         StalemateStyle.makeComponent(label);
         label.setForeground(Color.RED);
         label.setLocation(list_.x-25, list_.y+300);

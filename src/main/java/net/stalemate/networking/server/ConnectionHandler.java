@@ -175,12 +175,12 @@ public class ConnectionHandler implements Runnable{
                     isHandlerTerminated = true;
                     return;
                 }
-                // 33.33 packets per second
+                // 66.66 packets per second
                 long t1 = System.currentTimeMillis();
                 writeSafely(player.create_json_packet());
                 long t2 = System.currentTimeMillis() - t1;
-                if (30 - t2 > 0){
-                    Thread.sleep(30-t2);
+                if (15 - t2 > 0){
+                    Thread.sleep(15-t2);
                 }
 
                 Expect<String, ?> packet = readSafely();

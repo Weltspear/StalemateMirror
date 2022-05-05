@@ -30,7 +30,7 @@ public class EscapeMenu extends JInternalFrame {
      * 2 -> Options
      * 3 -> Return to game
      */
-    private int status = -1;
+    public int status = -1;
 
     public EscapeMenu(Font basis33){
         super();

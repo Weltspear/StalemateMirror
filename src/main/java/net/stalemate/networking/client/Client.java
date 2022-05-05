@@ -489,14 +489,20 @@ public class Client {
                     inGameUI.getFrame().dispose();
                     return;
                 }
-                System.out.println(result.unwrap());
+                client.close();
+                inGameUI.setResults(result.unwrap());
+
+                while (!inGameUI.isTermicon()){
+                    Thread.sleep(1);
+                    inGameUI.inGameUIUpdate();
+                }
+
                 runnable.terminate();
                 inGameUI.getFrame().dispose();
 
             } else {
                 System.out.println("Server miscommunication closing connection");
             }
-            client.close();
         } catch (Exception e){
             e.printStackTrace();
         }

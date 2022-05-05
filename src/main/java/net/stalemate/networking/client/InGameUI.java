@@ -863,6 +863,15 @@ public class InGameUI extends JPanel {
     }
 
     private volatile boolean termicon = false;
+    public volatile boolean showResults = false;
+    public ResultMenu resultMenu = null;
+
+    public void setResults(String res){
+        unsafeLock.lock();
+        showResults = true;
+        resultMenu = new ResultMenu(basis33, res);
+        unsafeLock.unlock();
+    }
 
     public boolean isTermicon(){
         return termicon;
@@ -870,6 +879,29 @@ public class InGameUI extends JPanel {
 
     public void inGameUIUpdate(){
         unsafeLock.lock();
+        if (showResults){
+            spawnEscapeMenu = false;
+            if (escapeMenu != null){
+                p.remove(escapeMenu);
+                escapeMenu = null;
+                focus_desktop_pane = false;
+                frame.addKeyListener(in_client);
+                frame.requestFocus();
+            }
+
+            resultMenu.setLocation((frame.getWidth()-resultMenu.getWidth())/2, (frame.getHeight()-resultMenu.getHeight())/2);
+            p.add(resultMenu);
+            focus_desktop_pane = true;
+            showResults = false;
+            frame.removeKeyListener(in_client);
+        }
+
+        if (resultMenu != null){
+            if (resultMenu.status == 1){
+                termicon = true;
+            }
+        }
+
         if (spawnEscapeMenu){
             escapeMenu = new EscapeMenu(basis33.deriveFont(12f));
             escapeMenu.setLocation((frame.getWidth()-escapeMenu.getWidth())/2, (frame.getHeight()-escapeMenu.getHeight())/2);

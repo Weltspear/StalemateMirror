@@ -19,7 +19,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 
 ## TODO
 - [ ] Make a tutorial on how to play this game.
-- [ ] Replace `System.out.println` with a logger.
+- [x] Replace `System.out.println` with a logger.
 - [ ] Replace raw `HashMap`s with `EntryTable`s.
 - [x] Make compression `Base64` handle unexpected things.
 - [x] Correct `ConnectionHandler` saying wrong ip after user connects.

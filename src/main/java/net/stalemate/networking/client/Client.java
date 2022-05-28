@@ -27,6 +27,7 @@ import net.panic.ErrorResult;
 import net.panic.Expect;
 import net.stalemate.menu.ClientMenu;
 import net.stalemate.menu.LobbySelectMenu;
+import net.stalemate.networking.client.config.ButtonTooltips;
 import net.stalemate.networking.client.config.Grass32ConfigClient;
 
 import javax.crypto.*;
@@ -42,6 +43,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static net.stalemate.log.MakeLog.makeLog;
 
 @SuppressWarnings("unchecked")
 public class Client {
@@ -59,6 +64,8 @@ public class Client {
     private BufferedReader input;
 
     private JFrame frame;
+
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Client.class.getName()));
 
     public Client(JFrame frame){
         this.frame = frame;
@@ -304,39 +311,39 @@ public class Client {
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
                 keyPairGen.initialize(2048);
                 keyPair = keyPairGen.generateKeyPair();
-                // System.out.println("KeyPair generated");
+                LOGGER.log(Level.FINE,"KeyPair generated");
 
                 // Init decryption
                 cipherDecryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipherDecryption.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-                // System.out.println("Decryption initialized");
+                LOGGER.log(Level.FINE,"Decryption initialized");
 
                 // Initialize output and input
                 output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
                 input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
-                // System.out.println("Input output initialized");
+                LOGGER.log(Level.FINE,"Input output initialized");
 
                 // Get server's public key
                 byte[] publicKeyByteServer = Base64.getDecoder().decode(input.readLine());
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                 PublicKey server_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteServer));
-                // System.out.println("Public key received!");
+                LOGGER.log(Level.FINE,"Public key received!");
 
                 // Send public key to client
                 byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
                 String publicKeyString = Base64.getEncoder().encodeToString(publicKeyBytes);
                 output.println(publicKeyString);
-                // System.out.println("Public key sent!");
+                LOGGER.log(Level.FINE,"Public key sent!");
 
                 // Initialize output encryption
-                // System.out.println("Initializing encryption");
+                LOGGER.log(Level.FINE,"Initializing encryption");
                 cipherEncryption = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // "RSA/ECB/PKCS1Padding"
                 cipherEncryption.init(Cipher.ENCRYPT_MODE, server_public_key);
 
                 initAES();
-                // System.out.println("Symmetric encryption initialized!");
+                LOGGER.log(Level.FINE,"Symmetric encryption initialized!");
             } catch (Exception e){
-                // System.out.println("Initialization failure closing connection");
+                LOGGER.log(Level.WARNING,"Initialization failure closing connection");
                 client.close();
                 return;
             }
@@ -347,7 +354,7 @@ public class Client {
             Expect<String, ?> lobby_list = readEncryptedData();
             if (lobby_list.isNone()){
                 client.close();
-                System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
+                LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
                 return;
             }
             PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
@@ -376,7 +383,7 @@ public class Client {
                     lobby_list = readEncryptedData();
                     if (lobby_list.isNone()){
                         client.close();
-                        System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
+                        LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
                         return;
                     }
                     ptv = BasicPolymorphicTypeValidator.builder()
@@ -397,7 +404,7 @@ public class Client {
                         lobby_list = readEncryptedData();
                         if (lobby_list.isNone()){
                             client.close();
-                            System.out.println("Failed to read lobby list: " + lobby_list.getResult().message());
+                            LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
                             return;
                         }
                     }
@@ -407,12 +414,12 @@ public class Client {
             frame.setVisible(false);
             lobbySelectMenu.clFrame();
 
-            System.out.println("Connected to lobby!");
+            LOGGER.log(Level.INFO,"Connected to lobby!");
 
             Expect<String, ?> data = readEncryptedData();
             if (data.isNone()){
                 client.close();
-                System.out.println("Unable to get data whether the game started or not: " + data.getResult().message());
+                LOGGER.log(Level.WARNING,"Unable to get data whether the game started or not: " + data.getResult().message());
                 return;
             }
 
@@ -432,13 +439,13 @@ public class Client {
                     long t2 = System.currentTimeMillis();
                     tick++;
                     if (tick == 100) {
-                        System.out.println("ping:" + (t2 - t1));
+                        LOGGER.log(Level.INFO,"ping:" + (t2 - t1));
                         tick = 0;
                     }
 
                     if (json.isNone()){
                         client.close();
-                        System.out.println("Failed to read packet: " + json.getResult().message());
+                        LOGGER.log(Level.WARNING,"Failed to read packet: " + json.getResult().message());
                         runnable.terminate();
                         inGameUI.getFrame().dispose();
                         return;
@@ -449,7 +456,7 @@ public class Client {
 
                     if (json.unwrap().startsWith("connection_terminated")){
                         String cause = input.readLine();
-                        System.out.println("Lobby was terminated. Additional information: " + cause);
+                        LOGGER.log(Level.WARNING,"Lobby was terminated. Additional information: " + cause);
                         runnable.terminate();
                         inGameUI.getFrame().dispose();
                         client.close();
@@ -460,7 +467,7 @@ public class Client {
                     Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
                     runnable.lock.unlock();
                     if (expect.isNone()){
-                        System.err.println("Failed to read server packet, shutting down client: " + expect.getResult().message());
+                        LOGGER.log(Level.WARNING,"Failed to read server packet, shutting down client: " + expect.getResult().message());
                         runnable.terminate();
                         client.close();
                         inGameUI.getFrame().dispose();
@@ -483,7 +490,7 @@ public class Client {
 
                 Expect<String, ?> result = readSafely();
                 if (result.isNone()){
-                    System.out.println("Failed to get result " + result.getResult().message());
+                    LOGGER.log(Level.WARNING,"Failed to get result " + result.getResult().message());
                     client.close();
                     runnable.terminate();
                     inGameUI.getFrame().dispose();
@@ -501,7 +508,7 @@ public class Client {
                 inGameUI.getFrame().dispose();
 
             } else {
-                System.out.println("Server miscommunication closing connection");
+                LOGGER.log(Level.WARNING,"Server miscommunication closing connection");
             }
         } catch (Exception e){
             e.printStackTrace();

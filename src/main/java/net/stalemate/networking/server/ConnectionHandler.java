@@ -20,6 +20,7 @@ package net.stalemate.networking.server;
 
 import net.panic.ErrorResult;
 import net.panic.Expect;
+import net.stalemate.log.StFormatter;
 import net.stalemate.networking.server.lobby_management.Lobby;
 import net.stalemate.networking.server.lobby_management.LobbyHandler;
 
@@ -33,6 +34,12 @@ import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Random;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static net.stalemate.log.MakeLog.makeLog;
 
 public class ConnectionHandler implements Runnable{
     public boolean isHandlerTerminated = false;
@@ -46,6 +53,8 @@ public class ConnectionHandler implements Runnable{
 
     private Cipher cipherEncryption;
     private Cipher cipherDecryption;
+
+    private static final Logger LOGGER = makeLog(Logger.getLogger(ConnectionHandler.class.getName()));
 
     public ConnectionHandler(Socket client, LobbyHandler lobbyHandler){
         this.client = client;
@@ -64,50 +73,50 @@ public class ConnectionHandler implements Runnable{
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
                 keyPairGen.initialize(2048);
                 KeyPair keyPair = keyPairGen.generateKeyPair();
-                // System.out.println("[ConnectionHandler] KeyPair generated");
+                LOGGER.log(Level.FINE, "KeyPair generated");
 
                 // Init decryption
                 cipherDecryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipherDecryption.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-                // System.out.println("[ConnectionHandler] Decryption initialized");
+                LOGGER.log(Level.FINE,"Decryption initialized");
 
                 // Initialize output and input
                 output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
                 // output = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(client.getOutputStream()), StandardCharsets.UTF_8), true);
                 input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
-                // System.out.println("[ConnectionHandler] Input output initialized");
+                LOGGER.log(Level.FINE,"Input output initialized");
 
                 // Send public key to client
                 byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
                 String publicKeyString = Base64.getEncoder().encodeToString(publicKeyBytes);
                 output.println(publicKeyString);
-                // System.out.println("[ConnectionHandler] Public key sent!");
+                LOGGER.log(Level.FINE,"Public key sent!");
 
                 // Get client's public key
                 byte[] publicKeyByteClient = Base64.getDecoder().decode(input.readLine());
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                 PublicKey client_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteClient));
-                // System.out.println("[ConnectionHandler] Public key received!");
+                LOGGER.log(Level.FINE,"Public key received!");
 
                 // Initialize output encryption
-                // System.out.println("[ConnectionHandler] Initializing encryption");
+                LOGGER.log(Level.FINE,"Initializing encryption");
                 cipherEncryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipherEncryption.init(Cipher.ENCRYPT_MODE, client_public_key);
 
                 initAES();
-                // System.out.println("[ConnectionHandler] Symmetric encryption initialized!");
+                LOGGER.log(Level.FINE,"Symmetric encryption initialized!");
             } catch (Exception e){
-                // System.out.println("[ConnectionHandler] Initialization failure closing connection");
+                LOGGER.log(Level.WARNING,"Initialization failure closing connection");
                 client.close();
                 return;
             }
 
             sendEncryptedData(lobbyHandler.lobby_list_json());
-            // System.out.println("[ConnectionHandler] Lobby list sent!");
+            LOGGER.log(Level.FINE,"Lobby list sent!");
 
             Expect<String, ?> nick = readEncryptedData();
             if (nick.isNone()){
-                System.err.println("Failed to read nickname: " + nick.getResult().message());
+                LOGGER.log(Level.WARNING,"Failed to read nickname: " + nick.getResult().message());
                 client.close();
                 isHandlerTerminated = true;
                 return;
@@ -119,7 +128,7 @@ public class ConnectionHandler implements Runnable{
                 while (lobby_invalid) {
                     Expect<String, ?> lb = readEncryptedData();
                     if (lb.isNone()){
-                        System.out.println("Failed to get player's lobby: " + lb.getResult().message());
+                        LOGGER.log(Level.WARNING,"Failed to get player's lobby: " + lb.getResult().message());
                         client.close();
                         isHandlerTerminated = true;
                         return;
@@ -128,7 +137,7 @@ public class ConnectionHandler implements Runnable{
                     try {
                         lobby = Integer.parseInt(lb.unwrap());
                     } catch (Exception e){
-                        System.out.println("Client miscommunication closing connection");
+                        LOGGER.log(Level.WARNING,"Client miscommunication closing connection");
                         client.close();
                         isHandlerTerminated = true;
                         return;
@@ -150,16 +159,16 @@ public class ConnectionHandler implements Runnable{
                     }
                 }
             } catch (NumberFormatException e){
-                System.out.println("Connection closed unexpectedly!");
+                LOGGER.log(Level.FINE,"Connection closed unexpectedly!");
                 return;
             }
-            // System.out.println("[ConnectionHandler] Lobby selection is OK!");
+            // System.out.println(" Lobby selection is OK!");
             player.set_nickname(nick.unwrap());
 
             while (!player.hasGameStarted()){
                 // Waits for game start
                 Thread.onSpinWait();
-                // System.out.println("[ConnectionHandler] Waiting for game to start");
+                // System.out.println(" Waiting for game to start");
             }
 
             sendEncryptedData("start");
@@ -186,7 +195,7 @@ public class ConnectionHandler implements Runnable{
                 Expect<String, ?> packet = readSafely();
 
                 if (packet.isNone()){
-                    System.out.println("Failed to read packet: " + packet.getResult().message());
+                    LOGGER.log(Level.WARNING,"Failed to read packet: " + packet.getResult().message());
                     player.terminateConnection();
                     client.close();
                     isHandlerTerminated = true;
@@ -195,7 +204,7 @@ public class ConnectionHandler implements Runnable{
                 try {
                     player.push_command(packet.unwrap());
                 } catch (Exception e){
-                    System.out.println("Client miscommunication. Closing connection");
+                    LOGGER.log(Level.WARNING,"Client miscommunication. Closing connection");
                     e.printStackTrace();
                     player.terminateConnection();
                     client.close();

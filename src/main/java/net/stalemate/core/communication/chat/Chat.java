@@ -18,12 +18,19 @@
 
 package net.stalemate.core.communication.chat;
 
+import net.stalemate.networking.client.config.ButtonTooltips;
+
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static net.stalemate.log.MakeLog.makeLog;
 
 public class Chat {
     private final ArrayList<Message> chat = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Chat.class.getName()));
 
     public Chat(){
 
@@ -32,6 +39,7 @@ public class Chat {
     public void pushMsg(Message msg){
         lock.lock();
         chat.add(msg);
+        LOGGER.log(Level.INFO, "[Chat: " + this.hashCode() + "] [" + msg.author + "]: " + msg.message);
         lock.unlock();
     }
 

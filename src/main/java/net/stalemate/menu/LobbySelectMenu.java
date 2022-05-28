@@ -33,7 +33,7 @@ import java.util.Objects;
 
 public class LobbySelectMenu extends JPanel {
     private final JFrame frame;
-    private final JList list;
+    private final JList<String> list;
     private Font basis33;
     /***
      * 1 -> connect

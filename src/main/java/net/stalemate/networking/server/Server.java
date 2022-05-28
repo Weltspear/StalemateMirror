@@ -22,8 +22,11 @@ import net.stalemate.networking.server.lobby_management.LobbyHandler;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static net.panic.Panic.panic;
+import static net.stalemate.log.MakeLog.makeLog;
 
 public class Server {
 
@@ -31,18 +34,19 @@ public class Server {
     protected final boolean server_running = true;
     // ArrayList<ConnectionHandler> connectionHandlers = new ArrayList<>();
     final LobbyHandler lobbyHandler = new LobbyHandler();
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Server.class.getName()));
 
     public Server(){
 
     }
 
     public void start_server(){
-        System.out.println("Stalemate Lobby Server");
+        LOGGER.log(Level.INFO, "Stalemate Lobby Server");
         try {
             serverSocket = new ServerSocket(59657);
             while (server_running) {
                 Socket client = serverSocket.accept();
-                System.out.println("Connection established from remote address" + client.getRemoteSocketAddress().toString());
+                LOGGER.log(Level.INFO,"Connection established from remote address" + client.getRemoteSocketAddress().toString());
                 ConnectionHandler connection_handler = new ConnectionHandler(client, lobbyHandler);
                 new Thread(connection_handler).start();
                 // connectionHandlers.add(connection_handler);

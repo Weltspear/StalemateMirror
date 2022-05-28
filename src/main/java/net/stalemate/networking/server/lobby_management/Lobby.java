@@ -31,11 +31,16 @@ import net.stalemate.core.communication.chat.Message;
 import net.stalemate.core.controller.Game;
 import net.stalemate.core.map_system.MapLoader;
 import net.stalemate.core.units.util.IBase;
+import net.stalemate.networking.server.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static net.stalemate.log.MakeLog.makeLog;
 
 public class Lobby implements Runnable{
     Game game;
@@ -59,6 +64,8 @@ public class Lobby implements Runnable{
     String map_name = "default";
     final String lobby_name = "Lobby";
 
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getName()));
+
     public void resetLobby(){
         chat = new Chat();
         game = MapLoader.load(map_path);
@@ -75,7 +82,7 @@ public class Lobby implements Runnable{
     }
 
     public void lbstart(){
-        System.out.println("Lobby started!");
+        LOGGER.log(Level.INFO,"Lobby started!");
         printStatus();
 
         // Waiting for players
@@ -87,7 +94,7 @@ public class Lobby implements Runnable{
                 e.printStackTrace();
             }
         }
-        System.out.print("Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
+        LOGGER.log(Level.INFO, "Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 
         for (Player player: players){
             Game.Team t = game.getUnassignedTeam();
@@ -158,7 +165,7 @@ public class Lobby implements Runnable{
     }
 
     public void printStatus(){
-        System.out.println("[Lobby] Current lobby status: Name: " + lobby_name + " Current Map: " + map_name + "Players: " + currentPlayerCount() + "/" + getMaxPlayerCount());
+        LOGGER.log(Level.INFO, "Current lobby status: Name: " + lobby_name + " Current Map: " + map_name + "Players: " + currentPlayerCount() + "/" + getMaxPlayerCount());
     }
 
     public static class Player{

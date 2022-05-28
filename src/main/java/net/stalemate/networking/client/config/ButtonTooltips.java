@@ -20,13 +20,19 @@ package net.stalemate.networking.client.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import net.stalemate.networking.server.ConnectionHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static net.stalemate.log.MakeLog.makeLog;
 
 public class ButtonTooltips {
     private static HashMap<String, HashMap<String, String>> tooltips = new HashMap<>();
+    private static Logger LOGGER = makeLog(Logger.getLogger(ButtonTooltips.class.getName()));
 
     @SuppressWarnings("unchecked")
     public static void init(){
@@ -39,7 +45,7 @@ public class ButtonTooltips {
                 e.printStackTrace();
             }
         } catch (Exception e){
-            System.out.println("Failed to load button tooltips");
+            LOGGER.log(Level.WARNING,"Failed to load button tooltips");
         }
     }
 

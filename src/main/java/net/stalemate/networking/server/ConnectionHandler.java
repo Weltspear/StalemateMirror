@@ -54,7 +54,7 @@ public class ConnectionHandler implements Runnable{
     private Cipher cipherEncryption;
     private Cipher cipherDecryption;
 
-    private static final Logger LOGGER = makeLog(Logger.getLogger(ConnectionHandler.class.getName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(ConnectionHandler.class.getSimpleName()));
 
     public ConnectionHandler(Socket client, LobbyHandler lobbyHandler){
         this.client = client;

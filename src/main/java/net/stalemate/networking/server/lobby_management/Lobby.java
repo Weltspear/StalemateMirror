@@ -64,7 +64,7 @@ public class Lobby implements Runnable{
     String map_name = "default";
     final String lobby_name = "Lobby";
 
-    private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getSimpleName()));
 
     public void resetLobby(){
         chat = new Chat();

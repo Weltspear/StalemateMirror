@@ -30,7 +30,7 @@ import static net.stalemate.log.MakeLog.makeLog;
 public class Chat {
     private final ArrayList<Message> chat = new ArrayList<>();
     private final ReentrantLock lock = new ReentrantLock();
-    private static final Logger LOGGER = makeLog(Logger.getLogger(Chat.class.getName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Chat.class.getSimpleName()));
 
     public Chat(){
 

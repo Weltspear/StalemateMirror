@@ -32,7 +32,7 @@ import static net.stalemate.log.MakeLog.makeLog;
 
 public class ButtonTooltips {
     private static HashMap<String, HashMap<String, String>> tooltips = new HashMap<>();
-    private static Logger LOGGER = makeLog(Logger.getLogger(ButtonTooltips.class.getName()));
+    private static Logger LOGGER = makeLog(Logger.getLogger(ButtonTooltips.class.getSimpleName()));
 
     @SuppressWarnings("unchecked")
     public static void init(){

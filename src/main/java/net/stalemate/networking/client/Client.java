@@ -65,7 +65,7 @@ public class Client {
 
     private JFrame frame;
 
-    private static final Logger LOGGER = makeLog(Logger.getLogger(Client.class.getName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Client.class.getSimpleName()));
 
     public Client(JFrame frame){
         this.frame = frame;

@@ -34,7 +34,7 @@ public class Server {
     protected final boolean server_running = true;
     // ArrayList<ConnectionHandler> connectionHandlers = new ArrayList<>();
     final LobbyHandler lobbyHandler = new LobbyHandler();
-    private static final Logger LOGGER = makeLog(Logger.getLogger(Server.class.getName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(Server.class.getSimpleName()));
 
     public Server(){
 

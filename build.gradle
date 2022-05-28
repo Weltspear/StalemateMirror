@@ -7,18 +7,22 @@ version 'v0.2.15'
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://libraries.minecraft.net"
+    }
 }
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.3'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.3'
     implementation 'org.yaml:snakeyaml:1.30'
     implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'com.mojang:brigadier:1.0.18'
     implementation files('lib/panic-v0.1.jar')
 }
 

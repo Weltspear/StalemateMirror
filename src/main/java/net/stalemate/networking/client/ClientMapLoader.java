@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
-import net.panic.ErrorResult;
-import net.panic.Expect;
+import net.libutils.error.ErrorResult;
+import net.libutils.error.Expect;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class ClientMapLoader {
     private String map_path = "";
     private ArrayList<ArrayList<String>> map = new ArrayList<>();
 
-    public static class ClientMapLoaderError implements ErrorResult{
+    public static class ClientMapLoaderError implements ErrorResult {
         @Override
         public String message() {
             return "Failed to load map";

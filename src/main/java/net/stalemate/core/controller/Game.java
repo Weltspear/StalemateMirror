@@ -18,6 +18,7 @@
 
 package net.stalemate.core.controller;
 
+import net.libutils.etable.EntryTable;
 import net.stalemate.core.Entity;
 import net.stalemate.core.MapObject;
 import net.stalemate.core.Unit;
@@ -25,8 +26,7 @@ import net.stalemate.core.event.EventListener;
 import net.stalemate.core.event.EventListenerRegistry;
 import net.stalemate.core.event.OnEvent;
 import net.stalemate.core.gamemode.IGamemode;
-import net.stalemate.core.gamemode.gamemodes.Versus;
-import net.stalemate.core.properties.EntryTable;
+import net.stalemate.core.gamemode.gamemodes.Versus;;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.*;
 

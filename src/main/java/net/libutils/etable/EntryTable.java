@@ -16,15 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.core.properties;
+package net.libutils.etable;
+import net.libutils.error.ErrorResult;
+import net.libutils.error.Expect;
 
-import net.panic.ErrorResult;
-import net.panic.Expect;
-
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.NoSuchElementException;
+
 
 @SuppressWarnings("unchecked")
 public class EntryTable {

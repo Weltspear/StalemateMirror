@@ -19,7 +19,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.13.3'
     implementation 'org.yaml:snakeyaml:1.30'
     implementation 'org.jetbrains:annotations:23.0.0'
-    implementation files('lib/panic-v0.1.jar')
 }
 
 test {

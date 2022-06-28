@@ -25,7 +25,6 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static net.panic.Panic.panic;
 import static net.stalemate.log.MakeLog.makeLog;
 
 public class Server {
@@ -51,11 +50,11 @@ public class Server {
                 new Thread(connection_handler).start();
                 // connectionHandlers.add(connection_handler);
             }
-
         }
         catch (Exception e){
             e.printStackTrace();
-            panic("Failed to start server!");
+            System.err.println("Failed to start server!");
+            System.exit(-1);
         }
     }
 

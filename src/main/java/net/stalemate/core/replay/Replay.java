@@ -18,8 +18,8 @@
 
 package net.stalemate.core.replay;
 
+import net.libutils.etable.EntryTable;
 import net.stalemate.core.Unit;
-import net.stalemate.core.properties.EntryTable;
 
 public class Replay {
 

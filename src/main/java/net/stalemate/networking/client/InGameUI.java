@@ -22,11 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
-import net.panic.Expect;
 import net.stalemate.networking.client.config.ButtonTooltips;
 import net.stalemate.networking.client.config.KeyboardBindMapper;
 import net.stalemate.networking.client.config.PropertiesMatcher;
 import net.stalemate.networking.client.property.ClientSideProperty;
+import net.libutils.error.Expect;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

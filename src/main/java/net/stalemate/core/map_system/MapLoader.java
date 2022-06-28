@@ -45,8 +45,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static net.panic.Panic.panic;
-
 // todo: check what happens if loaded incorrect map
 // todo: make it don't load too small or too big maps
 @SuppressWarnings("unchecked")
@@ -188,7 +186,8 @@ public class MapLoader {
             return g;
         } catch (Exception e){
             e.printStackTrace();
-            panic("Failed to load map");
+            System.err.println("Failed to load map");
+            System.exit(-1);
             return null;
         }
     }

@@ -32,20 +32,19 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientMenu extends JPanel {
 
-    private JFrame frame;
+    private final JFrame frame;
     private volatile Font basis33;
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
-    private BufferedImage background;
-    private BufferedImage title;
+    private final BufferedImage background;
+    private final BufferedImage title;
 
-    private JTextField entry;
-    private ButtonHover connect;
+    private final JTextField entry;
+    private final ButtonHover connect;
 
     private boolean alr_added_ok_button = false;
 
     public int status = 0;
-    private int buttonToBeHighlighted = -1;
 
     private final static Color StalemateGreen = new Color(35, 115, 0);
 
@@ -79,7 +78,6 @@ public class ClientMenu extends JPanel {
             e.printStackTrace();
         }
 
-        // 276
         entry = new HintEntry("Enter IP");
         StalemateStyle.makeJTextField(entry);
         entry.setFont(basis33.deriveFont(18f));

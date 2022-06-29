@@ -23,6 +23,15 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Replace raw `HashMap`s with `EntryTable`s.
 - [x] Make compression `Base64` handle unexpected things.
 - [x] Correct `ConnectionHandler` saying wrong ip after user connects.
+## `v0.3a` TODO:
+- [ ] Rework lobby system
+- [ ] Swingify UI
+  - [ ] Remove custom UI in main menu and connection screen
+  - [ ] Add Options menu
+- [ ] Add `AssetLoader`
+- [ ] Add Options menu
+- [ ] Add packet version
+- [ ] Add credits
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

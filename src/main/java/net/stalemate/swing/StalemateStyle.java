@@ -19,6 +19,7 @@
 package net.stalemate.swing;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import java.awt.*;
@@ -36,6 +37,11 @@ public class StalemateStyle {
         jButton.setPressedBackgroundColor(new Color(51, 39, 31));
         jButton.setPressedForegroundColor(Color.BLACK);
         jButton.setSize(150, 25);
+    }
+
+    public static void makeJTextField(JTextField textField){
+        makeComponent(textField);
+        textField.setBorder(new LineBorder(Color.BLACK, 1));
     }
 
     public static void simplifyJInternalFrame(JInternalFrame s){

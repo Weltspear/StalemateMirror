@@ -16,30 +16,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.menu.ui;
+package net.stalemate.swing;
 
-public class STEntry {
-    private final String label;
-    private String txt = "";
+import javax.swing.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
-    public STEntry(String label){
-        this.label = label;
+public class HintEntry extends JTextField implements FocusListener {
+    private boolean hinted = false;
+
+    public HintEntry(String hint){
+        super();
+        setText(hint);
+        addFocusListener(this);
     }
 
-    public void write(String t){
-        txt += t;
+    @Override
+    public void focusGained(FocusEvent e) {
+        if (!hinted){
+            setText("");
+            hinted = true;
+        }
     }
 
-    public void backspace(){
-        if (txt.length() > 0)
-        txt = txt.substring(0, txt.length() - 1);
-    }
+    @Override
+    public void focusLost(FocusEvent e) {
 
-    public String getFullTxt(){
-        return label + txt;
-    }
-
-    public String getTxt(){
-        return txt;
     }
 }

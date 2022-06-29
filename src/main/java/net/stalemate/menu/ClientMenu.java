@@ -18,123 +18,49 @@
 
 package net.stalemate.menu;
 
-import net.stalemate.menu.ui.Menu;
-import net.stalemate.menu.ui.STButton;
-import net.stalemate.menu.ui.STEntry;
 import net.stalemate.networking.client.AssetLoader;
-import net.stalemate.networking.client.config.KeyboardBindMapper;
+import net.stalemate.swing.ButtonHover;
+import net.stalemate.swing.HintEntry;
+import net.stalemate.swing.StalemateStyle;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static net.stalemate.menu.MainMenu.*;
-
-public class ClientMenu extends JPanel implements Menu {
+public class ClientMenu extends JPanel {
 
     private JFrame frame;
     private volatile Font basis33;
     private ReentrantLock lock = new ReentrantLock();
-    private MouseAdapter mouseAdapter;
 
     private BufferedImage background;
     private BufferedImage title;
 
-    private ArrayList<STButton> buttons = new ArrayList<>();
+    private JTextField entry;
+    private ButtonHover connect;
 
-    private STEntry entry = new STEntry("Enter ip: ");
+    private boolean alr_added_ok_button = false;
 
     public int status = 0;
     private int buttonToBeHighlighted = -1;
 
     private final static Color StalemateGreen = new Color(35, 115, 0);
 
-    private final KeyListener keyListener;
-
     private String error = "";
     public void setError(String error){
         this.error = error;
     }
 
-    public class EntryKeyboardListener implements KeyListener{
-
-        @Override
-        public void keyTyped(KeyEvent e) {
-
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            lock.lock();
-            if (status == 0) {
-                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
-                    entry.write(String.valueOf(e.getKeyChar()));
-                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                    status = 2;
-                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    status = 1;
-                } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                    entry.backspace();
-                }
-            }
-            lock.unlock();
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-
-        }
-    }
-
-    public class ClientMenuMouse extends MouseAdapter{
-        /***
-         * Char width in basis33
-         */
-        private final int width_f;
-        private int height_f;
-
-        public ClientMenuMouse(){
-            // get char size
-            FontMetrics metrics = getGraphics().getFontMetrics(basis33.deriveFont((float)(25)).deriveFont(Font.BOLD));
-            width_f = metrics.stringWidth("A");
-            height_f = 20;
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-            lock.lock();
-
-            if (status == 0 || status == 4) {
-                // select button to be highlighted
-                int y = 276 + 20;
-                commonMouseMovedProcedure(buttons, width_f, e, y);
-            }
-
-            lock.unlock();
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            lock.lock();
-            int y = 276 + 20; // 276
-            buttonToBeHighlighted = commonMouseClickProcedure(buttonToBeHighlighted, buttons, width_f, e, y);
-
-            lock.unlock();
-        }
-    }
-
     public String getTxt(){
         lock.lock();
         try {
-            return entry.getTxt();
+            if (entry.getText().equals("Enter IP")){
+                return "";
+            }
+            return entry.getText();
         } finally {
             lock.unlock();
         }
@@ -142,6 +68,9 @@ public class ClientMenu extends JPanel implements Menu {
 
     public ClientMenu(JFrame f){
         this.frame = f;
+        frame.add(this);
+        frame.pack();
+        this.setLayout(null);
 
         try {
             basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
@@ -150,26 +79,20 @@ public class ClientMenu extends JPanel implements Menu {
             e.printStackTrace();
         }
 
-        buttons.add(new STButton() {
-            @Override
-            public String text() {
-                return "OK";
-            }
+        // 276
+        entry = new HintEntry("Enter IP");
+        StalemateStyle.makeJTextField(entry);
+        entry.setFont(basis33.deriveFont(18f));
+        entry.setBounds(new Rectangle(240, 40));
+        entry.setLocation((832-14-entry.getWidth())/2, 276);
+        this.add(entry);
 
-            @Override
-            public void action() {
-                status = 1;
-            }
-        });
-
-        frame.add(this);
-        frame.pack();
-        mouseAdapter = new ClientMenuMouse();
-        keyListener = new EntryKeyboardListener();
-
-        frame.addMouseMotionListener(mouseAdapter);
-        frame.addMouseListener(mouseAdapter);
-        frame.addKeyListener(keyListener);
+        connect = new ButtonHover("Connect");
+        StalemateStyle.makeButton(connect);
+        connect.setLocation((832-14-connect.getWidth())/2, 320);
+        connect.setFont(basis33.deriveFont(16f));
+        connect.addActionListener(a -> status = 1);
+        this.add(connect);
 
         background = AssetLoader.load("assets/background.png");
         title = AssetLoader.load("assets/stalemate.png");
@@ -178,19 +101,19 @@ public class ClientMenu extends JPanel implements Menu {
 
     public void update(){
         lock.lock();
-        if (status == 4){
-            buttons = new ArrayList<>();
-            buttons.add(new STButton() {
-                @Override
-                public String text() {
-                    return "OK";
-                }
+        if (status != 0 && !alr_added_ok_button){
+            this.remove(connect);
+            this.remove(entry);
+        }
 
-                @Override
-                public void action() {
-                    status = -1;
-                }
-            });
+        if (status == 4 && !alr_added_ok_button){
+            // Repurposing pf connect button
+            this.add(connect);
+            connect.setSelected(false);
+            connect.setText("OK");
+            connect.addActionListener(a -> status = -1);
+            alr_added_ok_button = true;
+            // add display of ok button here {status = -1;}
         }
         this.repaint();
         lock.unlock();
@@ -203,68 +126,35 @@ public class ClientMenu extends JPanel implements Menu {
         g.drawImage(background, 0, 0, null);
 
         lock.lock();
-        if (status == 0) {
-            while (basis33 == null) {
-                Thread.onSpinWait();
-            }
 
-            // get char size
-            FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float) (25)).deriveFont(Font.BOLD));
-            int width = metrics.stringWidth("A");
-
-            // Render entry
-            g.setFont(basis33.deriveFont((float) (25)));
-            g.setColor(Color.WHITE);
-            int half_entry = ((832 + 14) - width * entry.getFullTxt().length()) / 2;
-            g.drawString(entry.getFullTxt(), half_entry, 276);
-
-            // Render button text
-            int y = 276 + 20;
-            renderTitleAndButtons(g, y, basis33, buttons, buttonToBeHighlighted, title);
-
-            lock.unlock();
-            return;
+        while (basis33 == null){
+            Thread.onSpinWait();
         }
 
-        FontMetrics metrics;
-        int width;
-        int y;
-        // Render title
-        g.setFont(basis33.deriveFont((float) (30)));
-        g.setColor(Color.white);
-
         // title char size
-        metrics = g.getFontMetrics(basis33.deriveFont((float) (30)).deriveFont(Font.BOLD));
-        width = metrics.stringWidth("A");
+        FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float) (25)).deriveFont(Font.BOLD));
+        int width = metrics.stringWidth("A");
+        int y;
 
         if (title!=null)
             g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 230-60, null);
 
         if (status == 3) {
-            // Render connecting
+            // Render connecting]
+            g.setFont(basis33.deriveFont(25f));
+            g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * "Connecting...".length()) / 2;
             g.drawString("Connecting...", half, 296);
         }
         if (status == 4) {
             // Render error
+            g.setFont(basis33.deriveFont(25f));
+            g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * error.length()) / 2;
-            g.drawString(error, half, 276);
-
-            // Render button text
-            y = 276 + 20;
-            int button_num = 0;
-            g.setFont(basis33.deriveFont((float) (25)));
-            g.setColor(Color.white);
-            for (STButton b : buttons) {
-                half = ((832 + 14) - width * b.text().length()) / 2;
-                if (button_num == buttonToBeHighlighted)
-                    g.setColor(Color.GRAY);
-                g.drawString(b.text(), half, y);
-                g.setColor(Color.WHITE);
-                y += 20;
-                button_num++;
-            }
+            g.drawString(error, half, 296);
         }
+
+        this.paintComponents(g);
         lock.unlock();
     }
 
@@ -277,9 +167,6 @@ public class ClientMenu extends JPanel implements Menu {
     public void clFrame(){
         lock.lock();
         frame.remove(this);
-        frame.removeMouseListener(mouseAdapter);
-        frame.removeMouseMotionListener(mouseAdapter);
-        frame.removeKeyListener(keyListener);
         lock.unlock();
     }
 }

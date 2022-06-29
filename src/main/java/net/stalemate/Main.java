@@ -19,15 +19,14 @@
 package net.stalemate;
 
 import net.stalemate.menu.MainMenu;
-import net.stalemate.networking.client.Client;
+import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.networking.server.Server;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws IllegalAccessException {
+        AssetLoader.loadAll();
         File f = new File("grass32");
         if (!f.exists()){
             throw new IllegalAccessException("grass32 doesn't exist");

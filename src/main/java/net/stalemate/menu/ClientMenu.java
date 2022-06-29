@@ -21,9 +21,9 @@ package net.stalemate.menu;
 import net.stalemate.menu.ui.Menu;
 import net.stalemate.menu.ui.STButton;
 import net.stalemate.menu.ui.STEntry;
+import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.networking.client.config.KeyboardBindMapper;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -171,14 +171,9 @@ public class ClientMenu extends JPanel implements Menu {
         frame.addMouseListener(mouseAdapter);
         frame.addKeyListener(keyListener);
 
-        try {
-            background = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
-            title = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/stalemate.png")));
-        }
-        catch (IOException e) {
-            background = null;
-            title = null;
-        }
+        background = AssetLoader.load("assets/background.png");
+        title = AssetLoader.load("assets/stalemate.png");
+
     }
 
     public void update(){

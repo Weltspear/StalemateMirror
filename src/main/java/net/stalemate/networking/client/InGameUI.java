@@ -268,13 +268,8 @@ public class InGameUI extends JPanel {
             graphics2D.dispose();
             this.interface_ = interface_;
 
-            try {
-                shovel = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/shovel.png")));
-                skull = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/skull.png")));
-            } catch (IOException e) {
-                shovel = null;
-                skull = null;
-            }
+            shovel = AssetLoader.load("assets/shovel.png");
+            skull = AssetLoader.load("assets/skull.png");
         }
 
         @SuppressWarnings("unchecked")
@@ -324,11 +319,11 @@ public class InGameUI extends JPanel {
                     // Add "big unit texture"
                     boolean texture_missing = false;
                     if (!loaded_images.containsKey((String)(selected_unit.get("texture")))) {
-                        try {
-                            loaded_images.put((String) selected_unit.get("texture"), ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource((String) selected_unit.get("texture")))));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (AssetLoader.load((String) selected_unit.get("texture")) == null){
                             texture_missing = true;
+                        }
+                        else {
+                            loaded_images.put((String) selected_unit.get("texture"), AssetLoader.load((String) selected_unit.get("texture")));
                         }
                     }
                     if (!texture_missing){ selected_unit_image = loaded_images.get((String)(selected_unit.get("texture")));}
@@ -347,9 +342,7 @@ public class InGameUI extends JPanel {
                             // Add textures to ArrayList
                             String texture = (String) b.get("texture");
                             if (!loaded_images.containsKey(texture)) {
-                                try {
-                                    loaded_images.put(texture, ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource(texture))));
-                                } catch (IOException | NullPointerException e) {
+                                if (AssetLoader.load(texture) == null) {
                                     buttons.add(this.interface_.texture_missing);
                                     binds.add((String) b.get("bind"));
                                     button_ids[y][x] = (String) b.get("id");
@@ -359,6 +352,8 @@ public class InGameUI extends JPanel {
                                         x = 0;
                                     }
                                     continue;
+                                } else{
+                                    loaded_images.put(texture, AssetLoader.load(texture));
                                 }
                             }
                             buttons.add(loaded_images.get(texture));
@@ -387,11 +382,12 @@ public class InGameUI extends JPanel {
                                 // Add textures to ArrayList
                                 String texture = (String) m.get("texture");
                                 if (!loaded_images.containsKey(texture)) {
-                                    try {
-                                        loaded_images.put(texture, ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource(texture))));
-                                    } catch (IOException | NullPointerException e) {
+                                    if (AssetLoader.load(texture) == null) {
                                         unit_queue.add(this.interface_.texture_missing);
                                         continue;
+                                    }
+                                    else {
+                                        loaded_images.put(texture, AssetLoader.load(texture));
                                     }
                                 }
                                 unit_queue.add(loaded_images.get(texture));
@@ -408,10 +404,11 @@ public class InGameUI extends JPanel {
                     if (((boolean) selected_unit.get("iselectorbutton_press"))){
                         // iselectorbutton_data_texture
                         if (!loaded_images.containsKey((String)selected_unit.get("iselectorbutton_data_selector_texture"))) {
-                            try {
-                                loaded_images.put((String) selected_unit.get("iselectorbutton_data_selector_texture"), ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource((String) selected_unit.get("iselectorbutton_data_selector_texture")))));
-                            } catch (IOException e) {
+                            if (AssetLoader.load((String) selected_unit.get("iselectorbutton_data_selector_texture")) == null){
                                 loaded_images.put((String) selected_unit.get("iselectorbutton_data_selector_texture"), this.interface_.texture_missing);
+                            }
+                            else {
+                                loaded_images.put((String) selected_unit.get("iselectorbutton_data_selector_texture"), AssetLoader.load((String) selected_unit.get("iselectorbutton_data_selector_texture")));
                             }
                         }
 
@@ -421,9 +418,9 @@ public class InGameUI extends JPanel {
 
                 if (selector == null){
                     if (!loaded_images.containsKey("assets/ui/selectors/ui_select.png")) {
-                        try {
-                            loaded_images.put("assets/ui/selectors/ui_select.png", ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/ui/selectors/ui_select.png"))));
-                        } catch (IOException e) {
+                        if (AssetLoader.load("assets/ui/selectors/ui_select.png") != null) {
+                            loaded_images.put("assets/ui/selectors/ui_select.png", AssetLoader.load("assets/ui/selectors/ui_select.png"));
+                        } else {
                             loaded_images.put("assets/ui/selectors/ui_select.png", this.interface_.texture_missing);
                         }
                     }
@@ -436,21 +433,18 @@ public class InGameUI extends JPanel {
                 for (ArrayList<String> x_row : map_textures) {
                     map.add(new ArrayList<>());
                     for (String texture : x_row) {
-                        try {
-                            try {
-                                if (texture == null) {
-                                    map.get(y).add(null);
-                                } else {
-                                    if (!loaded_images.containsKey(texture)) {
-                                        loaded_images.put(texture, ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource(texture))));
-                                    }
-                                    map.get(y).add(loaded_images.get(texture));
+                        if (texture == null) {
+                            map.get(y).add(null);
+                        }
+                        else {
+                            if (!loaded_images.containsKey(texture)) {
+                                if (AssetLoader.load(texture) == null){
+                                    map.get(y).add(this.interface_.texture_missing);
+                                    continue;
                                 }
-                            } catch (NullPointerException e) {
-                                map.get(y).add(this.interface_.texture_missing);
+                                loaded_images.put(texture, AssetLoader.load(texture));
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            map.get(y).add(loaded_images.get(texture));
                         }
                     }
                     y++;
@@ -463,38 +457,38 @@ public class InGameUI extends JPanel {
                     entities.add(new ArrayList<>());
                     for (String texture : x_row) {
                         try {
-                            try {
-                                if (texture == null) {
-                                    entities.get(y).add(null);
-                                } else {
-                                    if (!loaded_images.containsKey(texture)) {
-                                        loaded_images.put(texture, ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource(texture))));
+                            if (texture == null) {
+                                entities.get(y).add(null);
+                            } else {
+                                if (!loaded_images.containsKey(texture)) {
+                                    if (AssetLoader.load(texture) == null){
+                                        x__++;
+                                        continue;
                                     }
+                                    loaded_images.put(texture, AssetLoader.load(texture));
+                                }
 
-                                    if (unit_data_ar_.get(y).get(x__) != null){
-                                        HashMap<String, Object> unit_data = unit_data_ar_.get(y).get(x__);
-                                        if ((boolean) (unit_data.get("flip"))){
-                                            // Flip the image
-                                            AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                            tx.translate(-loaded_images.get(texture).getWidth(null), 0);
-                                            AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                            BufferedImage image = op.filter(loaded_images.get(texture), null);
+                                if (unit_data_ar_.get(y).get(x__) != null){
+                                    HashMap<String, Object> unit_data = unit_data_ar_.get(y).get(x__);
+                                    if ((boolean) (unit_data.get("flip"))){
+                                        // Flip the image
+                                        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                                        tx.translate(-loaded_images.get(texture).getWidth(null), 0);
+                                        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                                        BufferedImage image = op.filter(loaded_images.get(texture), null);
 
-                                            entities.get(y).add(image);
-                                        }
-                                        else{
-                                            entities.get(y).add(loaded_images.get(texture));
-                                        }
-                                    } else{
+                                        entities.get(y).add(image);
+                                    }
+                                    else{
                                         entities.get(y).add(loaded_images.get(texture));
                                     }
+                                } else{
+                                    entities.get(y).add(loaded_images.get(texture));
                                 }
-                            } catch (NullPointerException e) {
-                                e.printStackTrace();
-                                entities.get(y).add(this.interface_.texture_missing);
                             }
-                        } catch (IOException e) {
+                        } catch (NullPointerException e) {
                             e.printStackTrace();
+                            entities.get(y).add(this.interface_.texture_missing);
                         }
                         x__++;
                     }
@@ -837,20 +831,14 @@ public class InGameUI extends JPanel {
                 GraphicsEnvironment.getLocalGraphicsEnvironment();
         ge.registerFont(basis33);
 
-        try {
-            placeholder_ui = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/placeholder_ui.png")));
-            placeholder_ui_2 = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/placeholder_ui_2.png")));
-            panel = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/panel.png")));
-            selector = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/ui/selectors/ui_select.png")));
-            military_points = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/mp.png")));
-        }
-        catch (IOException e) {
-            placeholder_ui = texture_missing;
-            placeholder_ui_2 = texture_missing;
-            panel = texture_missing;
-            selector = texture_missing;
-            military_points = texture_missing;
-        }
+
+
+        placeholder_ui = AssetLoader.load("assets/placeholder_ui.png") != null ? AssetLoader.load("assets/placeholder_ui.png") : texture_missing;
+        placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png") != null ? AssetLoader.load("assets/placeholder_ui_2.png") : texture_missing;;
+        panel = AssetLoader.load("assets/panel.png") != null ? AssetLoader.load("assets/panel.png") : texture_missing;;
+        selector = AssetLoader.load("assets/ui/selectors/ui_select.png") != null ? AssetLoader.load("assets/ui/selectors/ui_select.png") : texture_missing;;
+        military_points = AssetLoader.load("assets/mp.png") != null ? AssetLoader.load("assets/mp.png") : texture_missing;;
+
         frame.setIconImage(selector);
     }
 
@@ -942,7 +930,7 @@ public class InGameUI extends JPanel {
             for (ArrayList<BufferedImage> row_x: map_to_render){
                 int x_count = 0;
                 for (BufferedImage x : row_x){
-                    g.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("empty.png"))).getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                    g.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : AssetLoader.load("empty.png").getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
                     x_count++;
                 }
                 y++;

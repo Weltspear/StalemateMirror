@@ -18,14 +18,12 @@
 
 package net.stalemate.menu;
 
-import net.stalemate.networking.client.config.ButtonTooltips;
+import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.swing.ButtonHover;
 import net.stalemate.swing.StalemateStyle;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,11 +52,12 @@ public class LobbySelectMenu extends JPanel {
 
         try {
             basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-            title = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/stalemate.png")));
-            background_img = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
+        title = AssetLoader.load("assets/stalemate.png");
+        background_img = AssetLoader.load("assets/background.png");
+
         assert basis33 != null;
         assert title!=null;
         assert background_img!=null;

@@ -35,6 +35,7 @@ public class LobbySelectMenu extends JPanel {
     private final JFrame frame;
     private final JList<String> list;
     private Font basis33;
+    private BufferedImage background_img;
     /***
      * 1 -> connect
      * 2 -> refresh
@@ -54,11 +55,13 @@ public class LobbySelectMenu extends JPanel {
         try {
             basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
             title = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/stalemate.png")));
+            background_img = ImageIO.read(Objects.requireNonNull(getClass().getClassLoader().getResource("assets/background.png")));
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
         assert basis33 != null;
         assert title!=null;
+        assert background_img!=null;
 
         list = new JList<>(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -101,7 +104,7 @@ public class LobbySelectMenu extends JPanel {
         label.setFont(basis33.deriveFont(14f));
         this.add(label);
 
-        this.setBackground(new Color(51, 39, 31));
+        // this.setBackground(new Color(51, 39, 31));
     }
 
     @Override
@@ -138,7 +141,8 @@ public class LobbySelectMenu extends JPanel {
 
     @Override
     public void paint(Graphics g){
-        super.paint(g);
+        g.drawImage(background_img, 0, 0, null);
+        paintComponents(g);
         if (title!=null)
             g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 65, null);
     }

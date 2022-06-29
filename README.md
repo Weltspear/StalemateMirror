@@ -28,10 +28,10 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Swingify UI
   - [ ] Remove custom UI in main menu and connection screen
   - [ ] Add Options menu
-- [ ] Add `AssetLoader`
+- [x] Add `AssetLoader`
 - [ ] Add Options menu
 - [ ] Add packet version
-- [ ] Add credits
+- [x] Add credits
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

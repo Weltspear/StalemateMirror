@@ -242,6 +242,8 @@ public class ConnectionHandler implements Runnable{
             return new Expect<>(() -> "Connection lost!");
         } catch (IllegalBlockSizeException | BadPaddingException e){
             return new Expect<>(() -> "Failed to decrypt data");
+        } catch (NullPointerException e){
+            return new Expect<>(() -> "Connection lost");
         }
     }
 

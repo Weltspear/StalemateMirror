@@ -394,7 +394,12 @@ public class Client {
                 else if (lobbySelectMenu.getStatus() == 1){
                     sendEncryptedData(""+(lobbySelectMenu.getIndex()+1));
                     Expect<String, ?> status = readEncryptedData();
-                    if (status.unwrap().equals("OK")){
+                    if (status.isNone()){
+                        client.close();
+                        LOGGER.log(Level.WARNING,"Connection lost!");
+                        return;
+                    }
+                    else if (status.unwrap().equals("OK")){
                         has_connected_to_lb = true;
                     }
                     else {

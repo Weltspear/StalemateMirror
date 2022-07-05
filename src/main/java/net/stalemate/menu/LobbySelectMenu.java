@@ -18,11 +18,15 @@
 
 package net.stalemate.menu;
 
+import net.libutils.error.ErrorResult;
+import net.libutils.error.Expect;
 import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.swing.ButtonHover;
+import net.stalemate.swing.LobbyJList;
 import net.stalemate.swing.StalemateStyle;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -32,6 +36,7 @@ import java.util.Objects;
 public class LobbySelectMenu extends JPanel {
     private final JFrame frame;
     private final JList<String> list;
+    private final LobbyJList lbJList;
     private Font basis33;
     private BufferedImage background_img;
     /***
@@ -67,7 +72,7 @@ public class LobbySelectMenu extends JPanel {
         list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
         list.setFont(basis33.deriveFont(16f));
         list.setSize(400, 300);
-        list.setVisible(true);
+        // list.setVisible(true);
         list.setLocation((this.getWidth()-list.getWidth()-50)/2, (this.getHeight()-list.getHeight())/2);
         Point list_ = new Point((this.getWidth()-list.getWidth())/2, (this.getHeight()-list.getHeight())/2);
 
@@ -78,6 +83,7 @@ public class LobbySelectMenu extends JPanel {
         connect.setLocation(new Point(list_.x+375, list_.y));
         connect.setVisible(true);
         connect.setFont(basis33.deriveFont(16f));
+        connect.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         ButtonHover refresh = new ButtonHover("Refresh");
         refresh.addActionListener(e -> status = 2);
@@ -86,11 +92,12 @@ public class LobbySelectMenu extends JPanel {
         refresh.setLocation(new Point(list_.x+375, list_.y+25));
         refresh.setVisible(true);
         refresh.setFont(basis33.deriveFont(16f));
+        refresh.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         this.add(connect);
         this.add(refresh);
         StalemateStyle.makeComponent(list);
-        this.add(list);
+        // this.add(list);
         this.setVisible(true);
         frame.add(this);
 
@@ -103,6 +110,11 @@ public class LobbySelectMenu extends JPanel {
         label.setFont(basis33.deriveFont(14f));
         this.add(label);
 
+        lbJList = new LobbyJList(basis33);
+        lbJList.setLocation((this.getWidth()-lbJList.getWidth()-50)/2, (this.getHeight()-lbJList.getHeight())/2);
+        lbJList.setVisible(true);
+        add(lbJList);
+
         // this.setBackground(new Color(51, 39, 31));
     }
 
@@ -112,14 +124,11 @@ public class LobbySelectMenu extends JPanel {
     }
 
     public int getIndex(){
-        return list.getSelectedIndex();
+        return lbJList.getSelectedIndex();
     }
 
-    public void setLobbies(ArrayList<String> a){
-        listModel.clear();
-        for (String s:a){
-            listModel.addElement(s);
-        }
+    public Expect<?, ErrorResult> setLobbies(ArrayList<String> a){
+        return lbJList.setLobbies(a);
     }
 
     public int getStatus(){

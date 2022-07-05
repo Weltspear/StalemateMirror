@@ -896,7 +896,8 @@ public class Lobby implements Runnable{
     }
 
     public synchronized String asString(){
-        return "" + lobby_name + ": Map: " + map_name + "[" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]";
+        // return "" + lobby_name + ": Map: " + map_name + "[" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]";
+        return lobby_name + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
     }
 
 

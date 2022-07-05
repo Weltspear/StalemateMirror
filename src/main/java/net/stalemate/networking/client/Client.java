@@ -369,7 +369,15 @@ public class Client {
             boolean has_connected_to_lb = false;
             while (!has_connected_to_lb){
                 ArrayList<String> lblist = (ArrayList<String>)(lobby_map.get("lobbies"));
-                lobbySelectMenu.setLobbies(lblist);
+                Expect<?, ?> resultExpect = lobbySelectMenu.setLobbies(lblist);
+
+                if (resultExpect.isNone()){
+                    client.close();
+                    LOGGER.log(Level.WARNING,resultExpect.getResult().message());
+                    lobbySelectMenu.clFrame();
+                    return;
+                }
+
                 while(lobbySelectMenu.getStatus() == 0){
                     Thread.onSpinWait();
                 }
@@ -383,6 +391,7 @@ public class Client {
                     if (lobby_list.isNone()){
                         client.close();
                         LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
+                        lobbySelectMenu.clFrame();
                         return;
                     }
                     ptv = BasicPolymorphicTypeValidator.builder()
@@ -397,6 +406,7 @@ public class Client {
                     if (status.isNone()){
                         client.close();
                         LOGGER.log(Level.WARNING,"Connection lost!");
+                        lobbySelectMenu.clFrame();
                         return;
                     }
                     else if (status.unwrap().equals("OK")){
@@ -409,6 +419,7 @@ public class Client {
                         if (lobby_list.isNone()){
                             client.close();
                             LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
+                            lobbySelectMenu.clFrame();
                             return;
                         }
                     }

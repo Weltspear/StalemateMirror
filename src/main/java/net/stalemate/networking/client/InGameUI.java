@@ -815,13 +815,8 @@ public class InGameUI extends JPanel {
         graphics2D.dispose();
         renderer.loaded_images.put("empty.png", empty);
 
-        try {
-            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-            basis33_button = basis33.deriveFont(((float)(14))).deriveFont(Font.BOLD);
-
-        } catch (IOException | FontFormatException e) {
-            e.printStackTrace();
-        }
+        basis33 = AssetLoader.getBasis33();
+        basis33_button = basis33.deriveFont(((float)(14))).deriveFont(Font.BOLD);
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);

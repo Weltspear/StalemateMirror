@@ -19,8 +19,10 @@
 package net.stalemate.networking.client;
 
 import net.stalemate.core.Unit;
+import net.stalemate.swing.StalemateInternalFrame;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -181,6 +183,12 @@ public class AssetLoader {
             "tiles/roadend3.png",
     };
 
+    private static Font basis33;
+
+    public static Font getBasis33(){
+        return basis33;
+    }
+
     public static void loadAll(){
         LOGGER.log(Level.INFO, "Loading all assets...");
         for (String res: resources){
@@ -190,6 +198,15 @@ public class AssetLoader {
         for (String tile: tiles){
             load(tile);
         }
+
+        try {
+            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("basis33/basis33.ttf")).openStream());
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LOGGER.log(Level.INFO, "Loaded basis33 font");
     }
 
     public static BufferedImage load(String img_path){

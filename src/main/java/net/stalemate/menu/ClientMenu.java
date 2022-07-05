@@ -71,12 +71,7 @@ public class ClientMenu extends JPanel {
         frame.pack();
         this.setLayout(null);
 
-        try {
-            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-
-        } catch (IOException | FontFormatException e) {
-            e.printStackTrace();
-        }
+        basis33 = AssetLoader.getBasis33();
 
         entry = new HintEntry("Enter IP");
         StalemateStyle.makeJTextField(entry);

@@ -54,12 +54,7 @@ public class MainMenu extends JPanel {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(null);
 
-        try {
-            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-
-        } catch (IOException | FontFormatException e) {
-            e.printStackTrace();
-        }
+        basis33 = AssetLoader.getBasis33();
 
         background = AssetLoader.load("assets/background.png");
         title = AssetLoader.load("assets/stalemate.png");

@@ -55,11 +55,7 @@ public class LobbySelectMenu extends JPanel {
         this.setSize(frame.getWidth(), frame.getHeight());
         this.setLayout(null);
 
-        try {
-            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(getClass().getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-        } catch (FontFormatException | IOException e) {
-            e.printStackTrace();
-        }
+        basis33 = AssetLoader.getBasis33();
         title = AssetLoader.load("assets/stalemate.png");
         background_img = AssetLoader.load("assets/background.png");
 

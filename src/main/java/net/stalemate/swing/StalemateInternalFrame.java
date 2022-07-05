@@ -18,6 +18,8 @@
 
 package net.stalemate.swing;
 
+import net.stalemate.networking.client.AssetLoader;
+
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
@@ -45,7 +47,7 @@ public class StalemateInternalFrame extends JInternalFrame {
 
                         super.installDefaults();
                         try {
-                            Font basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("basis33/basis33.ttf")).openStream()).deriveFont(15f);
+                            Font basis33 = AssetLoader.getBasis33();
                             setFont(basis33);
                         } catch (Exception ignored){
 

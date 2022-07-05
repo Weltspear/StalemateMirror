@@ -26,8 +26,9 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 ## `v0.3a` TODO:
 - [ ] Rework lobby system
 - [ ] Swingify UI
-  - [ ] Remove custom UI in main menu and connection screen
+  - [x] Remove custom UI in main menu and connection screen
   - [ ] Add Options menu
+  - [x] Reworked lobby selection screen
 - [x] Add `AssetLoader`
 - [ ] Add Options menu
 - [ ] Add packet version

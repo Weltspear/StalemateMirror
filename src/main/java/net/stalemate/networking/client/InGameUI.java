@@ -779,7 +779,7 @@ public class InGameUI extends JPanel {
 
         this.addMouseMotionListener(m);
         this.addMouseListener(m);
-        // Add DesktopPane for later use
+
         p = new JDesktopPane();
         p.setBackground(new Color(0x00FFFFFF, true));
         p.setVisible(true);

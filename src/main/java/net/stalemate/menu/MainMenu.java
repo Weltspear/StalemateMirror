@@ -18,11 +18,11 @@
 
 package net.stalemate.menu;
 
+import net.libutils.error.Expect;
 import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.networking.client.Client;
 import net.stalemate.networking.server.Server;
-import net.stalemate.swing.ButtonHover;
-import net.stalemate.swing.StalemateStyle;
+import net.stalemate.swing.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,8 +31,12 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MainMenu extends JPanel {
+public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     private final JFrame frame;
+    private final ButtonHover play;
+    private final ButtonHover start_srv;
+    private final ButtonHover options;
+    private final ButtonHover exit;
     private volatile Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -42,6 +46,8 @@ public class MainMenu extends JPanel {
 
     private final BufferedImage background;
     private final BufferedImage title;
+
+    private DesktopPaneFocusAssist p;
 
     public MainMenu(){
         frame = new JFrame("Stalemate");
@@ -59,13 +65,13 @@ public class MainMenu extends JPanel {
         background = AssetLoader.load("assets/background.png");
         title = AssetLoader.load("assets/stalemate.png");
 
-        ButtonHover play = new ButtonHover("Play");
+        play = new ButtonHover("Play");
         StalemateStyle.makeButton(play);
-        ButtonHover start_srv = new ButtonHover("Start a server");
+        start_srv = new ButtonHover("Start a server");
         StalemateStyle.makeButton(start_srv);
-        ButtonHover options = new ButtonHover("Options");
+        options = new ButtonHover("Options");
         StalemateStyle.makeButton(options);
-        ButtonHover exit = new ButtonHover("Exit");
+        exit = new ButtonHover("Exit");
         StalemateStyle.makeButton(exit);
 
         play.setLocation(new Point((832+14- play.getWidth())/2, 250));
@@ -80,10 +86,22 @@ public class MainMenu extends JPanel {
         exit.setFont(basis33.deriveFont(16f));
         exit.addActionListener((e) -> System.exit(0));
 
+
+        p = new DesktopPaneFocusAssist(this);
+        p.setSize(new Dimension(832+14,576));
+        p.setBackground(new Color(0x00FFFFFF, true));
+        p.setPreferredSize(new Dimension(832+14,576));
+        p.setBounds(0,0, 832+14,576);
+        // StalemateInternalFrame w = new StalemateInternalFrame("Options");
+        // w.setSize(400, 300);
+        // w.setTitle("Options");
+        // w.setVisible(true);
+
         this.add(play);
         this.add(start_srv);
         this.add(options);
         this.add(exit);
+        this.add(p);
     }
 
     public void update(){
@@ -94,7 +112,13 @@ public class MainMenu extends JPanel {
             // frame.setVisible(false);
             this.frame.remove(this);
             Client client = new Client(this.frame);
-            client.start_client();
+            Expect<?, ?> expect = client.start_client();
+            if (expect.isNone()){
+                StMessageBox messageBox = new StMessageBox("Error", makeNewLinesError(expect.getResult().message()));
+                messageBox.setLocation(((p.getWidth())-messageBox.getWidth())/2, ((p.getHeight())-messageBox.getHeight())/2);
+                messageBox.setVisible(true);
+                p.add(messageBox);
+            }
             this.frame.add(this);
             status = 0;
             frame.setVisible(true);
@@ -105,6 +129,7 @@ public class MainMenu extends JPanel {
             server.start_server();
             frame.setVisible(true);
         }
+        p.updateAssist();
         lock.unlock();
     }
 
@@ -129,6 +154,51 @@ public class MainMenu extends JPanel {
         int y = 276;
         if (title!=null)
             g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 230-60, null);
+
+        // even more evil things to get jdesktoppane to work
+        if (p != null)
+            p.setVisible(false);
         paintComponents(g);
+        if (p != null)
+            p.setVisible(true);
+
+        if (p != null){
+            // Evil things to get JDesktopPanel to work
+            BufferedImage clone = new BufferedImage(832+32,576+32+6, BufferedImage.TYPE_INT_ARGB_PRE);
+            Graphics2D graphics = clone.createGraphics();
+            p.printAll(graphics);
+            graphics.dispose();
+            g.drawImage(clone, 0, 0, null);
+        }
+    }
+
+    @Override
+    public void disableWhole() {
+        play.setEnabled(false);
+        start_srv.setEnabled(false);
+        exit.setEnabled(false);
+        options.setEnabled(false);
+    }
+
+    public String makeNewLinesError(String in){
+        StringBuilder stringBuilder = new StringBuilder();
+        int count = 0;
+        for (char c: in.toCharArray()){
+            stringBuilder.append(c);
+            count++;
+            if (count == 40){
+                stringBuilder.append('\n');
+                count = 0;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public void enableWhole() {
+        play.setEnabled(true);
+        start_srv.setEnabled(true);
+        exit.setEnabled(true);
+        options.setEnabled(true);
     }
 }

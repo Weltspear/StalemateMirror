@@ -46,12 +46,8 @@ public class StalemateInternalFrame extends JInternalFrame {
                     protected void installDefaults() {
 
                         super.installDefaults();
-                        try {
-                            Font basis33 = AssetLoader.getBasis33();
-                            setFont(basis33);
-                        } catch (Exception ignored){
-
-                        }
+                        Font basis33 = AssetLoader.getBasis33().deriveFont(15f);
+                        setFont(basis33);
                         selectedTextColor = new Color(198, 130, 77);
                         notSelectedTextColor = Color.BLACK;
                     }
@@ -72,10 +68,5 @@ public class StalemateInternalFrame extends JInternalFrame {
         this.setFrameIcon(new ImageIcon(Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("assets/internalframe/title_img_2.png"))));
         this.setBorder(new LineBorder(new Color(31, 27, 21), 2));
         this.setBackground(new Color(60, 38, 22));
-    }
-
-    @Override
-    public void updateUI() {
-        super.updateUI();
     }
 }

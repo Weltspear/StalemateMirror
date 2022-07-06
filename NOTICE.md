@@ -33,5 +33,6 @@ SOFTWARE.
 
 You can read the font's README file which is located in src/main/resources/basis33/README.txt. 
 Font itself is located in src/main/resources/basis33/basis33.ttf. License file of this font is located in 
-src/main/resources/basis33/LICENSE.txt.
+src/main/resources/basis33/LICENSE.txt. Since 07/06/2022 the font is modified and now includes support for letters: 
+ŁłŃńĘęÓóĄąŚśĆćŻżŹź
 

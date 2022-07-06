@@ -323,7 +323,11 @@ public class ConnectionHandler implements Runnable{
 
     public Expect<String, ErrorResult> readSafely(){
         try {
-            return new Expect<>(input.readLine());
+            String read = input.readLine();
+            if (read == null){
+                return new Expect<>(() -> "Connection lost!");
+            }
+            return new Expect<>(read);
         } catch (Exception e){
             return new Expect<>(() -> "Connection lost!");
         }

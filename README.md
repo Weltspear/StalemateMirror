@@ -30,9 +30,8 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [x] Remove custom UI in main menu and connection screen
   - [ ] Add Options menu
   - [x] Reworked lobby selection screen
-  - [ ] Add Error messagebox if client disconnects from server for some reason
+  - [x] Add Error messagebox if client disconnects from server for some reason
 - [x] Add `AssetLoader`
-- [ ] Add Options menu
 - [ ] Add packet version
 - [x] Add credits
 

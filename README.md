@@ -33,9 +33,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Add `AssetLoader`
 - [ ] Add packet version
 - [x] Add credits
-- [ ] Replace raw `HashMap`s with `EntryTable`s.
-  - [ ] conhandler
-  - [ ] client
+- [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
 - [ ] Revision of code in `Lobby`
 - [ ] More `ReetrantLock`s everywhere
 - [ ] `LobbySelectMenu` should show server's description

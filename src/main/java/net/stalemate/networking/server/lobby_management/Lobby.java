@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.stalemate.core.Entity;
 import net.stalemate.core.MapObject;
 import net.stalemate.core.Unit;
@@ -41,7 +43,7 @@ import java.util.logging.Logger;
 
 import static net.stalemate.log.MakeLog.makeLog;
 
-public class Lobby implements Runnable{
+public class Lobby implements Runnable{ // todo add more locks if necessary
     Game game;
     ArrayList<Player> players = new ArrayList<>();
     private int max_player_count = 2;
@@ -887,6 +889,10 @@ public class Lobby implements Runnable{
         }
     }
 
+    public synchronized void rmFromLobby(Player player){
+        players.remove(player);
+    }
+
     public enum LobbyState {
         WAITING_FOR_PLAYERS,
         STARTED
@@ -900,5 +906,31 @@ public class Lobby implements Runnable{
         return game_mode + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
     }
 
+    public ArrayList<String> getPlayerNicks(){
+        ArrayList<String> nicks = new ArrayList<>();
+        for (Player player: players){
+            nicks.add(player.nickname);
+        }
+        return nicks;
+    }
+
+    public String playerNicksString(){
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode rootNode = mapper.createObjectNode();
+
+        rootNode.put("type", "NickList");
+
+        ArrayNode node = rootNode.putArray("nicks");
+        for (String nick: getPlayerNicks()){
+            node.add(nick);
+        }
+
+        try {
+            return mapper.writer().writeValueAsString(rootNode);
+        } catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

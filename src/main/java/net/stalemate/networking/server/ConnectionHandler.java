@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,6 +121,7 @@ public class ConnectionHandler implements Runnable{
             }
 
             Lobby.Player player = null;
+            Lobby lobby_final = null;
             try {
                 boolean lobby_invalid = true;
                 while (lobby_invalid) {
@@ -130,6 +132,12 @@ public class ConnectionHandler implements Runnable{
                         isHandlerTerminated = true;
                         return;
                     }
+
+                    if (Objects.equals(lb.unwrap(), "continue")){
+                        sendEncryptedData("ok");
+                        continue;
+                    }
+
                     int lobby;
                     try {
                         lobby = Integer.parseInt(lb.unwrap());
@@ -152,6 +160,7 @@ public class ConnectionHandler implements Runnable{
                     } else {
                         sendEncryptedData("OK");
                         player = lobbyHandler.getLobby(lobby - 1).connect_to_lobby();
+                        lobby_final = lobbyHandler.getLobby(lobby-1);
                         lobby_invalid = false;
                     }
                 }
@@ -159,13 +168,21 @@ public class ConnectionHandler implements Runnable{
                 LOGGER.log(Level.FINE,"Connection closed unexpectedly!");
                 return;
             }
-            // System.out.println(" Lobby selection is OK!");
             player.set_nickname(nick.unwrap());
 
+            // Waits for game start
             while (!player.hasGameStarted()){
-                // Waits for game start
-                Thread.onSpinWait();
-                // System.out.println(" Waiting for game to start");
+                sendEncryptedData(lobby_final.playerNicksString());
+                Expect<String, ?> rd = readEncryptedData();
+                if (rd.isNone()){
+                    LOGGER.log(Level.WARNING,"Connection lost!");
+                    player.terminateConnection();
+                    lobby_final.rmFromLobby(player);
+                    client.close();
+                    isHandlerTerminated = true;
+                    return;
+                }
+
             }
 
             sendEncryptedData("start");

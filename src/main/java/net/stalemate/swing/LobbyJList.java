@@ -35,12 +35,9 @@ public class LobbyJList extends JPanel {
     private final JList<String> second = new JList<>();
     private final JList<String> third = new JList<>();
 
-    public class CellRenderer extends JLabel implements ListCellRenderer<String> {
+    public static class StCellRenderer extends JLabel implements ListCellRenderer<String> {
 
-        private final Font basis33;
-
-        public CellRenderer(Font basis33){
-            this.basis33 = basis33;
+        public StCellRenderer(Font basis33){
             setOpaque(true);
             setFont(basis33.deriveFont(17f));
         }
@@ -81,7 +78,7 @@ public class LobbyJList extends JPanel {
             jList.setLocation(plus, 0);
             jList.setBounds(plus, 20, i == 0 ? 150 : i == 1 ? 150 : 100, 300);
             StalemateStyle.makeComponent(jList);
-            jList.setCellRenderer(new CellRenderer(basis33));
+            jList.setCellRenderer(new StCellRenderer(basis33));
             jList.setBorder(new BevelBorder(BevelBorder.LOWERED));
             jList.addListSelectionListener(new ListSelectionListener() {
                 private static ReentrantLock lock = new ReentrantLock();

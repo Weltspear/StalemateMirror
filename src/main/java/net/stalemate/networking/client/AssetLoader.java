@@ -36,7 +36,7 @@ import static net.stalemate.log.MakeLog.makeLog;
 public class AssetLoader {
 
     private static HashMap<String, BufferedImage> img_storage = new HashMap<>();
-    private static final Logger LOGGER = makeLog(Logger.getLogger(Client.class.getSimpleName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(AssetLoader.class.getSimpleName()));
 
     private static String[] resources = {"assets/background.png",
             "assets/default.png",

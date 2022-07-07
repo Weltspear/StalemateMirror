@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.stalemate.menu.ClientMenu;
+import net.stalemate.menu.LobbyMenu;
 import net.stalemate.menu.LobbySelectMenu;
 import net.stalemate.networking.client.config.Grass32ConfigClient;
 import net.libutils.error.ErrorResult;
@@ -42,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -305,56 +307,56 @@ public class Client {
             Grass32ConfigClient.loadGrass32();
 
             client.setTcpNoDelay(true);
-            client.setSoTimeout(Grass32ConfigClient.getTimeout()*1000);
+            client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
             try {
                 // Initialize encryption
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
                 keyPairGen.initialize(2048);
                 keyPair = keyPairGen.generateKeyPair();
-                LOGGER.log(Level.FINE,"KeyPair generated");
+                LOGGER.log(Level.FINE, "KeyPair generated");
 
                 // Init decryption
                 cipherDecryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
                 cipherDecryption.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-                LOGGER.log(Level.FINE,"Decryption initialized");
+                LOGGER.log(Level.FINE, "Decryption initialized");
 
                 // Initialize output and input
                 output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
                 input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
-                LOGGER.log(Level.FINE,"Input output initialized");
+                LOGGER.log(Level.FINE, "Input output initialized");
 
                 // Get server's public key
                 byte[] publicKeyByteServer = Base64.getDecoder().decode(input.readLine());
                 KeyFactory keyFactory = KeyFactory.getInstance("RSA");
                 PublicKey server_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteServer));
-                LOGGER.log(Level.FINE,"Public key received!");
+                LOGGER.log(Level.FINE, "Public key received!");
 
                 // Send public key to client
                 byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
                 String publicKeyString = Base64.getEncoder().encodeToString(publicKeyBytes);
                 output.println(publicKeyString);
-                LOGGER.log(Level.FINE,"Public key sent!");
+                LOGGER.log(Level.FINE, "Public key sent!");
 
                 // Initialize output encryption
-                LOGGER.log(Level.FINE,"Initializing encryption");
+                LOGGER.log(Level.FINE, "Initializing encryption");
                 cipherEncryption = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // "RSA/ECB/PKCS1Padding"
                 cipherEncryption.init(Cipher.ENCRYPT_MODE, server_public_key);
 
                 initAES();
-                LOGGER.log(Level.FINE,"Symmetric encryption initialized!");
-            } catch (Exception e){
-                LOGGER.log(Level.WARNING,"Initialization failure closing connection");
+                LOGGER.log(Level.FINE, "Symmetric encryption initialized!");
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Initialization failure closing connection");
                 client.close();
                 return new Expect<>(() -> "Initialization failure closing connection");
             }
 
-            client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout()*1000);
+            client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout() * 1000);
 
             // Make player choose the lobby
             Expect<String, ?> lobby_list = readEncryptedData();
-            if (lobby_list.isNone()){
+            if (lobby_list.isNone()) {
                 client.close();
-                LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
+                LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
                 String msg = "Failed to read lobby list: " + lobby_list.getResult().message();
                 return new Expect<>(() -> msg);
             }
@@ -369,31 +371,32 @@ public class Client {
             LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame);
 
             boolean has_connected_to_lb = false;
-            while (!has_connected_to_lb){
-                ArrayList<String> lblist = (ArrayList<String>)(lobby_map.get("lobbies"));
+            while (!has_connected_to_lb) {
+                ArrayList<String> lblist = (ArrayList<String>) (lobby_map.get("lobbies"));
                 Expect<?, ?> resultExpect = lobbySelectMenu.setLobbies(lblist);
 
-                if (resultExpect.isNone()){
+                if (resultExpect.isNone()) {
                     client.close();
-                    LOGGER.log(Level.WARNING,resultExpect.getResult().message());
+                    LOGGER.log(Level.WARNING, resultExpect.getResult().message());
                     lobbySelectMenu.clFrame();
                     String msg = resultExpect.getResult().message();
                     return new Expect<>(() -> msg);
                 }
 
-                while(lobbySelectMenu.getStatus() == 0){
-                    Thread.onSpinWait();
+                while (lobbySelectMenu.getStatus() == 0) {
+                    sendEncryptedData("continue");
+                    readEncryptedData();
                 }
 
-                if (lobbySelectMenu.getStatus() == 2){
+                if (lobbySelectMenu.getStatus() == 2) {
                     sendEncryptedData("-1");
                     readEncryptedData();
 
                     // get lobby list
                     lobby_list = readEncryptedData();
-                    if (lobby_list.isNone()){
+                    if (lobby_list.isNone()) {
                         client.close();
-                        LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
+                        LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
                         lobbySelectMenu.clFrame();
                         String msg = "Failed to read lobby list: " + lobby_list.getResult().message();
                         return new Expect<>(() -> msg);
@@ -403,141 +406,171 @@ public class Client {
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                     lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
                     lobbySelectMenu.setStatus(0);
-                }
-                else if (lobbySelectMenu.getStatus() == 1){
-                    sendEncryptedData(""+(lobbySelectMenu.getIndex()+1));
+                } else if (lobbySelectMenu.getStatus() == 1) {
+                    sendEncryptedData("" + (lobbySelectMenu.getIndex() + 1));
                     Expect<String, ?> status = readEncryptedData();
-                    if (status.isNone()){
+                    if (status.isNone()) {
                         client.close();
-                        LOGGER.log(Level.WARNING,"Connection lost!");
+                        LOGGER.log(Level.WARNING, "Connection lost!");
                         lobbySelectMenu.clFrame();
                         return new Expect<>(() -> "Connection lost!");
-                    }
-                    else if (status.unwrap().equals("OK")){
+                    } else if (status.unwrap().equals("OK")) {
                         has_connected_to_lb = true;
-                    }
-                    else {
+                    } else {
                         lobbySelectMenu.setText("Can't connect to lobby because " + (status.unwrap().equals("INCORRECT_LOBBY") ? "incorrect lobby was chosen" :
-                                status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN") );
+                                status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN"));
                         lobby_list = readEncryptedData();
-                        if (lobby_list.isNone()){
+                        if (lobby_list.isNone()) {
                             client.close();
-                            LOGGER.log(Level.WARNING,"Failed to read lobby list: " + lobby_list.getResult().message());
+                            LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
                             lobbySelectMenu.clFrame();
                             String msg = "Failed to read lobby list: " + lobby_list.getResult().message();
                             return new Expect<>(() -> msg);
                         }
                     }
                     lobbySelectMenu.setStatus(0);
+                } else if (lobbySelectMenu.getStatus() == 3) {
+                    client.close();
+                    LOGGER.log(Level.INFO, "Disconnecting...");
+                    lobbySelectMenu.clFrame();
+                    return new Expect<>(1);
                 }
             }
             frame.setVisible(false);
             lobbySelectMenu.clFrame();
 
-            LOGGER.log(Level.INFO,"Connected to lobby!");
+            LOGGER.log(Level.INFO, "Connected to lobby!");
 
-            Expect<String, ?> data = readEncryptedData();
-            if (data.isNone()){
-                client.close();
-                LOGGER.log(Level.WARNING,"Unable to get data whether the game started or not: " + data.getResult().message());
-                String msg = "Unable to get data whether the game started or not: " + data.getResult().message();
-                return new Expect<>(() -> msg);
-            }
+            LobbyMenu lobbyMenu = new LobbyMenu(frame);
+            frame.setVisible(true);
 
-            client.setSoTimeout(Grass32ConfigClient.getTimeout()*1000);
-
-            if (data.unwrap().equals("start")) {
-                InGameUI inGameUI = new InGameUI();
-                InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
-                (new Thread(runnable)).start();
-                GameControllerClient controller = new GameControllerClient(inGameUI.getInput());
-
-                int tick = 0;
-
-                while (true) {
-                    long t1 = System.currentTimeMillis();
-                    Expect<String, ?> json = readSafely();
-                    long t2 = System.currentTimeMillis();
-                    tick++;
-                    if (tick == 100) {
-                        LOGGER.log(Level.INFO,"ping:" + (t2 - t1));
-                        tick = 0;
-                    }
-
-                    if (json.isNone()){
-                        client.close();
-                        LOGGER.log(Level.WARNING,"Failed to read packet: " + json.getResult().message());
-                        runnable.terminate();
-                        inGameUI.getFrame().dispose();
-                        String msg = "Failed to read packet: " + json.getResult().message();
-                        return new Expect<>(() -> msg);
-                    }
-                    if (json.unwrap().startsWith("endofgame")){
-                        break;
-                    }
-
-                    if (json.unwrap().startsWith("connection_terminated")){
-                        String cause = input.readLine();
-                        LOGGER.log(Level.WARNING,"Lobby was terminated. Additional information: " + cause);
-                        runnable.terminate();
-                        inGameUI.getFrame().dispose();
-                        client.close();
-                        return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
-                    }
-
-                    runnable.lock.lock();
-                    Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
-                    runnable.lock.unlock();
-                    if (expect.isNone()){
-                        LOGGER.log(Level.WARNING,"Failed to read server packet, shutting down client: " + expect.getResult().message());
-                        runnable.terminate();
-                        client.close();
-                        inGameUI.getFrame().dispose();
-                        String msg = "Failed to read server packet, shutting down client: " + expect.getResult().message();
-                        return new Expect<>(() -> msg);
-                    }
-
-                    controller.receive_packet(json.unwrap());
-                    inGameUI.inGameUIUpdate();
-
-                    // Escape menu connection termination
-                    if (inGameUI.isTermicon()){
-                        runnable.terminate();
-                        client.close();
-                        inGameUI.getFrame().dispose();
-                        return new Expect<>(1);
-                    }
-
-                    String packet = controller.create_json_packet();
-                    writeSafely(packet);
+            // waiting in lobby
+            while (true) {
+                /*
+                ptv = BasicPolymorphicTypeValidator.builder()
+                            .build();
+                    objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                    lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
+                 */
+                Expect<String, ?> msg = readEncryptedData();
+                if (msg.isNone()) {
+                    client.close();
+                    LOGGER.log(Level.WARNING, "Connection lost!");
+                    lobbyMenu.clFrame();
+                    return new Expect<>(() -> "Connection lost!");
+                } else if (msg.unwrap().equals("start")) {
+                    break;
+                } else {
+                    ptv = BasicPolymorphicTypeValidator.builder()
+                            .build();
+                    objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+                    Map<String, Object> nick_map = (objectMapper).readValue(msg.unwrap(), Map.class);
+                    ArrayList<String> nicks = (ArrayList<String>) nick_map.get("nicks");
+                    lobbyMenu.setNicks(nicks);
                 }
 
-                Expect<String, ?> result = readSafely();
-                if (result.isNone()){
-                    LOGGER.log(Level.WARNING,"Failed to get result " + result.getResult().message());
+                if (lobbyMenu.getStatus() == 1){
                     client.close();
+                    lobbyMenu.clFrame();
+                    return new Expect<>(1);
+                }
+                sendEncryptedData("ok");
+            }
+
+            lobbyMenu.clFrame();
+            frame.setVisible(false);
+
+            client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
+
+
+            InGameUI inGameUI = new InGameUI();
+            InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
+            (new Thread(runnable)).start();
+            GameControllerClient controller = new GameControllerClient(inGameUI.getInput());
+
+            int tick = 0;
+
+            while (true) {
+                long t1 = System.currentTimeMillis();
+                Expect<String, ?> json = readSafely();
+                long t2 = System.currentTimeMillis();
+                tick++;
+                if (tick == 100) {
+                    LOGGER.log(Level.INFO, "ping:" + (t2 - t1));
+                    tick = 0;
+                }
+
+                if (json.isNone()) {
+                    client.close();
+                    LOGGER.log(Level.WARNING, "Failed to read packet: " + json.getResult().message());
                     runnable.terminate();
-                    String msg = "Failed to get result " + result.getResult().message();
                     inGameUI.getFrame().dispose();
+                    String msg = "Failed to read packet: " + json.getResult().message();
                     return new Expect<>(() -> msg);
                 }
-                client.close();
-                inGameUI.setResults(result.unwrap());
-
-                while (!inGameUI.isTermicon()){
-                    Thread.sleep(1);
-                    inGameUI.inGameUIUpdate();
+                if (json.unwrap().startsWith("endofgame")) {
+                    break;
                 }
 
-                runnable.terminate();
-                inGameUI.getFrame().dispose();
+                if (json.unwrap().startsWith("connection_terminated")) {
+                    String cause = input.readLine();
+                    LOGGER.log(Level.WARNING, "Lobby was terminated. Additional information: " + cause);
+                    runnable.terminate();
+                    inGameUI.getFrame().dispose();
+                    client.close();
+                    return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
+                }
 
-                return new Expect<>(1);
+                runnable.lock.lock();
+                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
+                runnable.lock.unlock();
+                if (expect.isNone()) {
+                    LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
+                    runnable.terminate();
+                    client.close();
+                    inGameUI.getFrame().dispose();
+                    String msg = "Failed to read server packet, shutting down client: " + expect.getResult().message();
+                    return new Expect<>(() -> msg);
+                }
 
-            } else {
-                LOGGER.log(Level.WARNING,"Server miscommunication closing connection");
-                return new Expect<>(() -> "Server miscommunication closing connection");
+                controller.receive_packet(json.unwrap());
+                inGameUI.inGameUIUpdate();
+
+                // Escape menu connection termination
+                if (inGameUI.isTermicon()) {
+                    runnable.terminate();
+                    client.close();
+                    inGameUI.getFrame().dispose();
+                    return new Expect<>(1);
+                }
+
+                String packet = controller.create_json_packet();
+                writeSafely(packet);
             }
+
+            Expect<String, ?> result = readSafely();
+            if (result.isNone()) {
+                LOGGER.log(Level.WARNING, "Failed to get result " + result.getResult().message());
+                client.close();
+                runnable.terminate();
+                String msg = "Failed to get result " + result.getResult().message();
+                inGameUI.getFrame().dispose();
+                return new Expect<>(() -> msg);
+            }
+            client.close();
+            inGameUI.setResults(result.unwrap());
+
+            while (!inGameUI.isTermicon()) {
+                Thread.sleep(1);
+                inGameUI.inGameUIUpdate();
+            }
+
+            runnable.terminate();
+            inGameUI.getFrame().dispose();
+
+            return new Expect<>(1);
+
+
         } catch (Exception e){
             e.printStackTrace();
         }

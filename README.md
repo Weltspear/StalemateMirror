@@ -20,12 +20,11 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 ## TODO
 - [ ] Make a tutorial on how to play this game.
 - [x] Replace `System.out.println` with a logger.
-- [ ] Replace raw `HashMap`s with `EntryTable`s.
 - [x] Make compression `Base64` handle unexpected things.
 - [x] Correct `ConnectionHandler` saying wrong ip after user connects.
 - [ ] Hardware acceleration (?)
 ## `v0.3a` TODO:
-- [ ] Rework lobby system
+- [x] Rework lobby system
 - [ ] Swingify UI
   - [x] Remove custom UI in main menu and connection screen
   - [ ] Add Options menu
@@ -34,6 +33,12 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Add `AssetLoader`
 - [ ] Add packet version
 - [x] Add credits
+- [ ] Replace raw `HashMap`s with `EntryTable`s.
+  - [ ] conhandler
+  - [ ] client
+- [ ] Revision of code in `Lobby`
+- [ ] More `ReetrantLock`s everywhere
+- [ ] `LobbySelectMenu` should show server's description
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

@@ -36,7 +36,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
 - [ ] Revision of code in `Lobby`
   - [x] Lobby itself
-  - [ ] Player
+  - [x] Player
   - [ ] Add connection termination cause
 - [ ] More `ReetrantLock`s everywhere
 - [ ] `LobbySelectMenu` should show server's description

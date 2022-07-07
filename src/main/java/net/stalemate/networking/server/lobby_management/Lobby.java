@@ -218,39 +218,67 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
         String nickname;
 
+        private final ReentrantLock lock = new ReentrantLock();
+
         public Player(){
         }
 
         public void setChat(Chat c){
+            lock.lock();
             chat = c;
+            lock.unlock();
         }
 
         public void setMapPath(String map_path){
+            lock.lock();
             this.map_path = map_path;
+            lock.unlock();
         }
 
         private volatile boolean isConnectionTerminated = false;
-        public synchronized boolean isConnectionTerminated(){return isConnectionTerminated;}
-        public synchronized void terminateConnection(){isConnectionTerminated = true;}
+        public boolean isConnectionTerminated(){return isConnectionTerminated;}
+        public void terminateConnection(){isConnectionTerminated = true;}
 
-        public synchronized void setCamPos(int x, int y){
+        public void setCamPos(int x, int y){
+            lock.lock();
             this.cam_x = x;
             this.cam_y = y;
+            lock.unlock();
         }
 
-        public synchronized void setTeam(Game.Team t){
+        public void setTeam(Game.Team t){
+            lock.lock();
             team = t;
+            lock.unlock();
         }
-        public synchronized void setGame(Game g){game = g;}
-
-        public synchronized Game.Team getTeam(){
-            return team;
+        public void setGame(Game g){
+            lock.lock();
+            game = g;
+            lock.unlock();
         }
 
-        public synchronized boolean hasGameStarted(){return (team != null && game != null);}
+        public Game.Team getTeam(){
+            lock.lock();
+            try {
+                return team;
+            } finally {
+                lock.unlock();
+            }
+        }
 
-        public synchronized void set_nickname(String nickname){
+        public boolean hasGameStarted(){
+            lock.lock();
+            try {
+                return (team != null && game != null);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        public void set_nickname(String nickname){
+            lock.lock();
             this.nickname = nickname;
+            lock.unlock();
         }
 
         @SuppressWarnings("unchecked")
@@ -307,6 +335,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             * */
 
             game.lock.lock();
+            lock.lock();
 
             try {
                 if (camSelMode == 0){
@@ -518,9 +547,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 e.printStackTrace();
                 return new Expect<>(() -> "Failed to read packet");
             } finally {
+                lock.unlock();
                 game.lock.unlock();
             }
-
             return new Expect<>(1);
 
         }
@@ -586,6 +615,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
 
         public synchronized String create_json_packet(){
+            lock.lock();
             if (game != null)
             game.lock.lock();
             try {
@@ -862,6 +892,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             } finally {
                 if (game != null)
                 game.lock.unlock();
+                lock.unlock();
             }
             return null;
         }
@@ -895,11 +926,18 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         protected String endOfAGameMessage = null;
 
         public void setEndOfGameMessage(String endOfAGameMessage){
+            lock.lock();
             this.endOfAGameMessage = endOfAGameMessage;
+            lock.unlock();
         }
 
         public String getEndOfAGameMessage() {
-            return endOfAGameMessage;
+            lock.lock();
+            try {
+                return endOfAGameMessage;
+            } finally {
+                lock.unlock();
+            }
         }
     }
 

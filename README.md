@@ -35,6 +35,9 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Add credits
 - [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
 - [ ] Revision of code in `Lobby`
+  - [x] Lobby itself
+  - [ ] Player
+  - [ ] Add connection termination cause
 - [ ] More `ReetrantLock`s everywhere
 - [ ] `LobbySelectMenu` should show server's description
 

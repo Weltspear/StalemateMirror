@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,11 +56,21 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
     // protected volatile boolean is_terminated = true;
 
-    public synchronized int getMaxPlayerCount() {
-        return max_player_count;
+    public int getMaxPlayerCount() {
+        try {
+            lobby_lock.lock();
+            return max_player_count;
+        } finally {
+            lobby_lock.unlock();
+        }
     }
-    public synchronized int currentPlayerCount(){
-        return players.size();
+    public int currentPlayerCount() {
+        try {
+            lobby_lock.lock();
+            return players.size();
+        } finally {
+            lobby_lock.unlock();
+        }
     }
 
     String map_path;
@@ -68,7 +79,11 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
     private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getSimpleName()));
 
+    private final ReentrantLock lobby_lock = new ReentrantLock();
+
     public void resetLobby(){
+        lobby_lock.lock();
+
         chat = new Chat();
         game = MapLoader.load(map_path);
         max_player_count = MapLoader.getMapPlayerCount(map_path);
@@ -81,6 +96,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         if (current_next_map == next_maps.size()){
             current_next_map = 0;
         }
+
+        lobby_lock.unlock();
         lbstart();
     }
 
@@ -99,6 +116,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
         LOGGER.log(Level.INFO, "Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 
+        lobby_lock.lock();
+
         for (Player player: players){
             Game.Team t = game.getUnassignedTeam();
             player.setTeam(t);
@@ -115,7 +134,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             player.setChat(chat);
         }
 
-        while (!game.hasGameEnded() /* Game isn't ended, true is a placeholder */){ // Hardcoded tick speed: 15
+        lobby_lock.unlock();
+
+        while (!game.hasGameEnded()){ // Hardcoded tick speed: 15
             long timeCurrent1 = System.currentTimeMillis();
             game.update();
 
@@ -145,6 +166,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             }
         }
 
+        lobby_lock.lock();
+
         for (Player player: players){
             if (player.getTeam() == game.getVictoriousTeam()){
                 player.setEndOfGameMessage("You won!");
@@ -159,6 +182,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 player.setEndOfGameMessage("You lost! Player " + nick + " won!");
             }
         }
+
+        lobby_lock.unlock();
+
         resetLobby();
     }
 
@@ -882,43 +908,66 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         this.next_maps = next_maps;
     }
 
-    public synchronized Player connect_to_lobby(){
-        if (players.size() == max_player_count){
-            return null;
-        }
-        else{
-            Player player = new Player();
-            players.add(player);
-            return player;
+    public Player connect_to_lobby(){
+        lobby_lock.lock();
+        try {
+            if (players.size() == max_player_count) {
+                return null;
+            } else {
+                Player player = new Player();
+                players.add(player);
+                return player;
+            }
+        } finally {
+            lobby_lock.unlock();
         }
     }
 
-    public synchronized void rmFromLobby(Player player){
+    public void rmFromLobby(Player player){
+        lobby_lock.lock();
         players.remove(player);
+        lobby_lock.unlock();
     }
 
     public enum LobbyState {
         WAITING_FOR_PLAYERS,
         STARTED
     }
-    public synchronized LobbyState current_lobby_state(){
-        return players.size() != max_player_count ? LobbyState.WAITING_FOR_PLAYERS : LobbyState.STARTED;
+    public LobbyState current_lobby_state(){
+        try {
+            lobby_lock.lock();
+            return players.size() != max_player_count ? LobbyState.WAITING_FOR_PLAYERS : LobbyState.STARTED;
+        } finally {
+            lobby_lock.unlock();
+        }
     }
 
-    public synchronized String asString(){
+    public String asString(){
         // return "" + lobby_name + ": Map: " + map_name + "[" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]";
-        return game_mode + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
+        try {
+            lobby_lock.lock();
+            return game_mode + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
+        } finally {
+            lobby_lock.unlock();
+        }
     }
 
     public ArrayList<String> getPlayerNicks(){
+        lobby_lock.lock();
         ArrayList<String> nicks = new ArrayList<>();
         for (Player player: players){
             nicks.add(player.nickname);
         }
-        return nicks;
+        try {
+            return nicks;
+        } finally {
+            lobby_lock.unlock();
+        }
     }
 
     public String playerNicksString(){
+        lobby_lock.lock();
+
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode rootNode = mapper.createObjectNode();
 
@@ -934,6 +983,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         } catch (Exception e){
             e.printStackTrace();
             return null;
+        } finally {
+            lobby_lock.unlock();
         }
     }
 

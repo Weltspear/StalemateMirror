@@ -12,7 +12,7 @@ This is a gradle project, so you can import it into IntelliJ IDEA and simply bui
 
 ## Credits
 Weltspear (Dev & Sprites)\
-Dżołąb (Sprites)
+SP7 (Sprites)
 
 ## License
 See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)

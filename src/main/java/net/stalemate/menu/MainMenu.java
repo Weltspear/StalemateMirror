@@ -148,7 +148,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         g.setFont(basis33.deriveFont(16f));
         g.setColor(Color.WHITE);
         g.drawString("Version v0.3a-dev", 3, 570);
-        g.drawString("Made by Weltspear and D\u017Co\u0142\u0105b", 587, 540);
+        g.drawString("Made by Weltspear and SP7", 587, 540);
         g.drawString("Licensed under terms of GNU AGPLv3", 587, 550);
         g.drawString("See NOTICE.md and LICENSE.md for m", 587, 560);
         g.drawString("ore information", 587, 570);

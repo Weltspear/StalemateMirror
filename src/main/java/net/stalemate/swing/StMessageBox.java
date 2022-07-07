@@ -44,13 +44,22 @@ public class StMessageBox extends StalemateInternalFrame{
         });
         add(ok);
 
-        JTextArea label = new JTextArea(content);
-        label.setEditable(false);
-        label.setEnabled(false);
-        StalemateStyle.makeComponent(label);
-        label.setSize(200, 80);
-        label.setFont(label.getFont().deriveFont(11f));
-        label.setLocation(25, 20);
-        this.add(label);
+        StringBuilder text = new StringBuilder();
+        int append = 0;
+        for (int i = 0; i < content.toCharArray().length; i++){
+            char c = content.toCharArray()[i];
+            if (c == '\n' || !(i+1 < content.toCharArray().length)){
+                JLabel label = new JLabel(text.toString());
+                label.setSize(200, 20);
+                StalemateStyle.makeComponent(label);
+                label.setVisible(true);
+                label.setLocation(25, 20+append);
+                add(label);
+                System.out.println(text);
+                text = new StringBuilder();
+                append += 20;
+            }
+            text.append(c);
+        }
     }
 }

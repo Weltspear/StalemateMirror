@@ -73,7 +73,7 @@ public class LobbyJList extends JPanel {
 
         int plus = 0;
         int i = 0;
-        String[] col_name = new String[]{"Lobby Name", "Map", "Player Count"};
+        String[] col_name = new String[]{"Gamemode", "Map", "Player Count"};
         for (JList<String> jList: every){
             jList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
@@ -146,17 +146,17 @@ public class LobbyJList extends JPanel {
 
     public Expect<?, ErrorResult> setLobbies(ArrayList<String> lobbies){
         try {
-            DefaultListModel<String> lobby_names = new DefaultListModel<>();
+            DefaultListModel<String> gamemodes = new DefaultListModel<>();
             DefaultListModel<String> map_names = new DefaultListModel<>();
             DefaultListModel<String> player_counts = new DefaultListModel<>();
 
             for (String lobby : lobbies) {
                 String[] lb = lobby.split(",");
-                lobby_names.addElement(lb[0]);
+                gamemodes.addElement(lb[0]);
                 map_names.addElement(lb[1]);
                 player_counts.addElement(lb[2]);
             }
-            first.setModel(lobby_names);
+            first.setModel(gamemodes);
             second.setModel(map_names);
             third.setModel(player_counts);
         } catch (Exception e){

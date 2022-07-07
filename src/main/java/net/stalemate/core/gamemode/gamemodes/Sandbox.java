@@ -37,4 +37,9 @@ public class Sandbox implements IGamemode {
     public Game.Team getVictoriousTeam(IGameControllerGamemode g) {
         return null;
     }
+
+    @Override
+    public String gmName() {
+        return "Dev";
+    }
 }

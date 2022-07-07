@@ -26,6 +26,8 @@ import net.stalemate.swing.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
@@ -39,6 +41,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     private final ButtonHover exit;
     private volatile Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
+    private volatile boolean areButtonsDisabled = false;
 
     public int status = 0;
 
@@ -158,7 +161,24 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         // even more evil things to get jdesktoppane to work
         if (p != null)
             p.setVisible(false);
+        // this is connected to UI glitch with StMessageBox
+        if (play != null && start_srv != null && options != null && exit != null){
+            if (areButtonsDisabled){
+                play.setVisible(true);
+                start_srv.setVisible(true);
+                exit.setVisible(true);
+                options.setVisible(true);
+            }
+        }
         paintComponents(g);
+        if (play != null && start_srv != null && options != null && exit != null){
+            if (areButtonsDisabled){
+                play.setVisible(false);
+                start_srv.setVisible(false);
+                exit.setVisible(false);
+                options.setVisible(false);
+            }
+        }
         if (p != null)
             p.setVisible(true);
 
@@ -178,6 +198,12 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         start_srv.setEnabled(false);
         exit.setEnabled(false);
         options.setEnabled(false);
+
+        play.setVisible(false);
+        start_srv.setVisible(false);
+        exit.setVisible(false);
+        options.setVisible(false);
+        areButtonsDisabled = true;
     }
 
     public String makeNewLinesError(String in){
@@ -186,7 +212,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         for (char c: in.toCharArray()){
             stringBuilder.append(c);
             count++;
-            if (count == 40){
+            if (count == 37){
                 stringBuilder.append('\n');
                 count = 0;
             }
@@ -200,5 +226,11 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         start_srv.setEnabled(true);
         exit.setEnabled(true);
         options.setEnabled(true);
+
+        play.setVisible(true);
+        start_srv.setVisible(true);
+        exit.setVisible(true);
+        options.setVisible(true);
+        areButtonsDisabled = false;
     }
 }

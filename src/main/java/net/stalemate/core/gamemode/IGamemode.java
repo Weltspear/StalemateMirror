@@ -29,4 +29,5 @@ public interface IGamemode {
     default Properties getProperties(){
         return new Properties();
     }
+    String gmName();
 }

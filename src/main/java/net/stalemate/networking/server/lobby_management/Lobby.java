@@ -31,7 +31,6 @@ import net.stalemate.core.communication.chat.Message;
 import net.stalemate.core.controller.Game;
 import net.stalemate.core.map_system.MapLoader;
 import net.stalemate.core.units.util.IBase;
-import net.stalemate.networking.server.ConnectionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ public class Lobby implements Runnable{
 
     String map_path;
     String map_name = "default";
-    final String lobby_name = "Lobby";
+    String game_mode = "Versus";
 
     private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getSimpleName()));
 
@@ -73,6 +72,7 @@ public class Lobby implements Runnable{
         players = new ArrayList<>();
         map_name = MapLoader.getMapName(map_path);
         map_path = next_maps.get(current_next_map);
+        game_mode = game.getMode().gmName();
         current_next_map++;
 
         if (current_next_map == next_maps.size()){
@@ -165,7 +165,7 @@ public class Lobby implements Runnable{
     }
 
     public void printStatus(){
-        LOGGER.log(Level.INFO, "Current lobby status: Name: " + lobby_name + " Current Map: " + map_name + "Players: " + currentPlayerCount() + "/" + getMaxPlayerCount());
+        LOGGER.log(Level.INFO, "Current lobby status: Name: " + game_mode + " Current Map: " + map_name + "Players: " + currentPlayerCount() + "/" + getMaxPlayerCount());
     }
 
     public static class Player{
@@ -897,7 +897,7 @@ public class Lobby implements Runnable{
 
     public synchronized String asString(){
         // return "" + lobby_name + ": Map: " + map_name + "[" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]";
-        return lobby_name + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
+        return game_mode + "," + map_name + "," + currentPlayerCount() + "/" + getMaxPlayerCount();
     }
 
 

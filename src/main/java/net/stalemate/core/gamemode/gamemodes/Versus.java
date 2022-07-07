@@ -61,4 +61,9 @@ public class Versus implements IGamemode {
 
         return null;
     }
+
+    @Override
+    public String gmName() {
+        return "Versus";
+    }
 }

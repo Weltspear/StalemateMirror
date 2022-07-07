@@ -215,9 +215,16 @@ public class ConnectionHandler implements Runnable{
                     isHandlerTerminated = true;
                     return;
                 }
-                try {
-                    player.push_command(packet.unwrap());
-                } catch (Exception e){
+                try{
+                    Expect<Integer, ?> result = player.push_command(packet.unwrap());
+                    if (result.isNone()){
+                        LOGGER.log(Level.WARNING,"Client miscommunication. Closing connection");
+                        player.terminateConnection();
+                        client.close();
+                        isHandlerTerminated = true;
+                        return;
+                    }
+                } /*Just in case*/ catch (Exception e){
                     LOGGER.log(Level.WARNING,"Client miscommunication. Closing connection");
                     e.printStackTrace();
                     player.terminateConnection();

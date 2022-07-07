@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.libutils.etable.EntryTable;
 import net.stalemate.menu.ClientMenu;
 import net.stalemate.menu.LobbyMenu;
 import net.stalemate.menu.LobbySelectMenu;
@@ -363,7 +364,7 @@ public class Client {
             PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                     .build();
             ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-            Map<String, Object> lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
+            EntryTable lobby_etable = new EntryTable((HashMap<String, Object>) (objectMapper).readValue(lobby_list.unwrap(), HashMap.class));
 
             sendEncryptedData(Grass32ConfigClient.getNickname());
 
@@ -372,8 +373,14 @@ public class Client {
 
             boolean has_connected_to_lb = false;
             while (!has_connected_to_lb) {
-                ArrayList<String> lblist = (ArrayList<String>) (lobby_map.get("lobbies"));
-                Expect<?, ?> resultExpect = lobbySelectMenu.setLobbies(lblist);
+                Expect<ArrayList<String>, EntryTable.EntryTableGetFailure> lblist = lobby_etable.get("lobbies");
+                if (lblist.isNone()){
+                    client.close();
+                    LOGGER.log(Level.WARNING, "Failed to get lobbies");
+                    lobbySelectMenu.clFrame();
+                    return new Expect<>(() -> "Failed to get lobbies");
+                }
+                Expect<?, ?> resultExpect = lobbySelectMenu.setLobbies(lblist.unwrap());
 
                 if (resultExpect.isNone()) {
                     client.close();
@@ -404,7 +411,7 @@ public class Client {
                     ptv = BasicPolymorphicTypeValidator.builder()
                             .build();
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                    lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
+                    lobby_etable = new EntryTable((HashMap<String, Object>) (objectMapper).readValue(lobby_list.unwrap(), HashMap.class));
                     lobbySelectMenu.setStatus(0);
                 } else if (lobbySelectMenu.getStatus() == 1) {
                     sendEncryptedData("" + (lobbySelectMenu.getIndex() + 1));
@@ -464,9 +471,17 @@ public class Client {
                     ptv = BasicPolymorphicTypeValidator.builder()
                             .build();
                     objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                    Map<String, Object> nick_map = (objectMapper).readValue(msg.unwrap(), Map.class);
-                    ArrayList<String> nicks = (ArrayList<String>) nick_map.get("nicks");
-                    lobbyMenu.setNicks(nicks);
+                    EntryTable nick_etable = new EntryTable((objectMapper).readValue(msg.unwrap(), HashMap.class));
+                    Expect<ArrayList<String>, ?> nicks = nick_etable.get("nicks");
+
+                    if (nicks.isNone()){
+                        client.close();
+                        LOGGER.log(Level.WARNING, "Failed to get nick list");
+                        lobbyMenu.clFrame();
+                        return new Expect<>(() -> "Failed to get nick list");
+                    }
+
+                    lobbyMenu.setNicks(nicks.unwrap());
                 }
 
                 if (lobbyMenu.getStatus() == 1){

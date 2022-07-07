@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.libutils.error.Expect;
 import net.stalemate.core.Entity;
 import net.stalemate.core.MapObject;
 import net.stalemate.core.Unit;
@@ -227,7 +228,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
 
         @SuppressWarnings("unchecked")
-        public synchronized void push_command(String json){
+        public synchronized Expect<Integer, ?> push_command(String json){
             /* Client sent packet example
             * {
             *   "type" : "ActionPacket",
@@ -487,11 +488,14 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     performCameraMove(cam_y_tmp, cam_x_tmp);
                 }
 
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException | ClassCastException | NullPointerException e) {
                 e.printStackTrace();
+                return new Expect<>(() -> "Failed to read packet");
             } finally {
                 game.lock.unlock();
             }
+
+            return new Expect<>(1);
 
         }
 

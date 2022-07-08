@@ -368,6 +368,30 @@ public class Client {
 
             sendEncryptedData(Grass32ConfigClient.getNickname());
 
+            Expect<String, ?> response = readEncryptedData();
+
+            if (response.isNone()){
+                client.close();
+                LOGGER.log(Level.WARNING, "Failed to get server response");
+                return new Expect<>(() -> "Failed to get server response");
+            }
+
+            if (!response.unwrap().equals("ok")){
+                Expect<String, ?> resp2 = readEncryptedData();
+
+                if (resp2.isNone()){
+                    client.close();
+                    LOGGER.log(Level.WARNING, "Failed to get server response");
+                    return new Expect<>(() -> "Failed to get server response");
+                }
+                else {
+                    client.close();
+                    LOGGER.log(Level.WARNING, resp2.unwrap());
+                    String msg = resp2.unwrap();
+                    return new Expect<>(() -> msg);
+                }
+            }
+
             frame.setVisible(true);
             LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame);
 

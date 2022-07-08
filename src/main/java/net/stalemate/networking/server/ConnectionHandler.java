@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
@@ -112,12 +113,23 @@ public class ConnectionHandler implements Runnable{
             sendEncryptedData(lobbyHandler.lobby_list_json());
             LOGGER.log(Level.FINE,"Lobby list sent!");
 
+            // get nickname
             Expect<String, ?> nick = readEncryptedData();
             if (nick.isNone()){
                 LOGGER.log(Level.WARNING,"Failed to read nickname: " + nick.getResult().message());
                 client.close();
                 isHandlerTerminated = true;
                 return;
+            }
+
+            if (nick.unwrap().toLowerCase(Locale.ROOT).equals("server")){
+                sendEncryptedData("connection_terminated");
+                sendEncryptedData(String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
+                LOGGER.log(Level.WARNING,"Failed to read nickname: " + String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
+                client.close();
+                isHandlerTerminated = true;
+            } else{
+                sendEncryptedData("ok");
             }
 
             Lobby.Player player = null;

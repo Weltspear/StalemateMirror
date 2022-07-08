@@ -58,7 +58,6 @@ public class StMessageBox extends StalemateInternalFrame{
                 label.setVisible(true);
                 label.setLocation(25, 20+append);
                 add(label);
-                System.out.println(text);
                 text = new StringBuilder();
                 append += 20;
             }

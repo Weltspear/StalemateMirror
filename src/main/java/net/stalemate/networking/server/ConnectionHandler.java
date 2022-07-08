@@ -128,6 +128,7 @@ public class ConnectionHandler implements Runnable{
                 LOGGER.log(Level.WARNING,"Failed to read nickname: " + String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
                 client.close();
                 isHandlerTerminated = true;
+                return;
             } else{
                 sendEncryptedData("ok");
             }

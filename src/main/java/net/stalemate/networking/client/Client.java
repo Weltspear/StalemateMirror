@@ -687,7 +687,10 @@ public class Client {
 
     public Expect<String, ErrorResult> readSafely(){
         try {
-            return new Expect<>(input.readLine());
+            String data = input.readLine();
+            if (data != null)
+            return new Expect<>(data);
+            else return new Expect<>(() -> "Connection lost!");
         } catch (Exception e){
             return new Expect<>(() -> "Connection lost!");
         }

@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.libutils.etable.EntryTable;
+import net.stalemate.StVersion;
 import net.stalemate.menu.ClientMenu;
 import net.stalemate.menu.LobbyMenu;
 import net.stalemate.menu.LobbySelectMenu;
@@ -352,6 +353,27 @@ public class Client {
             }
 
             client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout() * 1000);
+
+            sendEncryptedData(String.valueOf(StVersion.packet_version));
+            Expect<String, ?> response_p = readEncryptedData();
+
+            if (response_p.isNone()){
+                client.close();
+                LOGGER.log(Level.WARNING, "Failed to get server response");
+                return new Expect<>(() -> "Failed to get server response");
+            }
+
+            if (!(response_p.unwrap().equals("ok"))){
+                Expect<String, ?> response_p2 = readEncryptedData();
+
+                if (response_p2.isNone()){
+                    client.close();
+                    LOGGER.log(Level.WARNING, "Failed to get server response");
+                    return new Expect<>(() -> "Failed to get server response");
+                }
+                return new Expect<>(response_p2::unwrap);
+            }
+
 
             // Make player choose the lobby
             Expect<String, ?> lobby_list = readEncryptedData();

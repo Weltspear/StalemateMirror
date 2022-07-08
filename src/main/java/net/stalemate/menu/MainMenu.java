@@ -19,6 +19,7 @@
 package net.stalemate.menu;
 
 import net.libutils.error.Expect;
+import net.stalemate.StVersion;
 import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.networking.client.Client;
 import net.stalemate.networking.server.Server;
@@ -151,7 +152,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
 
         g.setFont(AssetLoader.getBasis33().deriveFont(16f));
         g.setColor(Color.WHITE);
-        g.drawString("Version v0.3a-dev", 3, 570);
+        g.drawString("Version " + StVersion.version, 3, 570);
         g.drawString("Made by Weltspear and SP7", 587, 540);
         g.drawString("Licensed under terms of GNU AGPLv3", 587, 550);
         g.drawString("See NOTICE.md and LICENSE.md for m", 587, 560);

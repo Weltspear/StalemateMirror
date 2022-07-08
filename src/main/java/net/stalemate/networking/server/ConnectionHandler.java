@@ -18,6 +18,7 @@
 
 package net.stalemate.networking.server;
 
+import net.stalemate.StVersion;
 import net.stalemate.networking.server.lobby_management.Lobby;
 import net.stalemate.networking.server.lobby_management.LobbyHandler;
 import net.libutils.error.ErrorResult;
@@ -107,6 +108,37 @@ public class ConnectionHandler implements Runnable{
             } catch (Exception e){
                 LOGGER.log(Level.WARNING,"Initialization failure closing connection");
                 client.close();
+                isHandlerTerminated = true;
+                return;
+            }
+
+            Expect<String, ?> packet_version = readEncryptedData();
+
+            if (packet_version.isNone()){
+                LOGGER.log(Level.WARNING,"Failed to get packet version");
+                client.close();
+                isHandlerTerminated = true;
+                return;
+            }
+
+            try{
+                int packet_v = Integer.parseInt(packet_version.unwrap());
+
+                if (!(packet_v == StVersion.packet_version)){
+                    sendEncryptedData("connection_terminated");
+                    sendEncryptedData("Server requires packet version " + StVersion.packet_version
+                            + " this packet version is supported in " + StVersion.version + ".");
+                    LOGGER.log(Level.WARNING,"Client has wrong packet version");
+                    client.close();
+                    isHandlerTerminated = true;
+                    return;
+                }
+                else
+                sendEncryptedData("ok");
+            } catch (Exception e){
+                LOGGER.log(Level.WARNING,"Failed to get packet version");
+                client.close();
+                isHandlerTerminated = true;
                 return;
             }
 

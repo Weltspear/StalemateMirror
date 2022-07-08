@@ -192,8 +192,11 @@ public class ConnectionHandler implements Runnable{
             while (!terminated){
                 if (player.isConnectionTerminated()){
                     writeSafely("connection_terminated");
-                    writeSafely("Cause is unknown. Probably another player had disconnected or another player has" +
-                            " map missing");
+                    if (player.getConTerminationCause() == null)
+                        writeSafely("Cause is unknown. Probably another player had disconnected or another player has" +
+                                " map missing");
+                    else
+                        writeSafely(player.getConTerminationCause());
                     client.close();
                     isHandlerTerminated = true;
                     return;

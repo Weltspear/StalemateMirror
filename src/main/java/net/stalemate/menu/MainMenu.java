@@ -212,7 +212,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         for (char c: in.toCharArray()){
             stringBuilder.append(c);
             count++;
-            if (count == 37){
+            if (count == 33){
                 stringBuilder.append('\n');
                 count = 0;
             }

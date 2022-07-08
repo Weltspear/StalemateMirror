@@ -49,6 +49,9 @@ public class StMessageBox extends StalemateInternalFrame{
         for (int i = 0; i < content.toCharArray().length; i++){
             char c = content.toCharArray()[i];
             if (c == '\n' || !(i+1 < content.toCharArray().length)){
+                if (!(i+1 < content.toCharArray().length)){
+                    text.append(c);
+                }
                 JLabel label = new JLabel(text.toString());
                 label.setSize(200, 20);
                 StalemateStyle.makeComponent(label);

@@ -141,16 +141,20 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             game.update();
 
             boolean terminate_lobby = false;
+            lobby_lock.lock();
             for (Player player: players){
                 if (player.isConnectionTerminated){
                     terminate_lobby = true;
                     break;
                 }
             }
+            lobby_lock.unlock();
             if (terminate_lobby) {
+                lobby_lock.lock();
                 for (Player player: players){
-                    player.terminateConnection();
+                    player.terminateConnection("Another player has disconnected");
                 }
+                lobby_lock.unlock();
                 resetLobby();
             }
 
@@ -236,8 +240,20 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
 
         private volatile boolean isConnectionTerminated = false;
+        private String contermination_cause = null;
+
         public boolean isConnectionTerminated(){return isConnectionTerminated;}
         public void terminateConnection(){isConnectionTerminated = true;}
+        public void terminateConnection(String cause){
+            lock.lock();
+            isConnectionTerminated = true;
+            contermination_cause = cause;
+            lock.unlock();
+        }
+
+        public String getConTerminationCause(){
+            return contermination_cause;
+        }
 
         public void setCamPos(int x, int y){
             lock.lock();

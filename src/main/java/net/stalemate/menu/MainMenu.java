@@ -84,6 +84,13 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         start_srv.setFont(basis33.deriveFont(16f));
         start_srv.addActionListener((e) -> status = 2);
         options.setLocation(new Point((832+14- options.getWidth())/2, 310));
+        options.addActionListener((e) -> {
+            try {
+                Runtime.getRuntime().exec("notepad grass32");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
         options.setFont(basis33.deriveFont(16f));
         exit.setLocation(new Point((832+14- exit.getWidth())/2, 340));
         exit.setFont(basis33.deriveFont(16f));

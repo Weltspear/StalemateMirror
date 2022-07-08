@@ -36,7 +36,7 @@ public class EscapeMenu extends JInternalFrame {
         super();
         this.setLayout(null);
         this.setBackground(new Color(66, 40, 14));
-        this.setSize(150, 250);
+        this.setSize(150, 100);
         StalemateStyle.simplifyJInternalFrame(this);
 
         ButtonHover returnToGame = new ButtonHover("Return to game");
@@ -46,29 +46,30 @@ public class EscapeMenu extends JInternalFrame {
         returnToGame.addActionListener(e -> status = 3);
         StalemateStyle.makeButton(returnToGame);
 
-        ButtonHover options = new ButtonHover("Options");
+        // currently disabled
+        /*ButtonHover options = new ButtonHover("Options");
         options.setLocation(new Point(0,25));
         options.setSize(150, 25);
         options.setFont(basis33);
         options.addActionListener(e -> status = 2);
-        StalemateStyle.makeButton(options);
+        StalemateStyle.makeButton(options);*/
 
         ButtonHover disconnect = new ButtonHover("Disconnect");
-        disconnect.setLocation(new Point(0,200));
+        disconnect.setLocation(new Point(0,50));
         disconnect.setSize(150, 25);
         disconnect.setFont(basis33);
         disconnect.addActionListener(e -> status = 1);
         StalemateStyle.makeButton(disconnect);
 
         ButtonHover exit = new ButtonHover("Exit");
-        exit.setLocation(new Point(0,225));
+        exit.setLocation(new Point(0,75));
         exit.setSize(150, 25);
         exit.setFont(basis33);
         exit.addActionListener(e -> System.exit(0));
         StalemateStyle.makeButton(exit);
 
         this.add(returnToGame);
-        this.add(options);
+        // this.add(options);
         this.add(disconnect);
         this.add(exit);
     }

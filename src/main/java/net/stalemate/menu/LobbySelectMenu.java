@@ -48,7 +48,7 @@ public class LobbySelectMenu extends JPanel {
 
     private final ReentrantLock lock = new ReentrantLock();
 
-    public LobbySelectMenu(JFrame frame){
+    public LobbySelectMenu(JFrame frame, String srv_description){
 
         this.frame = frame;
         this.setSize(frame.getWidth(), frame.getHeight());
@@ -91,9 +91,19 @@ public class LobbySelectMenu extends JPanel {
         disconnect.setFont(basis33.deriveFont(16f));
         disconnect.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
+        JTextArea serverDesc = new JTextArea();
+        serverDesc.setEditable(false);
+        StalemateStyle.makeComponent(serverDesc);
+        serverDesc.setText(srv_description);
+        serverDesc.setLocation(new Point(lbJList.getX()+375+25, lbJList.getY()+75));
+        serverDesc.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        serverDesc.setFont(basis33.deriveFont(15f));
+        serverDesc.setSize(150, 225);
+
         this.add(connect);
         this.add(refresh);
         this.add(disconnect);
+        this.add(serverDesc);
         // this.add(list);
         this.setVisible(true);
         frame.add(this);

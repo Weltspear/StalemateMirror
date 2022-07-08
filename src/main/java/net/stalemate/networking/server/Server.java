@@ -41,6 +41,11 @@ public class Server {
     @SuppressWarnings("all")
     public void start_server(){
         LOGGER.log(Level.INFO, "Stalemate Lobby Server");
+
+        boolean result = ServerDescription.loadDesc();
+        if (!result)
+            LOGGER.log(Level.WARNING, "Failed to load server description");
+
         try {
             serverSocket = new ServerSocket(59657);
             while (server_running) {

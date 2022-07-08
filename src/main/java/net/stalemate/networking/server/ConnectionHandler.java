@@ -142,6 +142,13 @@ public class ConnectionHandler implements Runnable{
                 return;
             }
 
+            if (ServerDescription.getDescription() == null){
+                writeSafely("");
+            }
+            else {
+                writeSafely(ServerDescription.getDescription());
+            }
+
             sendEncryptedData(lobbyHandler.lobby_list_json());
             LOGGER.log(Level.FINE,"Lobby list sent!");
 

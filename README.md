@@ -32,7 +32,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [x] Reworked lobby selection screen
   - [x] Add Error messagebox if client disconnects from server for some reason
 - [x] Add `AssetLoader`
-- [ ] Add packet version
+- [x] Add packet version
 - [x] Add credits
 - [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
 - [x] Revision of code in `Lobby`
@@ -40,7 +40,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [x] Player
   - [x] Add connection termination cause
 - [x] More `ReetrantLock`s everywhere
-- [ ] `LobbySelectMenu` should show server's description
+- [x] `LobbySelectMenu` should show server's description
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

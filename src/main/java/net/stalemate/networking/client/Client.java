@@ -374,6 +374,12 @@ public class Client {
                 return new Expect<>(response_p2::unwrap);
             }
 
+            Expect<String, ?> srv_desc = readSafely();
+            if (srv_desc.isNone()){
+                client.close();
+                LOGGER.log(Level.WARNING, "Failed to get server description");
+                return new Expect<>(() -> "Failed to get server description");
+            }
 
             // Make player choose the lobby
             Expect<String, ?> lobby_list = readEncryptedData();
@@ -415,7 +421,7 @@ public class Client {
             }
 
             frame.setVisible(true);
-            LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame);
+            LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame, srv_desc.unwrap().replace("<br>", "\n"));
 
             boolean has_connected_to_lb = false;
             while (!has_connected_to_lb) {

@@ -34,11 +34,11 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Add packet version
 - [x] Add credits
 - [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
-- [ ] Revision of code in `Lobby`
+- [x] Revision of code in `Lobby`
   - [x] Lobby itself
   - [x] Player
-  - [ ] Add connection termination cause
-- [ ] More `ReetrantLock`s everywhere
+  - [x] Add connection termination cause
+- [x] More `ReetrantLock`s everywhere
 - [ ] `LobbySelectMenu` should show server's description
 
 ## Project status

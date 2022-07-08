@@ -22,7 +22,6 @@ public class Message {
     protected String author;
     protected String message;
     protected int timesRead = 0;
-    protected boolean isRecv = false;
 
     public Message(String author, String message){
         this.author = author;

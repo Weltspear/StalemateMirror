@@ -18,8 +18,6 @@
 
 package net.stalemate.core.communication.chat;
 
-import net.stalemate.networking.client.config.ButtonTooltips;
-
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;

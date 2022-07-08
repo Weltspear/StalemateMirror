@@ -18,10 +18,7 @@
 
 package net.stalemate.networking.client.config;
 
-import com.sun.source.tree.BreakTree;
-
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.HashMap;
 
 public class KeyboardBindMapper {

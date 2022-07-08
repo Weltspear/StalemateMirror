@@ -119,6 +119,7 @@ public class MapLoader {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            assert map != null;
             HashMap<String, Object> map_data = (HashMap<String, Object>) map.get("map_data");
 
             HashMap<String, Object> aparams;

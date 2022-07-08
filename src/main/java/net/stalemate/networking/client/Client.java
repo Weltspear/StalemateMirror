@@ -477,12 +477,6 @@ public class Client {
 
             // waiting in lobby
             while (true) {
-                /*
-                ptv = BasicPolymorphicTypeValidator.builder()
-                            .build();
-                    objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                    lobby_map = (objectMapper).readValue(lobby_list.unwrap(), Map.class);
-                 */
                 Expect<String, ?> msg = readEncryptedData();
                 if (msg.isNone()) {
                     client.close();

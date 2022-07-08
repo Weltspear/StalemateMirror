@@ -26,7 +26,7 @@ import net.stalemate.core.event.EventListener;
 import net.stalemate.core.event.EventListenerRegistry;
 import net.stalemate.core.event.OnEvent;
 import net.stalemate.core.gamemode.IGamemode;
-import net.stalemate.core.gamemode.gamemodes.Versus;;
+import net.stalemate.core.gamemode.gamemodes.Versus;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.*;
 
@@ -44,7 +44,7 @@ public class Game implements IGameControllerGamemode {
     public ReentrantLock lock = new ReentrantLock();
 
     // Additional map parameters
-    private HashMap<String, Object> aparams;
+    private final HashMap<String, Object> aparams;
     public HashMap<String, Object> getAparams(){return aparams;}
 
     @Deprecated

@@ -54,8 +54,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
     final ArrayList<String> next_maps;
     int current_next_map = 0;
 
-    // protected volatile boolean is_terminated = true;
-
     public int getMaxPlayerCount() {
         try {
             lobby_lock.lock();

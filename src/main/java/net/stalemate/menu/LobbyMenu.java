@@ -34,7 +34,6 @@ public class LobbyMenu extends JPanel {
     private final JFrame frame;
     private final BufferedImage background_img;
     private final BufferedImage title;
-    private final JList<String> player_list = new JList<>();
 
     private final ReentrantLock lock = new ReentrantLock();
     private final StJList stJList;

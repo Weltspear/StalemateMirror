@@ -22,15 +22,15 @@ import net.libutils.error.Expect;
 import net.stalemate.networking.client.AssetLoader;
 import net.stalemate.networking.client.Client;
 import net.stalemate.networking.server.Server;
-import net.stalemate.swing.*;
+import net.stalemate.swing.ButtonHover;
+import net.stalemate.swing.DesktopPaneFocusAssist;
+import net.stalemate.swing.StMessageBox;
+import net.stalemate.swing.StalemateStyle;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
@@ -39,7 +39,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     private final ButtonHover start_srv;
     private final ButtonHover options;
     private final ButtonHover exit;
-    private volatile Font basis33;
+    private final Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
     private volatile boolean areButtonsDisabled = false;
 
@@ -50,7 +50,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     private final BufferedImage background;
     private final BufferedImage title;
 
-    private DesktopPaneFocusAssist p;
+    private final DesktopPaneFocusAssist p;
 
     public MainMenu(){
         frame = new JFrame("Stalemate");
@@ -149,9 +149,6 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
 
-        while (basis33 == null){
-            Thread.onSpinWait();
-        }
         g.setFont(basis33.deriveFont(16f));
         g.setColor(Color.WHITE);
         g.drawString("Version v0.3a-dev", 3, 570);

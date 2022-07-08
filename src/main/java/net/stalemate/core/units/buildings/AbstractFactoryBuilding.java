@@ -21,12 +21,10 @@ package net.stalemate.core.units.buildings;
 import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.AnimationController;
-import net.stalemate.core.controller.Game;
 import net.stalemate.core.properties.Properties;
 import net.stalemate.core.units.util.IBuilding;
 import net.stalemate.core.util.IGameController;
 import net.stalemate.core.util.PriorityTurnUpdate;
-import net.stalemate.core.util.PriorityUpdate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
@@ -38,9 +36,8 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
     public static class UnitProductionTime{
         public final Unit unit;
         public int time_in_production;
-        public int cost;
 
-        public UnitProductionTime(Unit unit, int time_in_production, int cost){
+        public UnitProductionTime(Unit unit, int time_in_production){
             this.unit = unit;
             this.time_in_production = time_in_production;
         }
@@ -57,7 +54,6 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
      * This is a button which adds a unit to queue
      */
     public abstract class TrainButton implements IStandardButton{
-        protected Unit unitToBeProduced;
         protected final int productionTime;
         protected final int cost;
 
@@ -77,7 +73,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
             if (gameController.getUnitsTeam(AbstractFactoryBuilding.this).getMilitaryPoints() - cost >= 0) {
                 gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
                 try {
-                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, IGameController.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime, cost);
+                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, IGameController.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -166,9 +162,9 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         super(x, y, game, unitStats, anim, name);
     }
 
-    public void addUnitToQueue(Unit unit, int production_time, int cost){
+    public void addUnitToQueue(Unit unit, int production_time){
         if (production_queue.size() != 8) {
-            production_queue.add(new UnitProductionTime(unit, production_time, cost));
+            production_queue.add(new UnitProductionTime(unit, production_time));
         }
     }
 

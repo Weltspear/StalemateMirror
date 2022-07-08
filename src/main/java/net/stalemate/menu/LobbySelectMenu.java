@@ -29,16 +29,13 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LobbySelectMenu extends JPanel {
     private final JFrame frame;
     private final LobbyJList lbJList;
-    private Font basis33;
-    private BufferedImage background_img;
+    private final BufferedImage background_img;
     /***
      * 1 -> connect
      * 2 -> refresh
@@ -47,10 +44,9 @@ public class LobbySelectMenu extends JPanel {
     private volatile int status = 0;
 
     private final JLabel label;
-    private final DefaultListModel<String> listModel = new DefaultListModel<>();
-    private BufferedImage title;
+    private final BufferedImage title;
 
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
 
     public LobbySelectMenu(JFrame frame){
 
@@ -58,7 +54,7 @@ public class LobbySelectMenu extends JPanel {
         this.setSize(frame.getWidth(), frame.getHeight());
         this.setLayout(null);
 
-        basis33 = AssetLoader.getBasis33();
+        Font basis33 = AssetLoader.getBasis33();
         title = AssetLoader.load("assets/stalemate.png");
         background_img = AssetLoader.load("assets/background.png");
 

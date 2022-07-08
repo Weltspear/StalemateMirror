@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LobbyJList extends JPanel {
-    private final Font basis33;
     private final JList<String> first = new JList<>();
     private final JList<String> second = new JList<>();
     private final JList<String> third = new JList<>();
@@ -62,11 +61,11 @@ public class LobbyJList extends JPanel {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public LobbyJList(Font basis33){
         super();
-        this.basis33 = basis33;
         setLayout(null);
-        JList<String>[] every = new JList[]{first, second, third};
+        JList<String>[] every = (JList<String>[]) (new JList[]{first, second, third});
 
         int plus = 0;
         int i = 0;
@@ -81,7 +80,7 @@ public class LobbyJList extends JPanel {
             jList.setCellRenderer(new StCellRenderer(basis33));
             jList.setBorder(new BevelBorder(BevelBorder.LOWERED));
             jList.addListSelectionListener(new ListSelectionListener() {
-                private static ReentrantLock lock = new ReentrantLock();
+                private static final ReentrantLock lock = new ReentrantLock();
 
                 @Override
                 public void valueChanged(ListSelectionEvent e) {
@@ -126,10 +125,6 @@ public class LobbyJList extends JPanel {
         third.setVisible(true);
         this.setSize(400, 300);
         this.setBounds(new Rectangle(400, 300));
-    }
-
-    public JList<String>[] getEvery(){
-        return new JList[]{first, second, third};
     }
 
     @Override

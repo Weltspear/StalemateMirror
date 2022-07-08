@@ -45,7 +45,7 @@ public class ClientMapLoader {
 
     }
 
-    private record Tile(String texture_file){};
+    private record Tile(String texture_file){}
 
     @SuppressWarnings("unchecked")
     public Expect<String, ClientMapLoaderError> load(String map_path) {
@@ -54,7 +54,7 @@ public class ClientMapLoader {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                HashMap<String, Object> map = null;
+                HashMap<String, Object> map;
 
                 map = objectMapper.readValue(new File(map_path), HashMap.class);
 
@@ -107,7 +107,6 @@ public class ClientMapLoader {
                         map_textures.get(y2).add("empty.png");
                 else
                     map_textures.get(y2).add("empty.png");
-                boolean has_space_been_filled = false;
             }
             y2++;
         }

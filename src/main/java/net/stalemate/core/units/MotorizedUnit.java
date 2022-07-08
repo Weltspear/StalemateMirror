@@ -18,13 +18,11 @@
 
 package net.stalemate.core.units;
 
-import net.stalemate.core.Entity;
 import net.stalemate.core.Unit;
 import net.stalemate.core.animation.Animation;
 import net.stalemate.core.animation.AnimationController;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.buttons.ResupplyButton;
-import net.stalemate.core.controller.Game;
 import net.stalemate.core.units.util.IMechanized;
 import net.stalemate.core.util.IGameController;
 

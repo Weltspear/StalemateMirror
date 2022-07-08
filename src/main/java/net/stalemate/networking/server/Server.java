@@ -31,7 +31,6 @@ public class Server {
 
     protected ServerSocket serverSocket;
     protected final boolean server_running = true;
-    // ArrayList<ConnectionHandler> connectionHandlers = new ArrayList<>();
     final LobbyHandler lobbyHandler = new LobbyHandler();
     private static final Logger LOGGER = makeLog(Logger.getLogger(Server.class.getSimpleName()));
 
@@ -39,6 +38,7 @@ public class Server {
 
     }
 
+    @SuppressWarnings("all")
     public void start_server(){
         LOGGER.log(Level.INFO, "Stalemate Lobby Server");
         try {
@@ -48,7 +48,6 @@ public class Server {
                 LOGGER.log(Level.INFO,"Connection established from remote address" + client.getRemoteSocketAddress().toString());
                 ConnectionHandler connection_handler = new ConnectionHandler(client, lobbyHandler);
                 new Thread(connection_handler).start();
-                // connectionHandlers.add(connection_handler);
             }
         }
         catch (Exception e){

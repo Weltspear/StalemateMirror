@@ -21,7 +21,6 @@ package net.stalemate.swing;
 import net.stalemate.networking.client.AssetLoader;
 
 import javax.swing.*;
-import java.awt.*;
 import java.beans.PropertyVetoException;
 
 public class StMessageBox extends StalemateInternalFrame{

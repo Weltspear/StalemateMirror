@@ -25,7 +25,6 @@ import net.stalemate.core.buttons.AttackButton;
 import net.stalemate.core.buttons.MoveButton;
 import net.stalemate.core.units.util.IMechanized;
 import net.stalemate.core.util.IGameController;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 

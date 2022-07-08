@@ -22,13 +22,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.libutils.error.Expect;
 import net.stalemate.networking.client.config.ButtonTooltips;
 import net.stalemate.networking.client.config.KeyboardBindMapper;
 import net.stalemate.networking.client.config.PropertiesMatcher;
 import net.stalemate.networking.client.property.ClientSideProperty;
-import net.libutils.error.Expect;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -38,7 +37,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -204,8 +202,8 @@ public class InGameUI extends JPanel {
         private final BufferedImage fog_of_war;
         private final HashMap<String, BufferedImage> loaded_images = new HashMap<>();
         private final ClientMapLoader mapLoader = new ClientMapLoader();
-        private BufferedImage skull;
-        private BufferedImage shovel;
+        private final BufferedImage skull;
+        private final BufferedImage shovel;
 
         static class CachedBufferedImage{
             public BufferedImage image;
@@ -829,10 +827,10 @@ public class InGameUI extends JPanel {
 
 
         placeholder_ui = AssetLoader.load("assets/placeholder_ui.png") != null ? AssetLoader.load("assets/placeholder_ui.png") : texture_missing;
-        placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png") != null ? AssetLoader.load("assets/placeholder_ui_2.png") : texture_missing;;
-        panel = AssetLoader.load("assets/panel.png") != null ? AssetLoader.load("assets/panel.png") : texture_missing;;
-        selector = AssetLoader.load("assets/ui/selectors/ui_select.png") != null ? AssetLoader.load("assets/ui/selectors/ui_select.png") : texture_missing;;
-        military_points = AssetLoader.load("assets/mp.png") != null ? AssetLoader.load("assets/mp.png") : texture_missing;;
+        placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png") != null ? AssetLoader.load("assets/placeholder_ui_2.png") : texture_missing;
+        panel = AssetLoader.load("assets/panel.png") != null ? AssetLoader.load("assets/panel.png") : texture_missing;
+        selector = AssetLoader.load("assets/ui/selectors/ui_select.png") != null ? AssetLoader.load("assets/ui/selectors/ui_select.png") : texture_missing;
+        military_points = AssetLoader.load("assets/mp.png") != null ? AssetLoader.load("assets/mp.png") : texture_missing;
 
         frame.setIconImage(selector);
     }
@@ -925,7 +923,7 @@ public class InGameUI extends JPanel {
             for (ArrayList<BufferedImage> row_x: map_to_render){
                 int x_count = 0;
                 for (BufferedImage x : row_x){
-                    g.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : AssetLoader.load("empty.png").getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                    g.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
                     x_count++;
                 }
                 y++;

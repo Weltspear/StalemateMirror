@@ -19,7 +19,6 @@
 package net.stalemate.swing;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 public class DesktopPaneFocusAssist extends JDesktopPane{
     private final JComponent componentToRegainFocus;

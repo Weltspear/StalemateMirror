@@ -20,7 +20,6 @@ package net.stalemate.networking.client.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import net.stalemate.networking.server.ConnectionHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,7 @@ import static net.stalemate.log.MakeLog.makeLog;
 
 public class ButtonTooltips {
     private static HashMap<String, HashMap<String, String>> tooltips = new HashMap<>();
-    private static Logger LOGGER = makeLog(Logger.getLogger(ButtonTooltips.class.getSimpleName()));
+    private static final Logger LOGGER = makeLog(Logger.getLogger(ButtonTooltips.class.getSimpleName()));
 
     @SuppressWarnings("unchecked")
     public static void init(){

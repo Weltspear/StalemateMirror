@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClientMenu extends JPanel {
 
     private final JFrame frame;
-    private volatile Font basis33;
+    private final Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
 
     private final BufferedImage background;
@@ -119,10 +119,6 @@ public class ClientMenu extends JPanel {
         g.drawImage(background, 0, 0, null);
 
         lock.lock();
-
-        while (basis33 == null){
-            Thread.onSpinWait();
-        }
 
         // title char size
         FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float) (25)).deriveFont(Font.BOLD));

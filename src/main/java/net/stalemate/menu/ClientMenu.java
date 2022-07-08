@@ -33,7 +33,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClientMenu extends JPanel {
 
     private final JFrame frame;
-    private final Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
 
     private final BufferedImage background;
@@ -71,10 +70,9 @@ public class ClientMenu extends JPanel {
         frame.pack();
         this.setLayout(null);
 
-        basis33 = AssetLoader.getBasis33();
-
         entry = new HintEntry("Enter IP");
         StalemateStyle.makeJTextField(entry);
+        Font basis33 = AssetLoader.getBasis33();
         entry.setFont(basis33.deriveFont(18f));
         entry.setBounds(new Rectangle(240, 40));
         entry.setLocation((832-14-entry.getWidth())/2, 276);
@@ -115,13 +113,14 @@ public class ClientMenu extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
 
         lock.lock();
 
         // title char size
-        FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float) (25)).deriveFont(Font.BOLD));
+        FontMetrics metrics = g.getFontMetrics(AssetLoader.getBasis33().deriveFont((float) (25)).deriveFont(Font.BOLD));
         int width = metrics.stringWidth("A");
         int y;
 
@@ -130,14 +129,14 @@ public class ClientMenu extends JPanel {
 
         if (status == 3) {
             // Render connecting]
-            g.setFont(basis33.deriveFont(25f));
+            g.setFont(AssetLoader.getBasis33().deriveFont(25f));
             g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * "Connecting...".length()) / 2;
             g.drawString("Connecting...", half, 296);
         }
         if (status == 4) {
             // Render error
-            g.setFont(basis33.deriveFont(25f));
+            g.setFont(AssetLoader.getBasis33().deriveFont(25f));
             g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * error.length()) / 2;
             g.drawString(error, half, 296);

@@ -39,7 +39,6 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     private final ButtonHover start_srv;
     private final ButtonHover options;
     private final ButtonHover exit;
-    private final Font basis33;
     private final ReentrantLock lock = new ReentrantLock();
     private volatile boolean areButtonsDisabled = false;
 
@@ -59,11 +58,12 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         frame.setResizable(false);
         frame.add(this);
         frame.setVisible(true);
+        frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(null);
 
-        basis33 = AssetLoader.getBasis33();
+        Font basis33 = AssetLoader.getBasis33();
 
         background = AssetLoader.load("assets/background.png");
         title = AssetLoader.load("assets/stalemate.png");
@@ -149,7 +149,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
 
-        g.setFont(basis33.deriveFont(16f));
+        g.setFont(AssetLoader.getBasis33().deriveFont(16f));
         g.setColor(Color.WHITE);
         g.drawString("Version v0.3a-dev", 3, 570);
         g.drawString("Made by Weltspear and SP7", 587, 540);

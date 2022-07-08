@@ -45,8 +45,8 @@ public class InGameUI extends JPanel {
     private final ClientDataRenderer renderer;
     private final KeyboardInput in_client;
     private final JDesktopPane p;
-    @SuppressWarnings("FieldCanBeLocal") private Font basis33;
-    private Font basis33_button;
+    @SuppressWarnings("FieldCanBeLocal") private final Font basis33;
+    private final Font basis33_button;
     private boolean focus_desktop_pane = false;
 
     private final JFrame frame;
@@ -832,7 +832,7 @@ public class InGameUI extends JPanel {
         selector = AssetLoader.load("assets/ui/selectors/ui_select.png") != null ? AssetLoader.load("assets/ui/selectors/ui_select.png") : texture_missing;
         military_points = AssetLoader.load("assets/mp.png") != null ? AssetLoader.load("assets/mp.png") : texture_missing;
 
-        frame.setIconImage(selector);
+        frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
     }
 
     private volatile boolean spawnEscapeMenu = false;
@@ -1017,7 +1017,7 @@ public class InGameUI extends JPanel {
             if (unit_img != null) g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192+32, 384+32, null);
 
             // Render the stats
-            if (propertiesToRender != null){
+            if (propertiesToRender != null && basis33 != null){
                 // Find name of a unit
                 ClientSideProperty name = null;
                 for (ClientSideProperty property: propertiesToRender.properties){

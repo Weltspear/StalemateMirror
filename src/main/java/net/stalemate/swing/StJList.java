@@ -22,14 +22,13 @@ import net.stalemate.networking.client.AssetLoader;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Objects;
 
 public class StJList extends JPanel{
-    private JList<String> jList = new JList<>();
+    private final JList<String> jList = new JList<>();
+    private ArrayList<String> last = null;
 
     public StJList(int width, int height, String title){
         setLayout(null);
@@ -71,7 +70,11 @@ public class StJList extends JPanel{
     public void setStrings(ArrayList<String> strings){
         DefaultListModel<String> s = new DefaultListModel<>();
         s.addAll(strings);
-        jList.setModel(s);
+
+        if (!Objects.equals(strings, last)) {
+            jList.setModel(s);
+            last = strings;
+        }
     }
 
     @Override

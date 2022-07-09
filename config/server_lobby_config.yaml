@@ -1,13 +1,13 @@
 # This is a lobby configuration file
 
 lobbies:
-  - map: "maps/vs_default.json"
+  - map: "maps/vs_default_21x21.json"
     next_maps : [
-       "maps/vs_default.json"
+       "maps/vs_default_21x21.json"
     ]
-  - map: "maps/dev_default.json"
+  - map: "maps/dev_default_21x21.json"
     next_maps : [
-      "maps/dev_default.json"
+      "maps/dev_default_21x21.json"
     ]
   - map: "maps/dev_combat_test.json"
     next_maps: [

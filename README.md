@@ -8,7 +8,8 @@ You can report issues in issue tracker.
 Contributions are welcomed.
 
 ## Building
-This is a gradle project, so you can import it into IntelliJ IDEA and simply build it.
+In order to build jar and executables run gradle task `releaseBuild`. If you just want to run Stalemate execute gradle 
+task `runClient` or `runServer`. 
 
 ## Credits
 Weltspear (Dev & Sprites)\

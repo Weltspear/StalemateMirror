@@ -18,6 +18,7 @@ group 'net.stalemate'
 version 'v0.3a'
 
 task prepareDirsRelease {
+    group("stalemate-release")
     mustRunAfter clean
     doFirst {
         mkdir "$buildDir/release"
@@ -25,6 +26,7 @@ task prepareDirsRelease {
 }
 
 task createServerExe(type: Launch4jLibraryTask) {
+    group("stalemate-release")
     mustRunAfter prepareDirsRelease
     headerType "console"
     mainClassName "net.stalemate.Main"
@@ -37,6 +39,7 @@ task createServerExe(type: Launch4jLibraryTask) {
 }
 
 task createClientExe(type: Launch4jLibraryTask) {
+    group("stalemate-release")
     mustRunAfter prepareDirsRelease
     headerType "gui"
     icon "${projectDir}/icons/stalemate_icon.ico"
@@ -48,6 +51,7 @@ task createClientExe(type: Launch4jLibraryTask) {
 }
 
 task cpExes (type: Copy){
+    group("stalemate-release")
     mustRunAfter createServerExe
     mustRunAfter createClientExe
     from "$buildDir/launch4j"
@@ -55,6 +59,7 @@ task cpExes (type: Copy){
 }
 
 task prepareFiles(type: Copy){
+    group("stalemate-release")
     mustRunAfter cpExes
     from "."
     into "$buildDir/release"
@@ -64,6 +69,7 @@ task prepareFiles(type: Copy){
 }
 
 task copyFatJar(type: Copy){
+    group("stalemate-release")
     mustRunAfter shadowJar
     mustRunAfter prepareDirsRelease
     from "$buildDir/libs"
@@ -71,11 +77,13 @@ task copyFatJar(type: Copy){
 }
 
 task clearJarsLibs{
+    group("stalemate-release")
     mustRunAfter copyFatJar
     delete fileTree("$buildDir/libs").include('**/*')
 }
 
 task releaseBuild{
+    group("stalemate-release")
     dependsOn prepareDirsRelease
     dependsOn createClientExe
     dependsOn createServerExe
@@ -87,7 +95,21 @@ task releaseBuild{
 }
 
 task clearRelease{
+    group("stalemate-release")
     delete fileTree("$buildDir/release").include('**/*')
+}
+
+task runClient(type: JavaExec) {
+    group("run-stalemate")
+    classpath sourceSets.main.runtimeClasspath
+    main = "net.stalemate.Main"
+}
+
+task runServer(type: JavaExec) {
+    group("run-stalemate")
+    classpath sourceSets.main.runtimeClasspath
+    main = "net.stalemate.Main"
+    args("--serv")
 }
 
 repositories {

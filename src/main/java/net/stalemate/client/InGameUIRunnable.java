@@ -16,32 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate;
+package net.stalemate.client;
 
-import net.stalemate.client.ui.MainMenu;
-import net.stalemate.client.AssetLoader;
-import net.stalemate.server.Server;
+import net.stalemate.client.ui.InGameUI;
 
-import java.io.File;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Main {
-    public static void main(String[] args) throws IllegalAccessException {
-        File f = new File("grass32");
-        if (!f.exists()){
-            throw new IllegalAccessException("grass32 doesn't exist");
-        }
+public class InGameUIRunnable implements Runnable {
+    private boolean isTerminated = false;
+    private final InGameUI g;
+    public ReentrantLock lock = new ReentrantLock();
 
-        if (args.length > 0){
-            if (args[0].equals("--serv")){
-                Server server = new Server();
-                server.start_server();
+    public InGameUIRunnable(InGameUI g){
+        this.g = g;
+    }
+
+    public void terminate(){
+        isTerminated = true;
+    }
+
+    @Override
+    public void run() {
+        while (!isTerminated){
+            lock.lock();
+            try {
+                g.repaint();
             }
-        }
-        else {
-            AssetLoader.loadAll();
-            MainMenu mm = new MainMenu();
-            while (true) {
-                mm.update();
+            finally {
+                lock.unlock();
             }
         }
     }

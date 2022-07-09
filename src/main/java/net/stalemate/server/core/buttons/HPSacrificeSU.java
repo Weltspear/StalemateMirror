@@ -16,32 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate;
+package net.stalemate.server.core.buttons;
 
-import net.stalemate.client.ui.MainMenu;
-import net.stalemate.client.AssetLoader;
-import net.stalemate.server.Server;
+import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.util.IGameController;
 
-import java.io.File;
+public class HPSacrificeSU implements Unit.IStandardButton {
+    @Override
+    public String bind() {
+        return "S";
+    }
 
-public class Main {
-    public static void main(String[] args) throws IllegalAccessException {
-        File f = new File("grass32");
-        if (!f.exists()){
-            throw new IllegalAccessException("grass32 doesn't exist");
-        }
+    @Override
+    public String texture() {
+        return "assets/ui/buttons/sacrifice_button.png";
+    }
 
-        if (args.length > 0){
-            if (args[0].equals("--serv")){
-                Server server = new Server();
-                server.start_server();
-            }
-        }
-        else {
-            AssetLoader.loadAll();
-            MainMenu mm = new MainMenu();
-            while (true) {
-                mm.update();
+    @Override
+    public String identifier() {
+        return "button_hpsacrificesu";
+    }
+
+    @Override
+    public void action(Unit unit, IGameController gameController) {
+        if (!unit.hasTurnEnded()){
+            if (unit.unitStats().getHp() - 1 > 0){
+                unit.consumeSupply(-2);
+                unit.damage(1);
+                unit.endTurn();
             }
         }
     }

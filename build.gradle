@@ -100,12 +100,14 @@ task clearRelease{
 }
 
 task runClient(type: JavaExec) {
+    dependsOn(build)
     group("run-stalemate")
     classpath sourceSets.main.runtimeClasspath
     main = "net.stalemate.Main"
 }
 
 task runServer(type: JavaExec) {
+    dependsOn(build)
     group("run-stalemate")
     classpath sourceSets.main.runtimeClasspath
     main = "net.stalemate.Main"

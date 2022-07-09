@@ -19,6 +19,6 @@
 package net.stalemate;
 
 public class StVersion {
-    public static final String version = "v0.3a-dev";
+    public static final String version = "v0.3a";
     public static final int packet_version = 1;
 }

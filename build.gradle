@@ -1,9 +1,94 @@
+import edu.sc.seis.launch4j.tasks.Launch4jLibraryTask
+
 plugins {
     id 'java'
+    id 'edu.sc.seis.launch4j' version '2.5.3'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-group 'com.stalemate'
-version 'v0.2.15'
+shadowJar{
+    manifest {
+        attributes 'Main-Class': 'net.stalemate.Main'
+    }
+    archiveBaseName.set('stalemate-universal')
+    archiveClassifier.set('')
+}
+
+group 'net.stalemate'
+version 'v0.3a'
+
+task prepareDirsRelease {
+    mustRunAfter clean
+    doFirst {
+        mkdir "$buildDir/release"
+    }
+}
+
+task createServerExe(type: Launch4jLibraryTask) {
+    mustRunAfter prepareDirsRelease
+    headerType "console"
+    mainClassName "net.stalemate.Main"
+    icon "${projectDir}/icons/stalemate_srv.ico"
+    jreMinVersion "16"
+    productName "Stalemate Server"
+    copyright "GNU AGPLv3, CC-BY-SA"
+    outfile "stalemate_server.exe"
+    cmdLine "--serv"
+}
+
+task createClientExe(type: Launch4jLibraryTask) {
+    mustRunAfter prepareDirsRelease
+    headerType "gui"
+    icon "${projectDir}/icons/stalemate_icon.ico"
+    jreMinVersion "16"
+    mainClassName "net.stalemate.Main"
+    productName "Stalemate"
+    copyright "GNU AGPLv3, CC-BY-SA"
+    outfile "stalemate_client.exe"
+}
+
+task cpExes (type: Copy){
+    mustRunAfter createServerExe
+    mustRunAfter createClientExe
+    from "$buildDir/launch4j"
+    into "$buildDir/release"
+}
+
+task prepareFiles(type: Copy){
+    mustRunAfter cpExes
+    from "."
+    into "$buildDir/release"
+    include "grass32"
+    include "config/**"
+    include "maps/**"
+}
+
+task copyFatJar(type: Copy){
+    mustRunAfter shadowJar
+    mustRunAfter prepareDirsRelease
+    from "$buildDir/libs"
+    into "$buildDir/release"
+}
+
+task clearJarsLibs{
+    mustRunAfter copyFatJar
+    delete fileTree("$buildDir/libs").include('**/*')
+}
+
+task releaseBuild{
+    dependsOn prepareDirsRelease
+    dependsOn createClientExe
+    dependsOn createServerExe
+    dependsOn cpExes
+    dependsOn prepareFiles
+    dependsOn shadowJar
+    dependsOn copyFatJar
+    dependsOn clearJarsLibs
+}
+
+task clearRelease{
+    delete fileTree("$buildDir/release").include('**/*')
+}
 
 repositories {
     mavenCentral()

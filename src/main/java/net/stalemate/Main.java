@@ -26,7 +26,6 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) throws IllegalAccessException {
-        AssetLoader.loadAll();
         File f = new File("grass32");
         if (!f.exists()){
             throw new IllegalAccessException("grass32 doesn't exist");
@@ -39,6 +38,7 @@ public class Main {
             }
         }
         else {
+            AssetLoader.loadAll();
             MainMenu mm = new MainMenu();
             while (true) {
                 mm.update();

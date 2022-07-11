@@ -26,22 +26,11 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] Hardware acceleration (?)
 - [ ] Add Options menu
 - [ ] If there is a player lobby which more than two players don't terminate the game
-## `v0.3a` TODO:
-- [x] Rework lobby system
-- [x] Swingify UI
-  - [x] Remove custom UI in main menu and connection screen
-  - [x] Reworked lobby selection screen
-  - [x] Add Error messagebox if client disconnects from server for some reason
-- [x] Add `AssetLoader`
-- [x] Add packet version
-- [x] Add credits
-- [x] Replace raw `HashMap`s with `EntryTable`s (only partial replacement was needed).
-- [x] Revision of code in `Lobby`
-  - [x] Lobby itself
-  - [x] Player
-  - [x] Add connection termination cause
-- [x] More `ReetrantLock`s everywhere
-- [x] `LobbySelectMenu` should show server's description
+## `v0.3.x a` TODO:
+- [ ] Planes
+- [ ] Unit flags
+- [ ] Terrain buffs and debuffs
+- [ ] Remove entrenchment when unit killed another unit and moved
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

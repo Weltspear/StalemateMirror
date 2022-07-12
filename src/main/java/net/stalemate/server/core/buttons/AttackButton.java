@@ -24,12 +24,19 @@ import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.util.IGameController;
 
-public class AttackButton implements Unit.ISelectorButtonUnit {
+public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create more attack buttons for bombardment etc.
     protected final int attack_range;
     protected boolean anti_tank_mode = false;
+    private final Unit.Layer l;
 
     public AttackButton(int attack_range){
         this.attack_range = attack_range;
+        l = Unit.Layer.GROUND;
+    }
+
+    public AttackButton(int attack_range, Unit.Layer layer){
+        this.attack_range = attack_range;
+        l = layer;
     }
 
     public AttackButton enableAT(){
@@ -146,5 +153,10 @@ public class AttackButton implements Unit.ISelectorButtonUnit {
     @Override
     public boolean isUsedOnAlliedUnit() {
         return false;
+    }
+
+    @Override
+    public Unit.Layer getLayer() {
+        return l;
     }
 }

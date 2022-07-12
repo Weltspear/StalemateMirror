@@ -59,6 +59,12 @@
     "team": "red"
   }, {
     "class": "unit",
+    "id": "fighter",
+    "x": 1,
+    "y": 2,
+    "team": "red"
+  }, {
+    "class": "unit",
     "id": "base",
     "x": 48,
     "y": 48,

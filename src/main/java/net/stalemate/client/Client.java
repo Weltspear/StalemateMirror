@@ -58,15 +58,13 @@ public class Client {
     private final ClientMenu clientMenu;
     private Socket client;
 
-    private KeyPair keyPair;
-
     private Cipher cipherDecryption;
     private Cipher cipherEncryption;
 
     private PrintWriter output;
     private BufferedReader input;
 
-    private JFrame frame;
+    private final JFrame frame;
 
     private static final Logger LOGGER = makeLog(Logger.getLogger(Client.class.getSimpleName()));
 
@@ -208,6 +206,11 @@ public class Client {
                         action.put("action", "DeselectUnit");
                     actions.add(action);
                 }
+                else if (Objects.equals(input, "TAB")){
+                    HashMap<String, Object> action = new HashMap<>();
+                    action.put("action", "ChangeViewMode");
+                    actions.add(action);
+                }
                 else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(input))){
                     if (selected_unit != null && input != null){
                         HashMap<String, Object> action = new HashMap<>();
@@ -314,7 +317,7 @@ public class Client {
                 // Initialize encryption
                 KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
                 keyPairGen.initialize(2048);
-                keyPair = keyPairGen.generateKeyPair();
+                KeyPair keyPair = keyPairGen.generateKeyPair();
                 LOGGER.log(Level.FINE, "KeyPair generated");
 
                 // Init decryption

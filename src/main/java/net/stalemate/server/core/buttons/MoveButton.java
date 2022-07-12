@@ -18,6 +18,7 @@
 
 package net.stalemate.server.core.buttons;
 
+import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.buttons.util.Unflippable;
@@ -25,9 +26,16 @@ import net.stalemate.server.core.util.IGameController;
 
 public class MoveButton implements Unit.ISelectorButton {
     private final int move_range;
+    private final Unit.Layer l;
 
     public MoveButton(int move_range){
         this.move_range = move_range;
+        l = Unit.Layer.GROUND;
+    }
+
+    public MoveButton(int move_range, Unit.Layer layer){
+        this.move_range = move_range;
+        l = layer;
     }
 
     @Override
@@ -52,7 +60,9 @@ public class MoveButton implements Unit.ISelectorButton {
             if (gameController.getMapObject(x, y).isPassable) {
                 boolean isPassable = true;
                 for (Entity entity : gameController.getEntities(x, y)) {
-                    if (!entity.isPassable()) {
+                    if (!entity.isPassable()
+                            && !(!(entity instanceof AirUnit) && unit instanceof AirUnit)
+                            && !(entity instanceof AirUnit && !(unit instanceof AirUnit))) {
                         isPassable = false;
                         break;
                     }
@@ -84,5 +94,10 @@ public class MoveButton implements Unit.ISelectorButton {
     @Override
     public String selector_texture() {
         return "assets/ui/selectors/ui_move.png";
+    }
+
+    @Override
+    public Unit.Layer getLayer() {
+        return l;
     }
 }

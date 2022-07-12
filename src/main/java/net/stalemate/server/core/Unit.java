@@ -106,6 +106,11 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         String identifier();
     }
 
+    public enum Layer{
+        AIR,
+        GROUND
+    }
+
     /***
      * Button which needs a selection of x and y coordinates to work
      */
@@ -113,6 +118,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         void action(int x, int y, Unit unit, IGameController gameController);
         int selector_range();
         String selector_texture();
+
+        default Layer getLayer(){
+            return Layer.GROUND;
+        }
     }
 
     /***
@@ -128,6 +137,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         boolean isUsedOnAlliedUnit();
 
         default boolean canEnemyTeamUseOnOtherEnemyTeamUnit() {return false;}
+
+        default Layer getLayer(){
+            return Layer.GROUND;
+        }
     }
 
     /***

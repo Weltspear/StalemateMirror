@@ -27,11 +27,12 @@ public class Properties {
 
     }
 
-    public void put(String key, String value){
+    public Properties put(String key, String value){
         properties.add(new Property(key, value));
+        return this;
     }
 
-    public void rm(String key){
+    public Properties rm(String key){
         Property rm = null;
         for (Property p: properties){
             if (p.key().equals(key)){
@@ -41,6 +42,7 @@ public class Properties {
         }
         if (rm != null)
         properties.remove(rm);
+        return this;
     }
 
     public ArrayList<String[]> getProperties(){

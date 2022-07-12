@@ -170,7 +170,10 @@ public class InGameUI extends JPanel {
                     keysInQueue.add("SHIFT");
                 } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
                     isTypingChatMessage = true;
-                } else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
+                } else if (e.getKeyCode() == KeyEvent.VK_F1){
+                    keysInQueue.add("TAB");
+                }
+                else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
                     spawnEscapeMenu();
                 }
             } else {
@@ -470,18 +473,47 @@ public class InGameUI extends JPanel {
 
                                 if (unit_data_ar_.get(y).get(x__) != null){
                                     HashMap<String, Object> unit_data = unit_data_ar_.get(y).get(x__);
+                                    BufferedImage image;
                                     if ((boolean) (unit_data.get("flip"))){
                                         // Flip the image
                                         AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                        tx.translate(-loaded_images.get(texture).getWidth(null), 0);
+                                        tx.translate(-loaded_images.get(texture).getWidth(), 0);
                                         AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                        BufferedImage image = op.filter(loaded_images.get(texture), null);
-
-                                        entities.get(y).add(image);
+                                        image = op.filter(loaded_images.get(texture), null);
                                     }
                                     else{
-                                        entities.get(y).add(loaded_images.get(texture));
+                                        image = loaded_images.get(texture);
                                     }
+                                    if ((boolean)(unit_data.get("transparent"))){
+                                        BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+                                        Graphics2D graphics = clone.createGraphics();
+
+                                        graphics.setBackground(new Color(0x00FFFFFF, true));
+                                        graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
+
+                                        graphics.drawImage(image,0,0,null);
+
+                                        graphics.dispose();
+
+                                        for (int y_ = 0; y_ < 32; y_++){
+                                            for (int x_ = 0; x_ < 32; x_++) {
+
+                                                Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
+                                                        (new Color(clone.getRGB(x_, y_))).getGreen(),
+                                                        (new Color(clone.getRGB(x_, y_))).getBlue(),
+                                                        (new Color(clone.getRGB(x_, y_), true)).getAlpha());
+
+                                                clone.setRGB(x_, y_, (new Color(original.getRed(),
+                                                        original.getGreen(),
+                                                        original.getBlue(),
+                                                        (int) (original.getAlpha() * 0.5)).getRGB()));
+
+                                            }
+                                        }
+
+                                        image = clone;
+                                    }
+                                    entities.get(y).add(image);
                                 } else{
                                     entities.get(y).add(loaded_images.get(texture));
                                 }
@@ -1051,7 +1083,10 @@ public class InGameUI extends JPanel {
                 int y__ = 1;
                 for (ClientSideProperty clientSideProperty: propertiesToRender2.properties){
                     if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null){
+                        if (!Objects.equals("true", clientSideProperty.value()))
                         g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192+32+64+128, 384+43+13*y__);
+                        else
+                            g.drawString("(" + PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ")", 192+32+64+128, 384+43+13*y__);
                         y__++;
                     }
                 }

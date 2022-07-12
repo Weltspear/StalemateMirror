@@ -16,9 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate;
+package net.stalemate.server.core;
 
-public class StVersion {
-    public static final String version = "v0.3a";
-    public static final int packet_version = 2;
+import net.stalemate.server.core.animation.AnimationController;
+import net.stalemate.server.core.properties.Properties;
+import net.stalemate.server.core.util.IGameController;
+
+public abstract class AirUnit extends Unit {
+    /***
+     * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
+     */
+    public AirUnit(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
+        super(x, y, game, unitStats, anim, name);
+    }
+
+    @Override
+    public Properties getProperties() {
+        return super.getProperties().put("isAir", "true");
+    }
 }

@@ -28,6 +28,13 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [ ] If there is a player lobby which more than two players don't terminate the game
 ## `v0.3.x a` TODO:
 - [ ] Planes
+  - [x] AirUnit and packet stuff related to it
+  - [ ] Fighter
+  - [ ] Heavy fighter
+  - [ ] CAS bomber
+  - [ ] Strategic bomber
+  - [ ] Anti-Air
+  - [ ] Helicopters
 - [ ] Unit flags
 - [ ] Terrain buffs and debuffs
 - [ ] Remove entrenchment when unit killed another unit and moved

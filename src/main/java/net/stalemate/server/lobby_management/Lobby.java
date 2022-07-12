@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.libutils.error.Expect;
+import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.MapObject;
 import net.stalemate.server.core.Unit;
@@ -201,6 +202,11 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
     public static class Player{
 
+        public enum ViewMode{
+            GROUND,
+            AIR
+        }
+
         private String map_path = null;
         private int cam_x = 0;
         private int cam_y = 0;
@@ -221,6 +227,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         String nickname;
 
         private final ReentrantLock lock = new ReentrantLock();
+
+        private ViewMode viewMode = ViewMode.GROUND;
 
         public Player(){
         }
@@ -341,6 +349,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             *           "action" : "TeleportCamToBase1"
             *       },
             *       {
+            *           "action" : "ChangeViewMode"
+            *       },
+            *       {
             *           "action" : "TypeChat",
             *           "msg" : msg
             *       }
@@ -405,6 +416,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                         for (Entity entity : entities) {
                             if (entity instanceof Unit) {
+                                if ((entity instanceof AirUnit && viewMode == ViewMode.AIR) || (!(entity instanceof AirUnit) && viewMode == ViewMode.GROUND))
                                 selected_unit = (Unit) entity;
                             }
                         }
@@ -463,28 +475,31 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                         if (button != null)
                                             if (button.identifier().equals(iselectorbuttonid)) {
                                                 if (button instanceof Unit.ISelectorButton) {
+                                                    if (viewMode == getButtonViewMode(button))
                                                     if (selector_x >= 0 && selector_y >= 0) {
                                                         ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
                                                     }
                                                     iselectorbuttonid = null;
                                                 } else if (button instanceof Unit.ISelectorButtonUnit) {
-                                                    ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
+                                                    if (viewMode == getButtonViewMode(button)) {
+                                                        ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
 
-                                                    for (Entity entity : entities) {
-                                                        if (entity instanceof Unit) {
-                                                            if ((((Unit.ISelectorButtonUnit) button).isUsedOnAlliedUnit()
-                                                                    && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
-                                                                ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
-                                                                iselectorbuttonid = null;
-                                                            } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
-                                                                    && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
-                                                                if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
+                                                        for (Entity entity : entities) {
+                                                            if (entity instanceof Unit) {
+                                                                if ((((Unit.ISelectorButtonUnit) button).isUsedOnAlliedUnit()
+                                                                        && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
-                                                                else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))
-                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
-                                                                else if (!isSelectedUnitEnemyTeam)
-                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
-                                                                iselectorbuttonid = null;
+                                                                    iselectorbuttonid = null;
+                                                                } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
+                                                                        && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
+                                                                    if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
+                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                    else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))
+                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                    else if (!isSelectedUnitEnemyTeam)
+                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                    iselectorbuttonid = null;
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -498,6 +513,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     else if (action.get("action").equals("ISBCancel")) {
                         iselectorbuttonid = null;
+                        if (selected_unit instanceof AirUnit && viewMode != ViewMode.AIR){
+                            viewMode = ViewMode.AIR;
+                        }
+
+                        else if (!(selected_unit instanceof AirUnit) && viewMode != ViewMode.GROUND){
+                            viewMode = ViewMode.GROUND;
+                        }
                     }
 
                     else if (action.get("action").equals("DeselectUnit")) {
@@ -512,6 +534,12 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                 iselectorbuttonid = null;
                             }
                         }
+                    }
+
+                    else if (action.get("action").equals("ChangeViewMode")){
+                        iselectorbuttonid = null;
+                        selected_unit = null;
+                        viewMode = viewMode == ViewMode.GROUND ? ViewMode.AIR : ViewMode.GROUND;
                     }
                 }
 
@@ -609,8 +637,41 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                         selector_x = selected_unit.getX();
                         selector_y = selected_unit.getY();
+
+                        viewMode = getButtonViewMode(button);
                     }
                 }
+        }
+
+        private ViewMode layer2viewmode(Unit.Layer l){
+            return l == Unit.Layer.GROUND ? ViewMode.GROUND: ViewMode.AIR;
+        }
+
+        private ViewMode getButtonViewMode(Unit.IButton button){
+            if (button instanceof Unit.ISelectorButton b){
+                return layer2viewmode(b.getLayer());
+            } else if (button instanceof Unit.ISelectorButtonUnit b){
+                return layer2viewmode(b.getLayer());
+            }
+            return ViewMode.GROUND;
+        }
+
+        private boolean containsGroundUnit(ArrayList<Entity> entities){
+            for (Entity entity: entities){
+                if (entity instanceof Unit && !(entity instanceof AirUnit)){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean containsAirUnit(ArrayList<Entity> entities){
+            for (Entity entity: entities){
+                if (entity instanceof AirUnit){
+                    return true;
+                }
+            }
+            return false;
         }
 
         /***
@@ -649,11 +710,29 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         entity_render.add(new ArrayList<>());
                         for (int x = 0; x < 13; x++) {
                             boolean has_space_been_filled = false;
-                            for (Entity entity : game.getAllEntitiesCopy()) {
-                                if (entity.getX() == cam_x + x & entity.getY() == cam_y + y) {
-                                    has_space_been_filled = true;
-                                    entity_render.get(y2).add(entity);
-                                    break;
+                            for (Entity entity : game.getEntities(cam_x + x, cam_y + y)) {
+                                if (entity instanceof AirUnit){
+                                    if (viewMode == ViewMode.AIR){
+                                        entity_render.get(y2).add(entity);
+                                        has_space_been_filled = true;
+                                        break;
+                                    }
+                                    else if (viewMode == ViewMode.GROUND && !containsGroundUnit(game.getEntities(cam_x + x, cam_y + y))){
+                                        entity_render.get(y2).add(entity);
+                                        has_space_been_filled = true;
+                                        break;
+                                    }
+                                } else if (entity instanceof Unit){
+                                    if (viewMode == ViewMode.GROUND){
+                                        entity_render.get(y2).add(entity);
+                                        has_space_been_filled = true;
+                                        break;
+                                    }
+                                    else if (viewMode == ViewMode.AIR && !containsAirUnit(game.getEntities(cam_x + x, cam_y + y))){
+                                        entity_render.get(y2).add(entity);
+                                        has_space_been_filled = true;
+                                        break;
+                                    }
                                 }
                             }
                             if (!has_space_been_filled) {
@@ -802,6 +881,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                     stats.add(unit.getEntrenchment());
                                     unit_data.put("flip", unit.isFlipped());
                                     unit_data.put("stats", stats);
+                                    unit_data.put("transparent", unit instanceof AirUnit && viewMode != ViewMode.AIR || !(unit instanceof AirUnit) && viewMode != ViewMode.GROUND);
                                     unit_data_ar.get(y2).add(unit_data);
                                 } else {
                                     unit_data_ar.get(y2).add(null);

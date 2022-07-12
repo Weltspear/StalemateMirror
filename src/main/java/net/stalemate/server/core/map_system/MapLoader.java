@@ -99,6 +99,7 @@ public class MapLoader {
         EntityRegistry.addEntity("light_tank", LightTank.class);
         EntityRegistry.addEntity("heavy_tank", HeavyTank.class);
         EntityRegistry.addEntity("motorized_unit", MotorizedUnit.class);
+        EntityRegistry.addEntity("fighter", Fighter.class);
 
         GamemodeRegistry.addGamemode("versus", Versus.class);
         GamemodeRegistry.addGamemode("dev", Sandbox.class);

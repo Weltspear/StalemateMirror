@@ -34,6 +34,8 @@ public class LobbyJList extends JPanel {
     private final JList<String> second = new JList<>();
     private final JList<String> third = new JList<>();
 
+    private final ReentrantLock lock = new ReentrantLock();
+
     public static class StCellRenderer extends JLabel implements ListCellRenderer<String> {
 
         public StCellRenderer(Font basis33){
@@ -71,8 +73,7 @@ public class LobbyJList extends JPanel {
         int i = 0;
         String[] col_name = new String[]{"Gamemode", "Map", "Player Count"};
         for (JList<String> jList: every){
-            jList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-            jList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+            jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             jList.setSize(i == 0 ? 150 : i == 1 ? 150 : 100, 300);
             jList.setLocation(plus, 0);
             jList.setBounds(plus, 20, i == 0 ? 150 : i == 1 ? 150 : 100, 300);
@@ -129,14 +130,22 @@ public class LobbyJList extends JPanel {
 
     @Override
     public void paint(Graphics g) {
+        lock.lock();
         paintComponents(g);
+        lock.unlock();
     }
 
     public int getSelectedIndex(){
-        return first.getSelectedIndex();
+        lock.lock();
+        try {
+            return first.getSelectedIndex();
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Expect<?, ErrorResult> setLobbies(ArrayList<String> lobbies){
+        lock.lock();
         try {
             DefaultListModel<String> gamemodes = new DefaultListModel<>();
             DefaultListModel<String> map_names = new DefaultListModel<>();
@@ -148,12 +157,14 @@ public class LobbyJList extends JPanel {
                 map_names.addElement(lb[1]);
                 player_counts.addElement(lb[2]);
             }
+
             first.setModel(gamemodes);
             second.setModel(map_names);
             third.setModel(player_counts);
         } catch (Exception e){
             return new Expect<>(() -> "Failed to setup lobby list");
         }
+        lock.unlock();
         return new Expect<>(new Object());
     }
 }

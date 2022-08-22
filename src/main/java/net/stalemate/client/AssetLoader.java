@@ -33,10 +33,10 @@ import static net.stalemate.log.MakeLog.makeLog;
 
 public class AssetLoader {
 
-    private static HashMap<String, BufferedImage> img_storage = new HashMap<>();
+    private static final HashMap<String, BufferedImage> img_storage = new HashMap<>();
     private static final Logger LOGGER = makeLog(Logger.getLogger(AssetLoader.class.getSimpleName()));
 
-    private static String[] resources = {"assets/background.png",
+    private static final String[] resources = {"assets/background.png",
             "assets/default.png",
             "assets/menu/button.png",
             // "assets/menu/select.png",
@@ -153,7 +153,7 @@ public class AssetLoader {
             "assets/units/tank_factory_build.png",
     };
 
-    private static String[] tiles = {"tiles/forest1.png",
+    private static final String[] tiles = {"tiles/forest1.png",
             "tiles/forest2.png",
             "tiles/forest3.png",
             "tiles/grass1.png",
@@ -199,9 +199,7 @@ public class AssetLoader {
 
         try {
             basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("basis33/basis33.ttf")).openStream());
-        } catch (FontFormatException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
         LOGGER.log(Level.INFO, "Loaded basis33 font");

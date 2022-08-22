@@ -35,7 +35,7 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [ ] Strategic bomber
   - [ ] Anti-Air
   - [ ] Helicopters
-- [ ] Unit flags
+- [x] Unit flags
 - [ ] Terrain buffs and debuffs
 - [ ] Remove entrenchment when unit killed another unit and moved
 

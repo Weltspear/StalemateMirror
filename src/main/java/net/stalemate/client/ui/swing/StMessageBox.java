@@ -33,7 +33,7 @@ public class StMessageBox extends StalemateInternalFrame{
         StalemateStyle.makeButton(ok);
         ok.setSize(100, 20);
         ok.setLocation((250-ok.getWidth())/2, 105);
-        ok.setFont(AssetLoader.getBasis33().deriveFont(15f));
+        ok.setFont(AssetLoader.getMonogram().deriveFont(15f));
         ok.addActionListener(e -> {
             try {
                 this.setClosed(true);
@@ -52,6 +52,7 @@ public class StMessageBox extends StalemateInternalFrame{
                     text.append(c);
                 }
                 JLabel label = new JLabel(text.toString());
+                label.setFont(AssetLoader.getMonogram().deriveFont(16f));
                 label.setSize(200, 20);
                 StalemateStyle.makeComponent(label);
                 label.setVisible(true);

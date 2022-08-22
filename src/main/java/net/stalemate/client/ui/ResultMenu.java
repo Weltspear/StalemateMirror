@@ -18,6 +18,7 @@
 
 package net.stalemate.client.ui;
 
+import net.stalemate.client.AssetLoader;
 import net.stalemate.client.ui.swing.ButtonHover;
 import net.stalemate.client.ui.swing.StalemateStyle;
 
@@ -27,8 +28,11 @@ import java.awt.*;
 public class ResultMenu extends JInternalFrame {
     public volatile int status = 0;
 
-    public ResultMenu(Font basis33, String result_){
+    public ResultMenu(String result_){
         super();
+
+        Font monogram = AssetLoader.getMonogram();
+
         setLayout(null);
         setSize(400, 225);
         StalemateStyle.simplifyJInternalFrame(this);
@@ -38,7 +42,7 @@ public class ResultMenu extends JInternalFrame {
         label.setLocation((400-label.getWidth())/2, 0);
         label.setVisible(true);
         label.setForeground(Color.black);
-        label.setFont(basis33.deriveFont(25f));
+        label.setFont(monogram.deriveFont(30f));
         add(label);
 
         JLabel result = new JLabel(result_);
@@ -46,7 +50,7 @@ public class ResultMenu extends JInternalFrame {
         result.setLocation(20, 30);
         result.setVisible(true);
         result.setForeground(Color.black);
-        result.setFont(basis33.deriveFont(15f));
+        result.setFont(monogram.deriveFont(18f));
         add(result);
 
         ButtonHover buttonHover = new ButtonHover("OK");
@@ -55,7 +59,7 @@ public class ResultMenu extends JInternalFrame {
         buttonHover.setLocation(125, 195);
         buttonHover.setVisible(true);
         StalemateStyle.makeButton(buttonHover);
-        buttonHover.setFont(basis33.deriveFont(12f));
+        buttonHover.setFont(monogram.deriveFont(18f));
         add(buttonHover);
 
 

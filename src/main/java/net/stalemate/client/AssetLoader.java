@@ -18,8 +18,6 @@
 
 package net.stalemate.client;
 
-import net.stalemate.client.ui.swing.StalemateInternalFrame;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -181,10 +179,10 @@ public class AssetLoader {
             "tiles/roadend3.png",
     };
 
-    private static Font basis33;
+    private static Font monogram;
 
-    public static Font getBasis33(){
-        return basis33;
+    public static Font getMonogram(){
+        return monogram;
     }
 
     public static void loadAll(){
@@ -198,11 +196,12 @@ public class AssetLoader {
         }
 
         try {
-            basis33 = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("basis33/basis33.ttf")).openStream());
+            monogram = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(AssetLoader.class.getClassLoader().getResource("assets/monogram-extended.ttf")).openStream());
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
-        LOGGER.log(Level.INFO, "Loaded basis33 font");
+
+        LOGGER.log(Level.INFO, "Loaded monogram font");
     }
 
     public static BufferedImage load(String img_path){

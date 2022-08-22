@@ -35,7 +35,7 @@ public class StalemateInternalFrame extends JInternalFrame {
         // If this doesn't work for some reason put it into updateUI
         setUI(new MetalInternalFrameUI(this) {
             @Override protected JComponent createNorthPane(JInternalFrame w) {
-                BasicInternalFrameTitlePane p = new BasicInternalFrameTitlePane(w) {
+                return new BasicInternalFrameTitlePane(w) {
                     @Override
                     protected void paintTitleBackground(Graphics g) {
                         g.setColor(new Color(131, 71, 37));
@@ -46,8 +46,8 @@ public class StalemateInternalFrame extends JInternalFrame {
                     protected void installDefaults() {
 
                         super.installDefaults();
-                        Font basis33 = AssetLoader.getBasis33().deriveFont(15f);
-                        setFont(basis33);
+                        Font monogram = AssetLoader.getMonogram().deriveFont(15f);
+                        setFont(monogram);
                         selectedTextColor = new Color(198, 130, 77);
                         notSelectedTextColor = Color.BLACK;
                     }
@@ -59,10 +59,10 @@ public class StalemateInternalFrame extends JInternalFrame {
                             b.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
                         });
                         closeButton.setIcon(new ImageIcon(Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("assets/internalframe/x.png"))));
+                        closeButton.setToolTipText("<html><font face=\"monogram\" size=4>Close</font></html>");
                         windowMenu.setEnabled(false);
                     }
                 };
-                return p;
             }
         });
         this.setFrameIcon(new ImageIcon(Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("assets/internalframe/title_img_2.png"))));

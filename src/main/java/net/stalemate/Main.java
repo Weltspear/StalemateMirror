@@ -22,6 +22,7 @@ import net.stalemate.client.ui.MainMenu;
 import net.stalemate.client.AssetLoader;
 import net.stalemate.server.Server;
 
+import java.awt.*;
 import java.io.File;
 
 public class Main {
@@ -39,6 +40,11 @@ public class Main {
         }
         else {
             AssetLoader.loadAll();
+
+            GraphicsEnvironment ge =
+                    GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(AssetLoader.getMonogram());
+
             MainMenu mm = new MainMenu();
             while (true) {
                 mm.update();

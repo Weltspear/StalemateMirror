@@ -39,7 +39,7 @@ public class StJList extends JPanel{
         jList.setLocation(0, 20);
         jList.setBounds(0, 20, width, height-20);
         StalemateStyle.makeComponent(jList);
-        jList.setCellRenderer(new LobbyJList.StCellRenderer(AssetLoader.getBasis33()));
+        jList.setCellRenderer(new LobbyJList.StCellRenderer());
         jList.setBorder(new BevelBorder(BevelBorder.LOWERED));
         DefaultListModel<String> model = new DefaultListModel<>();
         jList.setModel(model);
@@ -53,7 +53,7 @@ public class StJList extends JPanel{
         label.setSize(jList.getWidth(), 20);
         label.setLocation(0, 0);
         label.setBounds(0, 0, jList.getWidth(), 20);
-        label.setFont(AssetLoader.getBasis33().deriveFont(15f));
+        label.setFont(AssetLoader.getMonogram().deriveFont(15f));
         label.setVisible(true);
 
         add(jList);

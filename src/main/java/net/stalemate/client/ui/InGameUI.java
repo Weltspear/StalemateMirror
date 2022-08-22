@@ -47,8 +47,8 @@ public class InGameUI extends JPanel {
     private final ClientDataRenderer renderer;
     private final KeyboardInput in_client;
     private final JDesktopPane p;
-    @SuppressWarnings("FieldCanBeLocal") private final Font basis33;
-    private final Font basis33_button;
+    @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
+    private final Font monogram_button;
     private boolean focus_desktop_pane = false;
 
     private final JFrame frame;
@@ -773,7 +773,7 @@ public class InGameUI extends JPanel {
                         if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
                                 && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
                             if (ButtonTooltips.getTooltip(point) != null)
-                                InGameUI.this.setToolTipText("<html><font face=\"basis33\" size=4>" + ButtonTooltips.getTooltip(point) + "</font></html>");
+                                InGameUI.this.setToolTipText("<html><font face=\"monogram\" size=5>" + ButtonTooltips.getTooltip(point) + "</font></html>");
                             else
                                 InGameUI.this.setToolTipText(null);
                             clearTooltip = true;
@@ -847,18 +847,11 @@ public class InGameUI extends JPanel {
         graphics2D.dispose();
         renderer.loaded_images.put("empty.png", empty);
 
-        basis33 = AssetLoader.getBasis33();
-        basis33_button = basis33.deriveFont(((float)(14))).deriveFont(Font.BOLD);
+        monogram = AssetLoader.getMonogram();
+        monogram_button = monogram.deriveFont(((float)(16)));
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);
-
-        // because tooltip font stopped working correctly of html for some reason
-        GraphicsEnvironment ge =
-                GraphicsEnvironment.getLocalGraphicsEnvironment();
-        ge.registerFont(basis33);
-
-
 
         placeholder_ui = AssetLoader.load("assets/placeholder_ui.png") != null ? AssetLoader.load("assets/placeholder_ui.png") : texture_missing;
         placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png") != null ? AssetLoader.load("assets/placeholder_ui_2.png") : texture_missing;
@@ -884,7 +877,7 @@ public class InGameUI extends JPanel {
     public void setResults(String res){
         unsafeLock.lock();
         showResults = true;
-        resultMenu = new ResultMenu(basis33, res);
+        resultMenu = new ResultMenu(res);
         unsafeLock.unlock();
     }
 
@@ -918,7 +911,7 @@ public class InGameUI extends JPanel {
         }
 
         if (spawnEscapeMenu){
-            escapeMenu = new EscapeMenu(basis33.deriveFont(12f));
+            escapeMenu = new EscapeMenu();
             escapeMenu.setLocation((frame.getWidth()-escapeMenu.getWidth())/2, (frame.getHeight()-escapeMenu.getHeight())/2);
             p.add(escapeMenu);
             focus_desktop_pane = true;
@@ -944,6 +937,11 @@ public class InGameUI extends JPanel {
 
     public void paint(Graphics g)
     {
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+
         g.clearRect(0, 0, 900, 900);
         unsafeLock.lock();
         try {
@@ -1008,7 +1006,7 @@ public class InGameUI extends JPanel {
 
             // Render the binds
             g.setColor(Color.BLACK);
-            g.setFont(basis33_button);
+            g.setFont(monogram_button);
 
             i = 0;
             x = 0;
@@ -1029,7 +1027,7 @@ public class InGameUI extends JPanel {
 
             // Render the time of production
             g.setColor(Color.BLACK);
-            g.setFont(basis33_button);
+            g.setFont(monogram_button);
 
             i = 0;
             x = 0;
@@ -1051,7 +1049,7 @@ public class InGameUI extends JPanel {
             if (unit_img != null) g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192+32, 384+32, null);
 
             // Render the stats
-            if (propertiesToRender != null && basis33 != null){
+            if (propertiesToRender != null && monogram != null){
                 // Find name of a unit
                 ClientSideProperty name = null;
                 for (ClientSideProperty property: propertiesToRender.properties){
@@ -1064,10 +1062,10 @@ public class InGameUI extends JPanel {
                 PropertiesToRender propertiesToRender2 = new PropertiesToRender(properties);
 
                 g.setColor(Color.BLACK);
-                g.setFont(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
+                g.setFont(monogram.deriveFont((float)(32)).deriveFont(Font.BOLD));
 
                 // Get font char size
-                FontMetrics metrics = g.getFontMetrics(basis33.deriveFont((float)(27)).deriveFont(Font.BOLD));
+                FontMetrics metrics = g.getFontMetrics(monogram.deriveFont((float)(27)).deriveFont(Font.BOLD));
                 int width = metrics.stringWidth("A");
 
                 if (name == null){
@@ -1078,7 +1076,8 @@ public class InGameUI extends JPanel {
 
                 g.drawString(name.value(),192+32+64+128+h, 384+30); // 416-640
 
-                g.setFont(basis33.deriveFont((float)(20)));
+
+                g.setFont(monogram.deriveFont(Font.PLAIN, 23f));
 
                 int y__ = 1;
                 for (ClientSideProperty clientSideProperty: propertiesToRender2.properties){
@@ -1093,8 +1092,8 @@ public class InGameUI extends JPanel {
             }
 
             g.setColor(Color.BLACK);
-            if (basis33 != null)
-            g.setFont(basis33.deriveFont((float)(15)));
+            if (monogram != null)
+            g.setFont(monogram.deriveFont((float)(19)));
             if (military_points != null)
             g.drawImage(military_points.getScaledInstance(17,17,Image.SCALE_FAST), 20, 10, null);
             g.drawString(""+mp, 40, 22);
@@ -1108,9 +1107,9 @@ public class InGameUI extends JPanel {
             // Render currently written chat message
             if (in_client != null)
             if (in_client.isTypingChatMessage()) {
-                if (basis33 != null) {
+                if (monogram != null) {
                     g.setColor(Color.WHITE);
-                    g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                    g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
                 }
                 String m = "[Chat]: " + in_client.getCurrentMSG();
                 g.drawString(m, 500, 383 - 40);
@@ -1119,9 +1118,9 @@ public class InGameUI extends JPanel {
             // Render chat
             y = 0;
             for (String msg: chat){
-                if (basis33 != null) {
+                if (monogram != null) {
                     g.setColor(Color.WHITE);
-                    g.setFont(basis33.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                    g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
                 }
                 g.drawString(msg, 500, 233 + (y * 10));
                 y++;

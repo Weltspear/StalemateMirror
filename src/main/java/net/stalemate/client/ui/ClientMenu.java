@@ -70,8 +70,8 @@ public class ClientMenu extends JPanel {
 
         entry = new HintEntry("Enter IP");
         StalemateStyle.makeJTextField(entry);
-        Font basis33 = AssetLoader.getBasis33();
-        entry.setFont(basis33.deriveFont(18f));
+        Font monogram = AssetLoader.getMonogram();
+        entry.setFont(monogram.deriveFont(18f));
         entry.setBounds(new Rectangle(240, 40));
         entry.setLocation((832-14-entry.getWidth())/2, 276);
         this.add(entry);
@@ -79,7 +79,7 @@ public class ClientMenu extends JPanel {
         connect = new ButtonHover("Connect");
         StalemateStyle.makeButton(connect);
         connect.setLocation((832-14-connect.getWidth())/2, 320);
-        connect.setFont(basis33.deriveFont(16f));
+        connect.setFont(monogram.deriveFont(16f));
         connect.addActionListener(a -> status = 1);
         this.add(connect);
 
@@ -118,7 +118,7 @@ public class ClientMenu extends JPanel {
         lock.lock();
 
         // title char size
-        FontMetrics metrics = g.getFontMetrics(AssetLoader.getBasis33().deriveFont((float) (25)).deriveFont(Font.BOLD));
+        FontMetrics metrics = g.getFontMetrics(AssetLoader.getMonogram().deriveFont((float) (25)).deriveFont(Font.BOLD));
         int width = metrics.stringWidth("A");
         int y;
 
@@ -127,14 +127,14 @@ public class ClientMenu extends JPanel {
 
         if (status == 3) {
             // Render connecting]
-            g.setFont(AssetLoader.getBasis33().deriveFont(25f));
+            g.setFont(AssetLoader.getMonogram().deriveFont(25f));
             g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * "Connecting...".length()) / 2;
             g.drawString("Connecting...", half, 296);
         }
         if (status == 4) {
             // Render error
-            g.setFont(AssetLoader.getBasis33().deriveFont(25f));
+            g.setFont(AssetLoader.getMonogram().deriveFont(25f));
             g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * error.length()) / 2;
             g.drawString(error, half, 296);

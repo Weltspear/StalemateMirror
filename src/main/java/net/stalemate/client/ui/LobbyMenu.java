@@ -48,7 +48,7 @@ public class LobbyMenu extends JPanel {
         this.setLayout(null);
         this.setSize(frame.getWidth(), frame.getHeight());
 
-        Font basis33 = AssetLoader.getBasis33();
+        Font monogram = AssetLoader.getMonogram();
         title = AssetLoader.load("assets/stalemate.png");
         background_img = AssetLoader.load("assets/background.png");
 
@@ -62,7 +62,7 @@ public class LobbyMenu extends JPanel {
         StalemateStyle.makeButton(disconnect);
         disconnect.setLocation(new Point(stJList.getX()+375+25, stJList.getY()));
         disconnect.setVisible(true);
-        disconnect.setFont(basis33.deriveFont(16f));
+        disconnect.setFont(monogram.deriveFont(16f));
         disconnect.setBorder(new BevelBorder(BevelBorder.LOWERED));
         add(disconnect);
 

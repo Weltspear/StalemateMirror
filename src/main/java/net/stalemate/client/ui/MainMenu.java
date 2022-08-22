@@ -22,11 +22,8 @@ import net.libutils.error.Expect;
 import net.stalemate.StVersion;
 import net.stalemate.client.AssetLoader;
 import net.stalemate.client.Client;
+import net.stalemate.client.ui.swing.*;
 import net.stalemate.server.Server;
-import net.stalemate.client.ui.swing.ButtonHover;
-import net.stalemate.client.ui.swing.DesktopPaneFocusAssist;
-import net.stalemate.client.ui.swing.StMessageBox;
-import net.stalemate.client.ui.swing.StalemateStyle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,7 +61,7 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(null);
 
-        Font basis33 = AssetLoader.getBasis33();
+        Font monogram = AssetLoader.getMonogram();
 
         background = AssetLoader.load("assets/background.png");
         title = AssetLoader.load("assets/stalemate.png");
@@ -79,10 +76,10 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         StalemateStyle.makeButton(exit);
 
         play.setLocation(new Point((832+14- play.getWidth())/2, 250));
-        play.setFont(basis33.deriveFont(16f));
+        play.setFont(monogram.deriveFont(18f));
         play.addActionListener((e) -> status = 1);
         start_srv.setLocation(new Point((832+14- start_srv.getWidth())/2, 280));
-        start_srv.setFont(basis33.deriveFont(16f));
+        start_srv.setFont(monogram.deriveFont(18f));
         start_srv.addActionListener((e) -> status = 2);
         options.setLocation(new Point((832+14- options.getWidth())/2, 310));
         options.addActionListener((e) -> {
@@ -92,21 +89,16 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
                 ex.printStackTrace();
             }
         });
-        options.setFont(basis33.deriveFont(16f));
+        options.setFont(monogram.deriveFont(18f));
         exit.setLocation(new Point((832+14- exit.getWidth())/2, 340));
-        exit.setFont(basis33.deriveFont(16f));
+        exit.setFont(monogram.deriveFont(18f));
         exit.addActionListener((e) -> System.exit(0));
-
 
         p = new DesktopPaneFocusAssist(this);
         p.setSize(new Dimension(832+14,576));
         p.setBackground(new Color(0x00FFFFFF, true));
         p.setPreferredSize(new Dimension(832+14,576));
         p.setBounds(0,0, 832+14,576);
-        // StalemateInternalFrame w = new StalemateInternalFrame("Options");
-        // w.setSize(400, 300);
-        // w.setTitle("Options");
-        // w.setVisible(true);
 
         this.add(play);
         this.add(start_srv);
@@ -147,10 +139,16 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
 
-        g.setFont(AssetLoader.getBasis33().deriveFont(16f));
+        g.setFont(AssetLoader.getMonogram().deriveFont(18f));
         g.setColor(Color.WHITE);
         g.drawString("Version " + StVersion.version, 3, 570);
         g.drawString("Made by Weltspear and SP7", 587, 540);

@@ -54,15 +54,15 @@ public class LobbySelectMenu extends JPanel {
         this.setSize(frame.getWidth(), frame.getHeight());
         this.setLayout(null);
 
-        Font basis33 = AssetLoader.getBasis33();
+        Font monogram = AssetLoader.getMonogram();
         title = AssetLoader.load("assets/stalemate.png");
         background_img = AssetLoader.load("assets/background.png");
 
-        assert basis33 != null;
+        assert monogram != null;
         assert title!=null;
         assert background_img!=null;
 
-        lbJList = new LobbyJList(basis33);
+        lbJList = new LobbyJList();
         lbJList.setLocation((this.getWidth()-lbJList.getWidth()-50)/2, (this.getHeight()-lbJList.getHeight())/2);
         lbJList.setVisible(true);
         add(lbJList);
@@ -72,7 +72,7 @@ public class LobbySelectMenu extends JPanel {
         connect.addActionListener(e -> status = 1);
         connect.setLocation(new Point(lbJList.getX()+375+25, lbJList.getY()));
         connect.setVisible(true);
-        connect.setFont(basis33.deriveFont(16f));
+        connect.setFont(monogram.deriveFont(16f));
         connect.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         ButtonHover refresh = new ButtonHover("Refresh");
@@ -80,7 +80,7 @@ public class LobbySelectMenu extends JPanel {
         StalemateStyle.makeButton(refresh);
         refresh.setLocation(new Point(lbJList.getX()+375+25, lbJList.getY()+25));
         refresh.setVisible(true);
-        refresh.setFont(basis33.deriveFont(16f));
+        refresh.setFont(monogram.deriveFont(16f));
         refresh.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         ButtonHover disconnect = new ButtonHover("Disconnect");
@@ -88,7 +88,7 @@ public class LobbySelectMenu extends JPanel {
         StalemateStyle.makeButton(disconnect);
         disconnect.setLocation(new Point(lbJList.getX()+375+25, lbJList.getY()+50));
         disconnect.setVisible(true);
-        disconnect.setFont(basis33.deriveFont(16f));
+        disconnect.setFont(monogram.deriveFont(16f));
         disconnect.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
         JTextArea serverDesc = new JTextArea();
@@ -97,7 +97,7 @@ public class LobbySelectMenu extends JPanel {
         serverDesc.setText(srv_description);
         serverDesc.setLocation(new Point(lbJList.getX()+375+25, lbJList.getY()+75));
         serverDesc.setBorder(new BevelBorder(BevelBorder.LOWERED));
-        serverDesc.setFont(basis33.deriveFont(15f));
+        serverDesc.setFont(monogram.deriveFont(15f));
         serverDesc.setSize(150, 225);
 
         this.add(connect);
@@ -114,7 +114,7 @@ public class LobbySelectMenu extends JPanel {
         label.setLocation(lbJList.getX(), lbJList.getY()+300);
         label.setVisible(true);
         label.setSize(400, 40);
-        label.setFont(basis33.deriveFont(14f));
+        label.setFont(monogram.deriveFont(14f));
         this.add(label);
 
         // this.setBackground(new Color(51, 39, 31));

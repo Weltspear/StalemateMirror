@@ -18,6 +18,7 @@
 
 package net.stalemate.client.ui;
 
+import net.stalemate.client.AssetLoader;
 import net.stalemate.client.ui.swing.ButtonHover;
 import net.stalemate.client.ui.swing.StalemateStyle;
 
@@ -32,8 +33,11 @@ public class EscapeMenu extends JInternalFrame {
      */
     public int status = -1;
 
-    public EscapeMenu(Font basis33){
+    public EscapeMenu(){
         super();
+
+        Font monogram = AssetLoader.getMonogram().deriveFont(16f);
+
         this.setLayout(null);
         this.setBackground(new Color(66, 40, 14));
         this.setSize(150, 100);
@@ -42,7 +46,7 @@ public class EscapeMenu extends JInternalFrame {
         ButtonHover returnToGame = new ButtonHover("Return to game");
         returnToGame.setLocation(new Point(0,0));
         returnToGame.setSize(150, 25);
-        returnToGame.setFont(basis33);
+        returnToGame.setFont(monogram);
         returnToGame.addActionListener(e -> status = 3);
         StalemateStyle.makeButton(returnToGame);
 
@@ -50,21 +54,21 @@ public class EscapeMenu extends JInternalFrame {
         /*ButtonHover options = new ButtonHover("Options");
         options.setLocation(new Point(0,25));
         options.setSize(150, 25);
-        options.setFont(basis33);
+        options.setFont(monogram);
         options.addActionListener(e -> status = 2);
         StalemateStyle.makeButton(options);*/
 
         ButtonHover disconnect = new ButtonHover("Disconnect");
         disconnect.setLocation(new Point(0,50));
         disconnect.setSize(150, 25);
-        disconnect.setFont(basis33);
+        disconnect.setFont(monogram);
         disconnect.addActionListener(e -> status = 1);
         StalemateStyle.makeButton(disconnect);
 
         ButtonHover exit = new ButtonHover("Exit");
         exit.setLocation(new Point(0,75));
         exit.setSize(150, 25);
-        exit.setFont(basis33);
+        exit.setFont(monogram);
         exit.addActionListener(e -> System.exit(0));
         StalemateStyle.makeButton(exit);
 

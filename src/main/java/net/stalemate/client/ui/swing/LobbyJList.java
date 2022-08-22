@@ -20,6 +20,7 @@ package net.stalemate.client.ui.swing;
 
 import net.libutils.error.ErrorResult;
 import net.libutils.error.Expect;
+import net.stalemate.client.AssetLoader;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -38,9 +39,10 @@ public class LobbyJList extends JPanel {
 
     public static class StCellRenderer extends JLabel implements ListCellRenderer<String> {
 
-        public StCellRenderer(Font basis33){
+        public StCellRenderer(){
+            Font monogram = AssetLoader.getMonogram();
             setOpaque(true);
-            setFont(basis33.deriveFont(17f));
+            setFont(monogram.deriveFont(17f));
         }
 
         @Override
@@ -64,10 +66,12 @@ public class LobbyJList extends JPanel {
     }
 
     @SuppressWarnings("unchecked")
-    public LobbyJList(Font basis33){
+    public LobbyJList(){
         super();
         setLayout(null);
         JList<String>[] every = (JList<String>[]) (new JList[]{first, second, third});
+
+        Font monogram = AssetLoader.getMonogram();
 
         int plus = 0;
         int i = 0;
@@ -78,7 +82,7 @@ public class LobbyJList extends JPanel {
             jList.setLocation(plus, 0);
             jList.setBounds(plus, 20, i == 0 ? 150 : i == 1 ? 150 : 100, 300);
             StalemateStyle.makeComponent(jList);
-            jList.setCellRenderer(new StCellRenderer(basis33));
+            jList.setCellRenderer(new StCellRenderer());
             jList.setBorder(new BevelBorder(BevelBorder.LOWERED));
             jList.addListSelectionListener(new ListSelectionListener() {
                 private static final ReentrantLock lock = new ReentrantLock();
@@ -103,7 +107,6 @@ public class LobbyJList extends JPanel {
             DefaultListModel<String> model = new DefaultListModel<>();
 
             jList.setModel(model);
-            // jList.setSelectedIndex(index);
             JLabel label = new JLabel(col_name[i],SwingConstants.CENTER);
             StalemateStyle.makeComponent(label);
 
@@ -112,7 +115,7 @@ public class LobbyJList extends JPanel {
             label.setSize(jList.getWidth(), 20);
             label.setLocation(plus, 0);
             label.setBounds(plus, 0, jList.getWidth(), 20);
-            label.setFont(basis33.deriveFont(15f));
+            label.setFont(monogram.deriveFont(15f));
             label.setVisible(true);
             add(label);
             plus += (i == 0 ? 150 : i == 1 ? 150 : 100);

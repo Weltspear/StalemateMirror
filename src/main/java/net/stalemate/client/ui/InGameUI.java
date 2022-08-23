@@ -773,7 +773,7 @@ public class InGameUI extends JPanel {
                         if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
                                 && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
                             if (ButtonTooltips.getTooltip(point) != null)
-                                InGameUI.this.setToolTipText("<html><font face=\"monogram\" size=5>" + ButtonTooltips.getTooltip(point) + "</font></html>");
+                                InGameUI.this.setToolTipText("<html><font face=\"monogramextended\" size=5>" + ButtonTooltips.getTooltip(point) + "</font></html>");
                             else
                                 InGameUI.this.setToolTipText(null);
                             clearTooltip = true;

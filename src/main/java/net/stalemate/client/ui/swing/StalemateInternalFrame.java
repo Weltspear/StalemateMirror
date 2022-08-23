@@ -59,7 +59,7 @@ public class StalemateInternalFrame extends JInternalFrame {
                             b.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
                         });
                         closeButton.setIcon(new ImageIcon(Objects.requireNonNull(StalemateInternalFrame.class.getClassLoader().getResource("assets/internalframe/x.png"))));
-                        closeButton.setToolTipText("<html><font face=\"monogram\" size=4>Close</font></html>");
+                        closeButton.setToolTipText("<html><font face=\"monogramextended\" size=4>Close</font></html>");
                         windowMenu.setEnabled(false);
                     }
                 };

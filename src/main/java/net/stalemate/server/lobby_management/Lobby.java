@@ -36,10 +36,7 @@ import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.map_system.MapLoader;
 import net.stalemate.server.core.units.util.IBase;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -801,6 +798,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     // Fog of war creation
 
                     ArrayList<ArrayList<Integer>> fog_of_war = new ArrayList<>();
+                    boolean[][] vision = new boolean[lgame.getMapHeight()][lgame.getMapWidth()];
 
                     y2 = 0;
                     for (int y = 0; y < 5; y++) {
@@ -824,6 +822,11 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                         }
                                     }
 
+                                }
+
+                                if ((x+ally_unit.getX() >= 0 && y+ally_unit.getY() >= 0)){
+                                    if (x+ally_unit.getX() < lgame.getMapWidth() && y+ally_unit.getY() < lgame.getMapHeight())
+                                    vision[y+ally_unit.getY()][x+ally_unit.getX()] = true;
                                 }
                             }
                         }
@@ -898,17 +901,15 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     // Deselect a unit if it is in fog of war and if it is removed or dead
                     if (selected_unit != null) {
-                        if (selected_unit.getY() - cam_y >= 0 && selected_unit.getX() - cam_x >= 0)
-                            if (selected_unit.getY() - cam_y < 5 && selected_unit.getX() - cam_x < 13)
-                                if (fog_of_war.get(selected_unit.getY() - cam_y).get(selected_unit.getX() - cam_x) == 1) {
-                                    selected_unit = null;
-                                    iselectorbuttonid = null;
-                                } else if (selected_unit.unitStats().getHp() <= 0) {
-                                    selected_unit = null;
-                                    iselectorbuttonid = null;
-                                } else if (!game.getAllEntities().contains(selected_unit)) {
-                                    selected_unit = null;
-                                }
+                        if (!vision[selected_unit.getY()][selected_unit.getX()]) {
+                            selected_unit = null;
+                            iselectorbuttonid = null;
+                        } else if (selected_unit.unitStats().getHp() <= 0) {
+                            selected_unit = null;
+                            iselectorbuttonid = null;
+                        } else if (!game.getAllEntities().contains(selected_unit)) {
+                            selected_unit = null;
+                        }
                     }
 
                     if (selected_unit != null) {

@@ -610,7 +610,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             else {
                 if ((cam_x_tmp >= 0 && cam_y_tmp >= 0) && (cam_y_tmp < game.getSizeY())) {
                     if (cam_x_tmp < game.getSizeX(cam_y_tmp)) {
-                        if (cam_x <= cam_x_tmp && cam_x_tmp <= cam_x+12 && cam_y <= cam_y_tmp && cam_y_tmp <= cam_y+4) {
+                        if (cam_x-1 <= cam_x_tmp && cam_x_tmp <= cam_x+13 && cam_y-1 <= cam_y_tmp && cam_y_tmp <= cam_y+5) {
                             selector_x = cam_x_tmp;
                             selector_y = cam_y_tmp;
                         }
@@ -703,18 +703,18 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     // Create entity render
                     ArrayList<ArrayList<Entity>> entity_render = new ArrayList<>();
                     int y2 = 0;
-                    for (int y = 0; y < 5; y++) {
+                    for (int y = 0; y < 7; y++) {
                         entity_render.add(new ArrayList<>());
-                        for (int x = 0; x < 13; x++) {
+                        for (int x = 0; x < 15; x++) {
                             boolean has_space_been_filled = false;
-                            for (Entity entity : game.getEntities(cam_x + x, cam_y + y)) {
+                            for (Entity entity : game.getEntities(cam_x + x-1, cam_y + y-1)) {
                                 if (entity instanceof AirUnit){
                                     if (viewMode == ViewMode.AIR){
                                         entity_render.get(y2).add(entity);
                                         has_space_been_filled = true;
                                         break;
                                     }
-                                    else if (viewMode == ViewMode.GROUND && !containsGroundUnit(game.getEntities(cam_x + x, cam_y + y))){
+                                    else if (viewMode == ViewMode.GROUND && !containsGroundUnit(game.getEntities(cam_x + x-1, cam_y + y-1))){
                                         entity_render.get(y2).add(entity);
                                         has_space_been_filled = true;
                                         break;
@@ -725,7 +725,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                         has_space_been_filled = true;
                                         break;
                                     }
-                                    else if (viewMode == ViewMode.AIR && !containsAirUnit(game.getEntities(cam_x + x, cam_y + y))){
+                                    else if (viewMode == ViewMode.AIR && !containsAirUnit(game.getEntities(cam_x + x-1, cam_y + y-1))){
                                         entity_render.get(y2).add(entity);
                                         has_space_been_filled = true;
                                         break;
@@ -754,8 +754,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     ArrayList<Entity> to_remove_entities = new ArrayList<>();
 
-                    for (int y = 0; y < 5; y++) {
-                        for (int x = 0; x < 13; x++) {
+                    for (int y = 0; y < 7; y++) {
+                        for (int x = 0; x < 15; x++) {
                             Entity entity = entity_render.get(y).get(x);
 
                             boolean is_in_fog_of_war_range = false;
@@ -786,9 +786,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     ArrayList<ArrayList<String>> entity_render_final = new ArrayList<>();
 
                     y2 = 0;
-                    for (int y = 0; y < 5; y++) {
+                    for (int y = 0; y < 7; y++) {
                         entity_render_final.add(new ArrayList<>());
-                        for (int x = 0; x < 13; x++) {
+                        for (int x = 0; x < 15; x++) {
                             String entity = entity_render.get(y).get(x) != null ? entity_render.get(y).get(x).getTextureFileName() : null;
                             entity_render_final.get(y).add(entity);
                         }
@@ -801,9 +801,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     boolean[][] vision = new boolean[lgame.getMapHeight()][lgame.getMapWidth()];
 
                     y2 = 0;
-                    for (int y = 0; y < 5; y++) {
+                    for (int y = 0; y < 7; y++) {
                         fog_of_war.add(new ArrayList<>());
-                        for (int x = 0; x < 13; x++) {
+                        for (int x = 0; x < 15; x++) {
                             fog_of_war.get(y2).add(1);
                         }
                         y2++;

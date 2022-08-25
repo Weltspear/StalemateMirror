@@ -52,6 +52,8 @@ public class InGameUI extends JPanel {
     private boolean focus_desktop_pane = false;
 
     private final JFrame frame;
+    private boolean do_offset = false;
+
     public JFrame getFrame(){return frame;}
 
     /***
@@ -75,6 +77,9 @@ public class InGameUI extends JPanel {
     private PropertiesToRender propertiesToRender = null;
 
     private final ReentrantLock unsafeLock = new ReentrantLock();
+
+    private int offset_x = 0;
+    private int offset_y = 0;
 
     ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
@@ -668,7 +673,7 @@ public class InGameUI extends JPanel {
                 int sel_y = (int) data_map.get("sel_y");
 
                 int sel_x_frame = (sel_x - ((int)data_map.get("x")+6))*64 + 6*64;
-                int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 3*64;
+                int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 2*64;
 
                 this.interface_.unsafeLock.lock();
                 this.interface_.map_to_render = map;
@@ -732,8 +737,8 @@ public class InGameUI extends JPanel {
                         int x_selector = 448;
                         int y_selector = 256;
 
-                        int x_diff = cam_sel_mode == 0 ? e.getX() - x_selector : sel_x_frame - e.getX();
-                        int y_diff = cam_sel_mode == 0 ? e.getY() - y_selector : sel_y_frame - e.getY();
+                        int x_diff = cam_sel_mode == 0 ? e.getX() - (x_selector - offset_x) : (sel_x_frame - offset_x) - e.getX();
+                        int y_diff = cam_sel_mode == 0 ? e.getY() - (y_selector - offset_y) : (sel_y_frame - offset_y) - e.getY();
 
                         int right_mv = (int) Math.ceil((float) x_diff / 64);
                         int down_mv = (int) Math.ceil((float) y_diff / 64);
@@ -784,9 +789,26 @@ public class InGameUI extends JPanel {
                 }
 
                 if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
-                    InGameUI.this.x_prev = e.getX() / 64;
-                    InGameUI.this.y_prev = e.getY() / 64;
-                    InGameUI.this.do_render_prev = true;
+                    if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
+
+                        int x_selector = 448;
+                        int y_selector = 256;
+
+                        int x_diff = e.getX() - (x_selector - offset_x);
+                        int y_diff = e.getY() - (y_selector - offset_y);
+
+                        InGameUI.this.x_prev = x_selector + (int)(Math.floor((float)x_diff/64))*64 - offset_x;
+                        InGameUI.this.y_prev = y_selector + (int)(Math.floor((float)y_diff/64))*64 - offset_y;
+
+                        InGameUI.this.do_render_prev = true;
+                        InGameUI.this.do_offset = true;
+                    }
+                    else {
+                        InGameUI.this.x_prev = ((e.getX()) / (64));
+                        InGameUI.this.y_prev = ((e.getY()) / (64));
+                        InGameUI.this.do_render_prev = true;
+                        InGameUI.this.do_offset = false;
+                    }
                 } else {
                     InGameUI.this.do_render_prev = false;
                 }
@@ -951,22 +973,32 @@ public class InGameUI extends JPanel {
             if (queue != null)
             g.drawImage(panel, 0, 384, null);
 
+            BufferedImage bufferedImage = new BufferedImage(13*64, 5*64, BufferedImage.TYPE_INT_ARGB_PRE);
+            Graphics2D g2 = bufferedImage.createGraphics();
+
             int y = 0;
             for (ArrayList<BufferedImage> row_x: map_to_render){
                 int x_count = 0;
                 for (BufferedImage x : row_x){
-                    g.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                    g2.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
                     x_count++;
                 }
                 y++;
             }
 
-            renderImagesScaled(g, entity_render);
-            renderImagesScaled(g, fog_of_war);
-            renderImages(g, unit_data_ar);
+            renderImagesScaled(entity_render, offset_x, offset_y, g2);
+            renderImagesScaled(fog_of_war, offset_x, offset_y, g2);
+            renderImages(unit_data_ar, offset_x, offset_y, g2);
+
+            if (selector != null && do_render_prev && do_offset){
+                g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev-64,null);
+            }
 
             if (selector != null)
-            g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame,sel_y_frame, null);
+                g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame-offset_x,sel_y_frame-offset_y, null);
+
+            g2.dispose();
+            g.drawImage(bufferedImage, 0, 64, null);
 
             // Render the buttons
             int i = 0;
@@ -1101,7 +1133,8 @@ public class InGameUI extends JPanel {
 
 
             if (selector != null && do_render_prev){
-                g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev*64,y_prev*64,null);
+                if (!do_offset)
+                    g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), (x_prev*64), (y_prev*64),null);
             }
 
             // Render currently written chat message
@@ -1146,28 +1179,28 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
-    private void renderImagesScaled(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
+    private void renderImagesScaled(ArrayList<ArrayList<BufferedImage>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
         int y;
         y = 0;
         for (ArrayList<BufferedImage> row_x: buffered_images){
             int x_count = 0;
             for (BufferedImage x : row_x){
                 if (x != null)
-                graphics.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*x_count, 64+64*y, null);
+                    g2.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
                 x_count++;
             }
             y++;
         }
     }
 
-    private void renderImages(Graphics graphics, ArrayList<ArrayList<BufferedImage>> buffered_images) {
+    private void renderImages(ArrayList<ArrayList<BufferedImage>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
         int y;
         y = 0;
         for (ArrayList<BufferedImage> row_x: buffered_images){
             int x_count = 0;
             for (BufferedImage x : row_x){
                 if (x != null)
-                    graphics.drawImage(x, 64*x_count, 64+64*y, null);
+                    g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
                 x_count++;
             }
             y++;

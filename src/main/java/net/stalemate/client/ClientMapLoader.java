@@ -94,9 +94,9 @@ public class ClientMapLoader {
     public ArrayList<ArrayList<String>> getMap(int cam_x, int cam_y) {
         ArrayList<ArrayList<String>> map_textures = new ArrayList<>();
         int y2 = 0;
-        for (int y = 0; y < 5; y++){
+        for (int y = -1; y < 6; y++){
             map_textures.add(new ArrayList<>());
-            for (int x = 0; x < 13; x++){
+            for (int x = -1; x < 14; x++){
                 if (cam_x + x >= 0 && cam_y + y >= 0)
                     if (cam_y + y < this.map.size())
                         if (cam_x + x < this.map.get(cam_y+y).size())

@@ -80,6 +80,7 @@ public class InGameUI extends JPanel {
 
     private int offset_x = 0;
     private int offset_y = 0;
+    private boolean dis_offset = false; // if true camera is locked
 
     enum OffsetDirection{
         None,
@@ -177,8 +178,15 @@ public class InGameUI extends JPanel {
                     keysInQueue.add("SPACE");
                 } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
                     keysInQueue.add(String.valueOf(e.getKeyChar()));
-                } else if (e.getKeyCode() == KeyboardBindMapper.change_cam_sel_mode) {
-                    keysInQueue.add("CTRL");
+                } else if (e.getKeyCode() == KeyboardBindMapper.lock_camera) {
+                    unsafeLock.lock();
+                    if (!dis_offset) {
+                        dis_offset = true;
+                        offset_direction = OffsetDirection.None;
+                    }
+                    else
+                        dis_offset = false;
+                    unsafeLock.unlock();
                 } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
                     keysInQueue.add("SHIFT");
                 } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
@@ -311,6 +319,7 @@ public class InGameUI extends JPanel {
         @SuppressWarnings("unchecked")
         public synchronized Expect<String, ?> change_render_data(String json, boolean[] resetOffsets) {
             try {
+                this.interface_.unsafeLock.lock();
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
@@ -734,11 +743,13 @@ public class InGameUI extends JPanel {
                     cachedUnitDataArImgs.clear();
                 }
 
+                interface_.unsafeLock.unlock();
                 return new Expect<>("");
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
+            interface_.unsafeLock.unlock();
             return new Expect<>(() -> "Incorrect packet format");
         }
 
@@ -823,19 +834,20 @@ public class InGameUI extends JPanel {
                 }
 
                 // move offset rightwards
-                if (e.getX() >= 12*64 && e.getY() >= 64 && e.getY() <= 6*64){
-                    offset_direction = OffsetDirection.Right;
+                if (!dis_offset) {
+                    if (e.getX() >= 12 * 64 && e.getY() >= 64 && e.getY() <= 6 * 64) {
+                        offset_direction = OffsetDirection.Right;
+                    } else if (e.getX() <= 64 && e.getY() >= 64 && e.getY() <= 6 * 64) {
+                        offset_direction = OffsetDirection.Left;
+                    } else if (e.getX() <= 12 * 64 && e.getY() >= 5 * 64 && e.getY() <= 6 * 64) {
+                        offset_direction = OffsetDirection.Down;
+                    } else if (e.getX() <= 12 * 64 && e.getY() >= 64 && e.getY() <= 128) {
+                        offset_direction = OffsetDirection.Up;
+                    } else {
+                        offset_direction = OffsetDirection.None;
+                    }
                 }
-                else if (e.getX() <= 64 && e.getY() >= 64 && e.getY() <= 6*64){
-                    offset_direction = OffsetDirection.Left;
-                }
-                else if (e.getX() <= 12*64 && e.getY() >= 5*64 && e.getY() <= 6*64){
-                    offset_direction = OffsetDirection.Down;
-                }
-                else if (e.getX() <= 12*64 && e.getY() >= 64 && e.getY() <= 128){
-                    offset_direction = OffsetDirection.Up;
-                }
-                else{
+                else {
                     offset_direction = OffsetDirection.None;
                 }
 

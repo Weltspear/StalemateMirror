@@ -338,9 +338,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             *           "action" : "EndTurn"
             *       },
             *       {
-            *           "action" : "ChangeCamSelMode"
-            *       }
-            *       {
             *           "action" : "TeleportCamToBase1"
             *       },
             *       {

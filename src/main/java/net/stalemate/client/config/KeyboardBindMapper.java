@@ -32,7 +32,7 @@ public class KeyboardBindMapper {
     public static int escape = 0;
     public static int finish_turn = 0;
 
-    public static int change_cam_sel_mode = 0;
+    public static int lock_camera = 0;
     public static int goto_first_built_base = 0;
     public static int chat = 0;
 
@@ -46,7 +46,7 @@ public class KeyboardBindMapper {
         escape = AWTKeyStroke.getAWTKeyStroke(binds.get("escape")).getKeyCode();
         finish_turn = AWTKeyStroke.getAWTKeyStroke(binds.get("finish_turn")).getKeyCode();
 
-        change_cam_sel_mode = AWTKeyStroke.getAWTKeyStroke(binds.get("change_cam_sel_mode")).getKeyCode();
+        lock_camera = AWTKeyStroke.getAWTKeyStroke(binds.get("lock_camera")).getKeyCode();
         goto_first_built_base = AWTKeyStroke.getAWTKeyStroke(binds.get("goto_first_built_base")).getKeyCode();
         chat = AWTKeyStroke.getAWTKeyStroke(binds.get("chat")).getKeyCode();
     }

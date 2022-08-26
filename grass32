@@ -17,7 +17,7 @@ config:
         "escape": "ESCAPE"
         "finish_turn": "SPACE"
 
-        "change_cam_sel_mode": "CONTROL"
+        "lock_camera": "CONTROL"
         "goto_first_built_base": "SHIFT"
         "chat": "BACK_SLASH"
 

@@ -723,50 +723,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         }
                     }
 
-                    // Remove out of range in-fog entities
-
-                    ArrayList<Entity> to_remove_entities = new ArrayList<>();
-
-                    for (int y = 0; y < 7; y++) {
-                        for (int x = 0; x < 15; x++) {
-                            Entity entity = entity_render.get(y).get(x);
-
-                            boolean is_in_fog_of_war_range = false;
-
-                            if (entity != null) {
-                                for (Unit unit : ally_units) {
-                                    if (unit.isEntityInFogOfWarRange(entity)) {
-                                        is_in_fog_of_war_range = true;
-                                        break;
-                                    }
-                                }
-                                if (!is_in_fog_of_war_range || entity.isInvisible())
-                                    to_remove_entities.add(entity);
-
-                                if (ally_units.isEmpty()) {
-                                    to_remove_entities.add(entity);
-                                }
-                            }
-                        }
-                    }
-
-                    for (Entity entity : to_remove_entities) {
-                        entity_render.get(entity.getY() - cam_y).set(entity.getX() - cam_x, null);
-                    }
-
-                    // Final Entity render
-
-                    ArrayList<ArrayList<String>> entity_render_final = new ArrayList<>();
-
-                    y2 = 0;
-                    for (int y = 0; y < 7; y++) {
-                        entity_render_final.add(new ArrayList<>());
-                        for (int x = 0; x < 15; x++) {
-                            String entity = entity_render.get(y).get(x) != null ? entity_render.get(y).get(x).getTextureFileName() : null;
-                            entity_render_final.get(y).add(entity);
-                        }
-                        y2++;
-                    }
 
                     // Fog of war creation
 
@@ -799,10 +755,44 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                                 if ((x+ally_unit.getX() >= 0 && y+ally_unit.getY() >= 0)){
                                     if (x+ally_unit.getX() < lgame.getMapWidth() && y+ally_unit.getY() < lgame.getMapHeight())
-                                    vision[y+ally_unit.getY()][x+ally_unit.getX()] = true;
+                                        vision[y+ally_unit.getY()][x+ally_unit.getX()] = true;
                                 }
                             }
                         }
+                    }
+
+                    // Remove out of range in-fog entities
+
+                    ArrayList<Entity> to_remove_entities = new ArrayList<>();
+
+                    for (int y = 0; y < 7; y++) {
+                        for (int x = 0; x < 15; x++) {
+                            Entity entity = entity_render.get(y).get(x);
+
+                            if (entity != null) {
+                                if (!vision[entity.getY()][entity.getX()] || entity.isInvisible()){
+                                    to_remove_entities.add(entity);
+                                }
+                            }
+                        }
+                    }
+
+                    for (Entity entity : to_remove_entities) {
+                        entity_render.get(entity.getY() - (cam_y-1)).set(entity.getX() - (cam_x-1), null);
+                    }
+
+                    // Final Entity render
+
+                    ArrayList<ArrayList<String>> entity_render_final = new ArrayList<>();
+
+                    y2 = 0;
+                    for (int y = 0; y < 7; y++) {
+                        entity_render_final.add(new ArrayList<>());
+                        for (int x = 0; x < 15; x++) {
+                            String entity = entity_render.get(y).get(x) != null ? entity_render.get(y).get(x).getTextureFileName() : null;
+                            entity_render_final.get(y).add(entity);
+                        }
+                        y2++;
                     }
 
                     // Making it a json string

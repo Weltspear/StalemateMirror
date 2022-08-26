@@ -35,6 +35,8 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [ ] Strategic bomber
   - [ ] Anti-Air
   - [ ] Helicopters
+  - [ ] An icon above a unit signalising that there's a plane over it
+- [ ] Minimap
 - [x] Unit flags
 - [ ] Terrain buffs and debuffs
 - [ ] Remove entrenchment when unit killed another unit and moved

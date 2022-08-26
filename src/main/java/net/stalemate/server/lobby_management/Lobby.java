@@ -211,8 +211,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         private int selector_x = 0;
         private int selector_y = 0;
 
-        private int camSelMode = 0;
-
         private Unit selected_unit = null;
 
         private Game.Team team = null;
@@ -360,11 +358,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             lock.lock();
 
             try {
-                if (camSelMode == 0){
-                    selector_x = cam_x + 6;
-                    selector_y = cam_y + 2;
-                }
-
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
@@ -381,16 +374,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         chat.pushMsg(new Message(nickname, msg));
                     }
 
-                    if (action.get("action").equals("ChangeCamSelMode")){
-                        switch (camSelMode) {
-                            case 0 -> camSelMode = 1;
-                            case 1 -> camSelMode = 0;
-                        }
-                    }
                     else if (action.get("action").equals("TeleportCamToBase1")){
                         iselectorbuttonid = null;
                         selected_unit = null;
-                        camSelMode = 0;
 
                         for (Unit u: team.getTeamUnits()){
                             if (u instanceof IBase){
@@ -541,20 +527,12 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 }
 
 
-                int cam_y_tmp = camSelMode == 0 ? (int) data_map.get("cam_y") : (int) data_map.get("sel_y");
-                int cam_x_tmp = camSelMode == 0 ? (int) data_map.get("cam_x") : (int) data_map.get("sel_x");
+                int cam_y_tmp = (int) data_map.get("cam_y");
+                int cam_x_tmp = (int) data_map.get("cam_x");
+                int sel_x_tmp = (int) data_map.get("sel_x");
+                int sel_y_tmp = (int) data_map.get("sel_y");
 
                 if (iselectorbuttonid != null & selected_unit != null) {
-                    int selector_x_tmp;
-                    int selector_y_tmp;
-                    if (camSelMode == 0) {
-                        selector_x_tmp = cam_x_tmp + 6;
-                        selector_y_tmp = cam_y_tmp + 2;
-                    } else{
-                        selector_x_tmp = (int) data_map.get("sel_x");
-                        selector_y_tmp = (int) data_map.get("sel_y");
-                    }
-
                     int range = -1;
 
                     // Get selector button
@@ -573,12 +551,17 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                 }
                         }
 
-                    if (((selected_unit.getX() - range) <= selector_x_tmp) && ((selected_unit.getX() + range) >= selector_x_tmp)) {
-                        if (((selected_unit.getY() - range) <= selector_y_tmp) && ((selected_unit.getY() + range) >= selector_y_tmp)) {
-                            performCameraMove(cam_y_tmp, cam_x_tmp);
+                    if (((selected_unit.getX() - range) <= sel_x_tmp) && ((selected_unit.getX() + range) >= sel_x_tmp)) {
+                        if (((selected_unit.getY() - range) <= sel_y_tmp) && ((selected_unit.getY() + range) >= sel_y_tmp)) {
+                            performSelectorMove(sel_y_tmp, sel_x_tmp);
                         }
                     }
-                } else if (!ignore_cam_set){
+                }
+                else {
+                    performSelectorMove(sel_y_tmp, sel_x_tmp);
+                }
+
+                if (!ignore_cam_set){
                     performCameraMove(cam_y_tmp, cam_x_tmp);
                 }
 
@@ -599,21 +582,20 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
          * @param cam_x_tmp Camera x which is already moved
          */
         private void performCameraMove(int cam_y_tmp, int cam_x_tmp) {
-            if (camSelMode == 0) {
-                if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
-                    if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {
-                        cam_x = cam_x_tmp;
-                        cam_y = cam_y_tmp;
-                    }
+            if ((cam_x_tmp + 6 >= 0 && cam_y_tmp + 2 >= 0) && (cam_y_tmp + 2 < game.getSizeY())) {
+                if (cam_x_tmp + 6 < game.getSizeX(cam_y_tmp + 2)) {
+                    cam_x = cam_x_tmp;
+                    cam_y = cam_y_tmp;
                 }
             }
-            else {
-                if ((cam_x_tmp >= 0 && cam_y_tmp >= 0) && (cam_y_tmp < game.getSizeY())) {
-                    if (cam_x_tmp < game.getSizeX(cam_y_tmp)) {
-                        if (cam_x-1 <= cam_x_tmp && cam_x_tmp <= cam_x+13 && cam_y-1 <= cam_y_tmp && cam_y_tmp <= cam_y+5) {
-                            selector_x = cam_x_tmp;
-                            selector_y = cam_y_tmp;
-                        }
+        }
+
+        public void performSelectorMove(int sel_y_tmp, int sel_x_tmp){
+            if ((sel_x_tmp >= 0 && sel_y_tmp >= 0) && (sel_y_tmp < game.getSizeY())) {
+                if (sel_x_tmp < game.getSizeX(sel_y_tmp)) {
+                    if (cam_x-1 <= sel_x_tmp && sel_x_tmp <= cam_x+13 && cam_y-1 <= sel_y_tmp && sel_y_tmp <= cam_y+5) {
+                        selector_x = sel_x_tmp;
+                        selector_y = sel_y_tmp;
                     }
                 }
             }
@@ -693,12 +675,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             try {
                 if (game != null && team != null) {
                     Game.LockGame lgame = game.getLockedGame();
-
-                    // Change selector coordinates to cam if camSelMode is 0
-                    if (camSelMode == 0) {
-                        selector_x = cam_x + 6;
-                        selector_y = cam_y + 2;
-                    }
 
                     // Create entity render
                     ArrayList<ArrayList<Entity>> entity_render = new ArrayList<>();

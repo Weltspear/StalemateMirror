@@ -29,10 +29,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientMapLoader {
     private String map_path = "";
     private ArrayList<ArrayList<String>> map = new ArrayList<>();
+    private ReentrantLock lock = new ReentrantLock();
+    private boolean is_map_loaded = false;
 
     public static class ClientMapLoaderError implements ErrorResult {
         @Override
@@ -47,8 +50,36 @@ public class ClientMapLoader {
 
     private record Tile(String texture_file){}
 
+    public int getWidth(){
+        lock.lock();
+        try {
+            return map.get(0).size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int getHeight(){
+        lock.lock();
+        try {
+            return map.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public boolean isMapLoaded(){
+        lock.lock();
+        try {
+            return is_map_loaded;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public Expect<String, ClientMapLoaderError> load(String map_path) {
+        lock.lock();
         try {
             if (!this.map_path.equals(map_path)) {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
@@ -85,13 +116,17 @@ public class ClientMapLoader {
                     y++;
                 }
             }
+            is_map_loaded = true;
+            lock.unlock();
             return new Expect<>("");
         } catch (IOException e){
+            lock.unlock();
             return new Expect<>(new ClientMapLoaderError());
         }
     }
 
     public ArrayList<ArrayList<String>> getMap(int cam_x, int cam_y) {
+        lock.lock();
         ArrayList<ArrayList<String>> map_textures = new ArrayList<>();
         int y2 = 0;
         for (int y = -1; y < 6; y++){
@@ -110,6 +145,7 @@ public class ClientMapLoader {
             }
             y2++;
         }
+        lock.unlock();
         return map_textures;
     }
 }

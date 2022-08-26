@@ -23,15 +23,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.libutils.error.ErrorResult;
+import net.libutils.error.Expect;
 import net.libutils.etable.EntryTable;
 import net.stalemate.StVersion;
+import net.stalemate.client.config.Grass32ConfigClient;
 import net.stalemate.client.ui.ClientMenu;
 import net.stalemate.client.ui.InGameUI;
 import net.stalemate.client.ui.LobbyMenu;
 import net.stalemate.client.ui.LobbySelectMenu;
-import net.stalemate.client.config.Grass32ConfigClient;
-import net.libutils.error.ErrorResult;
-import net.libutils.error.Expect;
 
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
@@ -85,7 +85,6 @@ public class Client {
 
         int client_sel_x;
         int client_sel_y;
-        int camSelMode = 0;
 
         int cam_x;
         int cam_y;
@@ -96,11 +95,13 @@ public class Client {
         HashMap<String, Object> selected_unit = null;
 
         final InGameUI.KeyboardInput in;
+        private final ClientMapLoader clientMapLoader;
 
         private boolean isselectorbutton_press = false;
 
-        public GameControllerClient(InGameUI.KeyboardInput input){
+        public GameControllerClient(InGameUI.KeyboardInput input, ClientMapLoader clientMapLoader){
             in = input;
+            this.clientMapLoader = clientMapLoader;
         }
 
         @SuppressWarnings("unchecked")
@@ -136,6 +137,18 @@ public class Client {
             }
         }
 
+        private boolean reset_x_offset = false;
+        private boolean reset_y_offset = false;
+
+        public boolean[] resetOffsetArn(){
+            try {
+                return new boolean[]{reset_x_offset, reset_y_offset};
+            } finally {
+                reset_y_offset = false;
+                reset_x_offset = false;
+            }
+        }
+
         @SuppressWarnings("unchecked")
         public String create_json_packet(){
             HashMap<String, Object> packet = new HashMap<>();
@@ -144,44 +157,22 @@ public class Client {
             while(!in.getQueue().isEmpty()) {
                 String input = in.getQueue().poll();
 
-                if (Objects.equals(input, "CTRL")){
-                    switch (camSelMode) {
-                        case 0 -> camSelMode = 1;
-                        case 1 -> camSelMode = 0;
-                    }
-                    HashMap<String, Object> action = new HashMap<>();
-                    action.put("action", "ChangeCamSelMode");
-                    actions.add(action);
-                }
-                else if (Objects.equals(input, "SHIFT")){
-                    camSelMode = 0;
+                if (Objects.equals(input, "SHIFT")){
                     HashMap<String, Object> action = new HashMap<>();
                     action.put("action", "TeleportCamToBase1");
                     actions.add(action);
                 }
                 else if (Objects.equals(input, "UP")){
-                    if (camSelMode == 0)
-                        client_cam_y--;
-                    else
-                        client_sel_y--;
+                    client_sel_y--;
                 }
                 else if (Objects.equals(input, "DOWN")){
-                    if (camSelMode == 0)
-                        client_cam_y++;
-                    else
-                        client_sel_y++;
+                    client_sel_y++;
                 }
                 else if (Objects.equals(input, "LEFT")){
-                    if (camSelMode == 0)
-                        client_cam_x--;
-                    else
-                        client_sel_x--;
+                    client_sel_x--;
                 }
                 else if (Objects.equals(input, "RIGHT")){
-                    if (camSelMode == 0)
-                        client_cam_x++;
-                    else
-                        client_sel_x++;
+                    client_sel_x++;
                 }
                 else if (Objects.equals(input, "SPACE")){
                     HashMap<String, Object> action = new HashMap<>();
@@ -247,6 +238,39 @@ public class Client {
                     }
                 }
             }
+
+            // offset stuff
+            int offx = in.getOffsetX();
+            int offy = in.getOffsetY();
+
+            if (clientMapLoader.isMapLoaded()) {
+                if (offx <= -64) {
+                    if (client_cam_x + 5 >= 0) { // (client_cam_x + 6 >= 0 && client_cam_y + 2 >= 0) && (client_cam_y + 2 < clientMapLoader.getHeight()) && client_cam_x + 6 < clientMapLoader.getWidth()
+                        client_cam_x--;
+                        reset_x_offset = true;
+                    }
+                }
+                if (offx >= 64) {
+                    if (client_cam_x + 7 < clientMapLoader.getWidth()) {
+                        client_cam_x++;
+                        reset_x_offset = true;
+                    }
+                }
+
+                if (offy >= 64){
+                    if ( client_cam_y + 3 < clientMapLoader.getHeight()) {
+                        client_cam_y++;
+                        reset_y_offset = true;
+                    }
+                }
+                if (offy <= -64){
+                    if (client_cam_y + 1 >= 0) {
+                        client_cam_y--;
+                        reset_y_offset = true;
+                    }
+                }
+            }
+
 
             packet.put("cam_x", client_cam_x);
             packet.put("cam_y", client_cam_y);
@@ -550,7 +574,7 @@ public class Client {
             InGameUI inGameUI = new InGameUI();
             InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
             (new Thread(runnable)).start();
-            GameControllerClient controller = new GameControllerClient(inGameUI.getInput());
+            GameControllerClient controller = new GameControllerClient(inGameUI.getInput(), inGameUI.getRenderer().getMapLoader());
 
             int tick = 0;
 
@@ -586,7 +610,7 @@ public class Client {
                 }
 
                 runnable.lock.lock();
-                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.camSelMode);
+                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.resetOffsetArn());
                 runnable.lock.unlock();
                 if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());

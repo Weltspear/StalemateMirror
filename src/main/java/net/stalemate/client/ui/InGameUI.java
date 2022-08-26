@@ -76,10 +76,20 @@ public class InGameUI extends JPanel {
 
     private PropertiesToRender propertiesToRender = null;
 
-    private final ReentrantLock unsafeLock = new ReentrantLock();
+    public final ReentrantLock unsafeLock = new ReentrantLock();
 
     private int offset_x = 0;
     private int offset_y = 0;
+
+    enum OffsetDirection{
+        None,
+        Left,
+        Right,
+        Up,
+        Down
+    }
+
+    private OffsetDirection offset_direction = OffsetDirection.None;
 
     ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
@@ -105,8 +115,6 @@ public class InGameUI extends JPanel {
 
     int sel_x_frame;
     int sel_y_frame;
-
-    int cam_sel_mode;
 
     int x_prev = 0;
     int y_prev = 0;
@@ -205,6 +213,22 @@ public class InGameUI extends JPanel {
         public void keyReleased(KeyEvent e) {
 
         }
+
+        // spaghetti code gaming
+        public int getOffsetX(){
+            unsafeLock.lock();
+            try {
+                return offset_x;
+            }
+            finally {unsafeLock.unlock();}
+        }
+
+        public int getOffsetY(){
+            unsafeLock.lock();
+            try {
+                return offset_y;
+            }finally {unsafeLock.unlock();}
+        }
     }
 
     public static class ClientDataRenderer {
@@ -221,6 +245,10 @@ public class InGameUI extends JPanel {
             public CachedBufferedImage(BufferedImage i){
                 image = i;
             }
+        }
+
+        public ClientMapLoader getMapLoader(){
+            return mapLoader;
         }
 
         private final HashMap<Integer, CachedBufferedImage> cachedUnitDataArImgs = new HashMap<>();
@@ -281,7 +309,7 @@ public class InGameUI extends JPanel {
         }
 
         @SuppressWarnings("unchecked")
-        public synchronized Expect<String, ?> change_render_data(String json, int CamSelMode) {
+        public synchronized Expect<String, ?> change_render_data(String json, boolean[] resetOffsets) {
             try {
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
@@ -692,9 +720,15 @@ public class InGameUI extends JPanel {
                 this.interface_.id_array = button_ids;
                 this.interface_.sel_x_frame = sel_x_frame;
                 this.interface_.sel_y_frame = sel_y_frame;
-                this.interface_.cam_sel_mode = CamSelMode;
                 this.interface_.chat = chat;
                 this.interface_.unsafeLock.unlock();
+
+                if (resetOffsets[0]){
+                    this.interface_.offset_x = 0;
+                }
+                if (resetOffsets[1]){
+                    this.interface_.offset_y = 0;
+                }
 
                 if (cachedUnitDataArImgs.size() > 100){
                     cachedUnitDataArImgs.clear();
@@ -732,34 +766,34 @@ public class InGameUI extends JPanel {
                     }
 
                     // Move cam
-                    if ((e.getX() >= 0 && e.getX() <= 832) &&
-                            (e.getY() >= 64 && e.getY() <= 384)) {
-                        int x_selector = 448;
-                        int y_selector = 256;
+                    if (offset_direction == OffsetDirection.None) {
+                        if ((e.getX() >= 0 && e.getX() <= 832) &&
+                                (e.getY() >= 64 && e.getY() <= 384)) {
+                            int x_diff = (sel_x_frame - offset_x) - e.getX();
+                            int y_diff = (sel_y_frame + 64 - offset_y) - e.getY();
 
-                        int x_diff = cam_sel_mode == 0 ? e.getX() - (x_selector - offset_x) : (sel_x_frame - offset_x) - e.getX();
-                        int y_diff = cam_sel_mode == 0 ? e.getY() - (y_selector - offset_y) : (sel_y_frame - offset_y) - e.getY();
+                            int right_mv = (int) Math.ceil((float) x_diff / 64);
+                            int down_mv = (int) Math.ceil((float) y_diff / 64);
 
-                        int right_mv = (int) Math.ceil((float) x_diff / 64);
-                        int down_mv = (int) Math.ceil((float) y_diff / 64);
-
-                        for (int m1 = 0; m1 < Math.abs(right_mv); m1++) {
-                            if (right_mv > 0) {
-                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "RIGHT" : "LEFT");
-                            } else if (right_mv < 0) {
-                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "LEFT" : "RIGHT");
+                            for (int m1 = 0; m1 < Math.abs(right_mv); m1++) {
+                                if (right_mv > 0) {
+                                    in_client.keysInQueue.add("LEFT");
+                                } else if (right_mv < 0) {
+                                    in_client.keysInQueue.add("RIGHT");
+                                }
                             }
-                        }
 
-                        for (int m2 = 0; m2 < Math.abs(down_mv); m2++) {
-                            if (down_mv > 0) {
-                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "DOWN" : "UP");
-                            } else if (down_mv < 0) {
-                                in_client.keysInQueue.add(cam_sel_mode == 0 ? "UP" : "DOWN");
+                            for (int m2 = 0; m2 < Math.abs(down_mv); m2++) {
+                                if (down_mv > 0) {
+                                    in_client.keysInQueue.add("UP");
+                                } else if (down_mv < 0) {
+                                    in_client.keysInQueue.add("DOWN");
+                                }
                             }
                         }
                     }
-                } else if (e.getButton() == MouseEvent.BUTTON2) {
+                }
+                else if (e.getButton() == MouseEvent.BUTTON2) {
                     in_client.keysInQueue.add("ESCAPE");
                 } else {
                     in_client.keysInQueue.add("ENTER");
@@ -788,6 +822,24 @@ public class InGameUI extends JPanel {
                     y++;
                 }
 
+                // move offset rightwards
+                if (e.getX() >= 12*64 && e.getY() >= 64 && e.getY() <= 6*64){
+                    offset_direction = OffsetDirection.Right;
+                }
+                else if (e.getX() <= 64 && e.getY() >= 64 && e.getY() <= 6*64){
+                    offset_direction = OffsetDirection.Left;
+                }
+                else if (e.getX() <= 12*64 && e.getY() >= 5*64 && e.getY() <= 6*64){
+                    offset_direction = OffsetDirection.Down;
+                }
+                else if (e.getX() <= 12*64 && e.getY() >= 64 && e.getY() <= 128){
+                    offset_direction = OffsetDirection.Up;
+                }
+                else{
+                    offset_direction = OffsetDirection.None;
+                }
+
+                if (offset_direction == OffsetDirection.None)
                 if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
                     if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
 
@@ -812,6 +864,8 @@ public class InGameUI extends JPanel {
                 } else {
                     InGameUI.this.do_render_prev = false;
                 }
+                else
+                    do_render_prev = false;
 
                 if (!clearTooltip) {
                     InGameUI.this.setToolTipText(null);
@@ -954,6 +1008,48 @@ public class InGameUI extends JPanel {
             if (escapeMenu.getStatus() == 1)
             termicon = true;
         }
+
+        if (offset_direction == OffsetDirection.Left){
+            if (offset_x >= -64) {
+                offset_x -= 4*2;
+            }
+        }
+        else if (offset_direction == OffsetDirection.Right){
+            if (offset_x <= 64) {
+                offset_x += 4*2;
+            }
+        }
+
+        if (offset_x > 64){
+            offset_x = 64;
+        }
+        if (offset_x < -64){
+            offset_x = -64;
+        }
+
+
+        if (offset_direction == OffsetDirection.Up){
+            if (offset_y >= -64) {
+                offset_y -= 4*2;
+            }
+        }
+        if (offset_direction == OffsetDirection.Down){
+            if (offset_y <= 64) {
+                offset_y += 4*2;
+            }
+        }
+
+        if (offset_y > 64){
+            offset_y = 64;
+        }
+        if (offset_y < -64){
+            offset_y = -64;
+        }
+
+        if (offset_direction != OffsetDirection.None){
+            do_render_prev = false;
+        }
+
         unsafeLock.unlock();
     }
 

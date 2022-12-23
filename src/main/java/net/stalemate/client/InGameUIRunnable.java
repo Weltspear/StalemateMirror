@@ -39,8 +39,18 @@ public class InGameUIRunnable implements Runnable {
     public void run() {
         while (!isTerminated){
             lock.lock();
+            long t1 = System.currentTimeMillis();
             try {
+                g.inGameUIUpdate();
                 g.repaint();
+                long t2 = System.currentTimeMillis() - t1;
+                if (8 - t2 > 0) {
+                    try {
+                        Thread.sleep(8 - t2);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
             finally {
                 lock.unlock();

@@ -66,6 +66,7 @@ public class ConnectionHandler implements Runnable{
         // todo: make it handle unexpected disconnects while choosing lobbies
         try {
             client.setSoTimeout(30000);
+            client.setTcpNoDelay(true);
 
             try {
                 // Initialize encryption

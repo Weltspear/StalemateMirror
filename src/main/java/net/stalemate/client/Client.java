@@ -608,10 +608,7 @@ public class Client {
                     client.close();
                     return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
                 }
-
-                runnable.lock.lock();
                 Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.resetOffsetArn());
-                runnable.lock.unlock();
                 if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
                     runnable.terminate();
@@ -622,7 +619,6 @@ public class Client {
                 }
 
                 controller.receive_packet(json.unwrap());
-                inGameUI.inGameUIUpdate();
 
                 // Escape menu connection termination
                 if (inGameUI.isTermicon()) {

@@ -814,6 +814,7 @@ public class InGameUI extends JPanel {
 
         @Override
         public void mouseMoved(MouseEvent e) {
+            unsafeLock.lock();
             if (!focus_desktop_pane) {
                 boolean clearTooltip = false;
                 int y = 0;
@@ -883,6 +884,7 @@ public class InGameUI extends JPanel {
                     InGameUI.this.setToolTipText(null);
                 }
             }
+            unsafeLock.unlock();
         }
     }
 

@@ -25,7 +25,6 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Correct `ConnectionHandler` saying wrong ip after user connects.
 - [ ] Hardware acceleration (?)
 - [ ] Add Options menu
-- [ ] If there is a player lobby which more than two players don't terminate the game
 ## `v0.3.x a` TODO:
 - [ ] Planes
   - [x] AirUnit and packet stuff related to it
@@ -40,6 +39,12 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [x] Unit flags
 - [ ] Terrain buffs and debuffs
 - [ ] Remove entrenchment when unit killed another unit and moved
+- [ ] Unit experience
+- [ ] Check how does multiplayer with more than 2 players work
+  - [ ] If there is a player lobby with more than two players don't terminate the game
+- [ ] Remove building supply
+- [ ] Increase SupplyStation range
+- [ ] Protocol refactor
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

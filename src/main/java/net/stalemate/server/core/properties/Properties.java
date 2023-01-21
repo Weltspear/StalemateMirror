@@ -45,7 +45,7 @@ public class Properties {
         return this;
     }
 
-    public ArrayList<String[]> getProperties(){
+    public ArrayList<String[]> serialize(){
         ArrayList<String[]> properties = new ArrayList<>();
         for (Property p: this.properties){
             properties.add(p.asStringArray());

@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -185,6 +186,8 @@ public class AssetLoader {
         return monogram;
     }
 
+    private static final ReentrantLock lock = new ReentrantLock();
+
     public static void loadAll(){
         LOGGER.log(Level.INFO, "Loading all assets...");
         for (String res: resources){
@@ -205,16 +208,21 @@ public class AssetLoader {
     }
 
     public static BufferedImage load(String img_path){
-        if (!img_storage.containsKey(img_path)){
-            try {
-                LOGGER.log(Level.INFO,"Loading " + img_path);
-                img_storage.put(img_path, ImageIO.read(Objects.requireNonNull(AssetLoader.class.getClassLoader().getResource(img_path))));
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to load " + img_path);
-                return null;
+        lock.lock();
+        try {
+            if (!img_storage.containsKey(img_path)) {
+                try {
+                    LOGGER.log(Level.INFO, "Loading " + img_path);
+                    img_storage.put(img_path, ImageIO.read(Objects.requireNonNull(AssetLoader.class.getClassLoader().getResource(img_path))));
+                } catch (IOException e) {
+                    LOGGER.log(Level.WARNING, "Failed to load " + img_path);
+                    return null;
+                }
             }
+            return img_storage.get(img_path);
+        } finally {
+            lock.unlock();
         }
-        return img_storage.get(img_path);
     }
 
 }

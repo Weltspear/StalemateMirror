@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.libutils.error.Expect;
 import net.stalemate.client.AssetLoader;
+import net.stalemate.client.ClientGame;
 import net.stalemate.client.ClientMapLoader;
 import net.stalemate.client.config.ButtonTooltips;
 import net.stalemate.client.config.KeyboardBindMapper;
@@ -273,10 +274,27 @@ public class InGameUI extends JPanel {
             "sel_x" : 0,
             "sel_y" : 0,
 
-            "map_textures" : [ ... ] <- 2D array of MapObject's textures 12x5
-            "fog_of_war" : [ ... ] <- 2D array of integers 1/0 to signalise whether there is fog of war or isn't 12x5
-            "entity_render" : [ ... ] <- 2D array of Entity textures 12x5
-            "unit_data_ar" : [ ... ] UnitData Example: {"team_rgb" : [0,0,0], "stats" : [0 HP, 0 MAX_HP, 0 SU, 0 MAX_SU]}, "flip" : false}
+            Those are in packet in order to teleport camera to player's first base
+            c = cam
+            s = selector
+            "cbas_x" : 0,
+            "cbas_y" : 0,
+            "sbas_x" : 0,
+            "sbas_y" : 0,
+
+            "entity_data" : [
+                {
+                    "type" : "unit" | "entity",
+                    "rgb" : int,
+                    "stats" : [...],
+                    "transparent" : bool,
+                    "texture" : str
+                    "flip" : bool
+                    "x" : int,
+                    "y" : int
+                }
+
+            ]
             "minimap_data" : {
                 "fog_fo_war" : [[]], 1/0 2d array
                 "units" : [[[0, 0, 0]]], Unit's team rgb
@@ -316,148 +334,70 @@ public class InGameUI extends JPanel {
             skull = AssetLoader.load("assets/skull.png");
         }
 
-        @SuppressWarnings("unchecked")
-        public synchronized Expect<String, ?> change_render_data(String json, boolean[] resetOffsets) {
+        public synchronized Expect<String, ?> change_render_data(boolean[] resetOffsets, ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
+                                                                 boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
+                                                                 boolean is_it_your_turn, int sel_x, int sel_y, String map_path, int cam_x, int cam_y) {
             try {
                 this.interface_.unsafeLock.lock();
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-                Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
+                //Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
-                Expect<String, ?> m_ = mapLoader.load((String) data_map.get("map_path"));
+                Expect<String, ?> m_ = mapLoader.load(map_path);
                 if (m_.isNone()){
                     return m_;
                 }
 
-                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap((Integer) data_map.get("x"), (Integer)data_map.get("y"));
-                ArrayList<ArrayList<String>> entity_render = (ArrayList<ArrayList<String>>) data_map.get("entity_render");
-                ArrayList<ArrayList<Integer>> fog_of_war = (ArrayList<ArrayList<Integer>>) data_map.get("fog_of_war");
-                ArrayList<ArrayList<HashMap<String, Object>>> unit_data_ar_ = (ArrayList<ArrayList<HashMap<String, Object>>>) data_map.get("unit_data_ar");
-                ArrayList<String> chat = (ArrayList<String>) data_map.get("chat");
+                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(cam_x, cam_y);
 
-                HashMap<String, Object> selected_unit;
                 ArrayList<BufferedImage> buttons = new ArrayList<>();
-                ArrayList<BufferedImage> unit_queue = null;
                 ArrayList<String> binds = new ArrayList<>();
-                ArrayList<String> unit_queue_turn_time = new ArrayList<>();
+
                 BufferedImage selected_unit_image = null;
                 PropertiesToRender propertiesToRender = null;
                 BufferedImage selector = null;
 
-                String[][] button_ids ={{null, null, null},{null, null, null},{null, null, null}};
-                int mp;
+                ArrayList<BufferedImage> unit_queue = null;
+                ArrayList<String> unit_queue_turn_time = new ArrayList<>();
 
-                mp = (int) data_map.get("mp");
-                boolean is_it_your_turn = (boolean) data_map.get("is_it_your_turn");
-                if (!(data_map.get("selected_unit_data") instanceof Integer)) {
-                    selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");
+                String[][] button_ids = {{null, null, null}, {null, null, null}, {null, null, null}};
 
-                    // Create PropertiesToRender
-                    ArrayList<ArrayList<String>> unready_properties = (ArrayList<ArrayList<String>>) selected_unit.get("properties");
-                    ArrayList<ClientSideProperty> clientSideProperties = new ArrayList<>();
-                    for (ArrayList<String> p : unready_properties){
-                        clientSideProperties.add(new ClientSideProperty(p.get(0), p.get(1)));
-                    }
-                    propertiesToRender = new PropertiesToRender(clientSideProperties);
+                if (selectedUnit != null) {
+                    selected_unit_image = selectedUnit.getTexture();
+                    propertiesToRender = new PropertiesToRender(selectedUnit.getProperties());
+                    selector = selectedUnit.getISelectorButtonPress();
 
-                    // Add "big unit texture"
-                    boolean texture_missing = false;
-                    if (!loaded_images.containsKey((String)(selected_unit.get("texture")))) {
-                        if (AssetLoader.load((String) selected_unit.get("texture")) == null){
-                            texture_missing = true;
-                        }
-                        else {
-                            loaded_images.put((String) selected_unit.get("texture"), AssetLoader.load((String) selected_unit.get("texture")));
+                    // Deal with unit queue
+
+                    if (selectedUnit.getQueue() != null) {
+                        unit_queue = new ArrayList<>();
+                        for (ClientGame.ClientSelectedUnit.ClientUnitQueueElement queueElement : selectedUnit.getQueue()) {
+                            unit_queue.add(queueElement.getTexture());
+                            unit_queue_turn_time.add("" + queueElement.getTurn_time());
                         }
                     }
-                    if (!texture_missing){ selected_unit_image = loaded_images.get((String)(selected_unit.get("texture")));}
 
-                    // Get the buttons
-                    ArrayList<Object> buttons_ = (ArrayList<Object>) selected_unit.get("buttons");
+                    // Deal with the buttons
 
-                    // Add textures
-                    int y = 0;
-                    int x = 0;
-                    for (Object button : buttons_) {
+                    int by = 0;
+                    int bx = 0;
+                    for (ClientGame.ClientSelectedUnit.ClientButton button : selectedUnit.getButtons()) {
+                        if (bx == 3) {
+                            bx = 0;
+                            by++;
+                        }
 
-                        if (!(button instanceof Integer)) {
-                            HashMap<String, Object> b = (HashMap<String, Object>) button;
-
-                            // Add textures to ArrayList
-                            String texture = (String) b.get("texture");
-                            if (!loaded_images.containsKey(texture)) {
-                                if (AssetLoader.load(texture) == null) {
-                                    buttons.add(this.interface_.texture_missing);
-                                    binds.add((String) b.get("bind"));
-                                    button_ids[y][x] = (String) b.get("id");
-                                    x++;
-                                    if (x == 3){
-                                        y += 1;
-                                        x = 0;
-                                    }
-                                    continue;
-                                } else{
-                                    loaded_images.put(texture, AssetLoader.load(texture));
-                                }
-                            }
-                            buttons.add(loaded_images.get(texture));
-                            binds.add(((String) b.get("bind")).toUpperCase());
-                            button_ids[y][x] = (String) b.get("id");
+                        if (button != null) {
+                            button_ids[by][bx] = button.getId();
+                            buttons.add(button.getImage());
+                            binds.add(button.getBind());
                         } else {
                             buttons.add(null);
                             binds.add(null);
                         }
-                        x++;
-                        if (x == 3){
-                            y += 1;
-                            x = 0;
-                        }
-                    }
 
-                    // Create queue
-                    if (!(selected_unit.get("queue") instanceof Integer)) {
-                        unit_queue = new ArrayList<>();
-                        ArrayList<Object> queue_ = (ArrayList<Object>) selected_unit.get("queue");
-
-                        for (Object member : queue_) {
-                            if (!(member instanceof Integer)) {
-                                HashMap<String, Object> m = (HashMap<String, Object>) member;
-
-                                // Add textures to ArrayList
-                                String texture = (String) m.get("texture");
-                                if (!loaded_images.containsKey(texture)) {
-                                    if (AssetLoader.load(texture) == null) {
-                                        unit_queue.add(this.interface_.texture_missing);
-                                        continue;
-                                    }
-                                    else {
-                                        loaded_images.put(texture, AssetLoader.load(texture));
-                                    }
-                                }
-                                unit_queue.add(loaded_images.get(texture));
-                                unit_queue_turn_time.add(((Integer) m.get("turn_time")).toString());
-                            } else {
-                                unit_queue.add(null);
-                                unit_queue_turn_time.add(" ");
-                            }
-                        }
-                    }
-
-                    // Selector texture thingy
-
-                    if (((boolean) selected_unit.get("iselectorbutton_press"))){
-                        // iselectorbutton_data_texture
-                        if (!loaded_images.containsKey((String)selected_unit.get("iselectorbutton_data_selector_texture"))) {
-                            if (AssetLoader.load((String) selected_unit.get("iselectorbutton_data_selector_texture")) == null){
-                                loaded_images.put((String) selected_unit.get("iselectorbutton_data_selector_texture"), this.interface_.texture_missing);
-                            }
-                            else {
-                                loaded_images.put((String) selected_unit.get("iselectorbutton_data_selector_texture"), AssetLoader.load((String) selected_unit.get("iselectorbutton_data_selector_texture")));
-                            }
-                        }
-
-                        selector = loaded_images.get((String)selected_unit.get("iselectorbutton_data_selector_texture"));
+                        bx++;
                     }
                 }
 
@@ -473,6 +413,7 @@ public class InGameUI extends JPanel {
                     selector = loaded_images.get("assets/ui/selectors/ui_select.png");
                 }
 
+                // deal with map
                 ArrayList<ArrayList<BufferedImage>> map = new ArrayList<>();
                 int y = 0;
                 for (ArrayList<String> x_row : map_textures) {
@@ -495,38 +436,30 @@ public class InGameUI extends JPanel {
                     y++;
                 }
 
+                // Deal with entities
                 ArrayList<ArrayList<BufferedImage>> entities = new ArrayList<>();
                 y = 0;
                 int x__ = 0;
-                for (ArrayList<String> x_row : entity_render) {
+                for (ClientGame.ClientEntity[] x_row : _entities) {
                     entities.add(new ArrayList<>());
-                    for (String texture : x_row) {
+                    for (ClientGame.ClientEntity centity: x_row) {
                         try {
-                            if (texture == null) {
+                            if (centity == null) {
                                 entities.get(y).add(null);
                             } else {
-                                if (!loaded_images.containsKey(texture)) {
-                                    if (AssetLoader.load(texture) == null){
-                                        x__++;
-                                        continue;
-                                    }
-                                    loaded_images.put(texture, AssetLoader.load(texture));
-                                }
-
-                                if (unit_data_ar_.get(y).get(x__) != null){
-                                    HashMap<String, Object> unit_data = unit_data_ar_.get(y).get(x__);
+                                if (centity instanceof ClientGame.ClientUnit ucentity){
                                     BufferedImage image;
-                                    if ((boolean) (unit_data.get("flip"))){
+                                    if (ucentity.isFlip()){
                                         // Flip the image
                                         AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                        tx.translate(-loaded_images.get(texture).getWidth(), 0);
+                                        tx.translate(-ucentity.getTexture().getWidth(), 0);
                                         AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                        image = op.filter(loaded_images.get(texture), null);
+                                        image = op.filter(ucentity.getTexture(), null);
                                     }
                                     else{
-                                        image = loaded_images.get(texture);
+                                        image = ucentity.getTexture();
                                     }
-                                    if ((boolean)(unit_data.get("transparent"))){
+                                    if (ucentity.isTransparent()){
                                         BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
                                         Graphics2D graphics = clone.createGraphics();
 
@@ -557,7 +490,7 @@ public class InGameUI extends JPanel {
                                     }
                                     entities.get(y).add(image);
                                 } else{
-                                    entities.get(y).add(loaded_images.get(texture));
+                                    entities.get(y).add(centity.getTexture());
                                 }
                             }
                         } catch (NullPointerException e) {
@@ -572,10 +505,10 @@ public class InGameUI extends JPanel {
 
                 ArrayList<ArrayList<BufferedImage>> fog_of_war_ = new ArrayList<>();
                 y = 0;
-                for (ArrayList<Integer> x_row : fog_of_war) {
+                for (boolean[] x_row : fog_of_war) {
                     fog_of_war_.add(new ArrayList<>());
-                    for (int texture : x_row) {
-                        if (texture == 1) {
+                    for (boolean texture : x_row) {
+                        if (!texture) {
                             fog_of_war_.get(y).add(this.fog_of_war);
                         } else {
                             fog_of_war_.get(y).add(null);
@@ -587,30 +520,27 @@ public class InGameUI extends JPanel {
                 // Create those team showing thingies
                 ArrayList<ArrayList<BufferedImage>> unit_data_ar = new ArrayList<>();
                 y = 0;
-                for (ArrayList<HashMap<String, Object>> row : unit_data_ar_){
+                for (ClientGame.ClientEntity[] row : _entities){
                     unit_data_ar.add(new ArrayList<>());
-                    for (HashMap<String, Object> unit_data: row){
+                    for (ClientGame.ClientEntity centity: row) {
+                        if (centity instanceof ClientGame.ClientUnit ucentity) {
 
-                        if (unit_data != null) {
-                            // calculate hash
-                            ArrayList<Integer> rgb_team = (ArrayList<Integer>) unit_data.get("rgb");
-                            ArrayList<Integer> stats = (ArrayList<Integer>) unit_data.get("stats");
-                            boolean has_unit_su_enabled = stats.get(2) != -1 && stats.get(3) != -1 && stats.get(2) != 0 && stats.get(3) != 0;
-                            Object[] hash_ar = new Object[]{new Color(rgb_team.get(0), rgb_team.get(1), rgb_team.get(2)),
-                                    ((float)stats.get(0))/((float)stats.get(1)),
-                                    (has_unit_su_enabled) ? ((float)stats.get(2))/((float)stats.get(3)): -1,
+                            // Calculate hash
+                            Color rgb_team = ucentity.getTeamColor();
+                            boolean has_unit_su_enabled = ucentity.getSu() != -1 && ucentity.getMaxSu() != -1 && ucentity.getSu() != 0 && ucentity.getMaxSu() != 0;
+                            Object[] hash_ar = new Object[]{rgb_team,
+                                    ((float) ucentity.getHp()) / ((float) ucentity.getMaxHp()),
+                                    (has_unit_su_enabled) ? ((float) ucentity.getSu()) / ((float) ucentity.getMaxSu()) : -1,
                                     0};
 
                             // takes indicators into account
-                            if (stats.get(2) < stats.get(3) * 0.4 && has_unit_su_enabled){
+                            if (ucentity.getSu() < ucentity.getMaxSu() * 0.4 && has_unit_su_enabled) {
                                 hash_ar[3] = -1;
-                            }
-                            else if (stats.get(4) > 0 && !(stats.get(2) < stats.get(3) * 0.4 && has_unit_su_enabled)){
-                                hash_ar[3] = stats.get(4);
+                            } else if (ucentity.getEt() > 0 && !(ucentity.getSu() < ucentity.getMaxSu() * 0.4 && has_unit_su_enabled)) {
+                                hash_ar[3] = ucentity.getEt();
                             }
 
                             if (!cachedUnitDataArImgs.containsKey(Arrays.hashCode(hash_ar))) {
-                                Color color = new Color(rgb_team.get(0), rgb_team.get(1), rgb_team.get(2));
 
                                 BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
                                 Graphics2D graphics = clone.createGraphics();
@@ -618,7 +548,7 @@ public class InGameUI extends JPanel {
                                 graphics.setBackground(new Color(0x00FFFFFF, true));
                                 graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
 
-                                graphics.setColor(color);
+                                graphics.setColor(rgb_team);
 
                                 graphics.drawLine(23, 0, 31, 0);
                                 graphics.drawLine(31, 0, 31, 8);
@@ -628,16 +558,16 @@ public class InGameUI extends JPanel {
 
                                 graphics.setColor(new Color(148, 0, 21));
 
-                                int hp = stats.get(0);
-                                int max_hp = stats.get(1);
+                                int hp = ucentity.getHp();
+                                int max_hp = ucentity.getMaxHp();
 
                                 if (hp != -1 && max_hp != -1 && hp != 0 && max_hp != 0) {
                                     graphics.drawLine(22, 30, 22 + (int) (9f * ((float) (hp) / (float) (max_hp))), 30);
                                 }
 
                                 graphics.setColor(Color.YELLOW);
-                                int su = stats.get(2);
-                                int max_su = stats.get(3);
+                                int su = ucentity.getSu();
+                                int max_su = ucentity.getMaxSu();
 
                                 if (has_unit_su_enabled) {
                                     graphics.drawLine(22, 31, 22 + (int) (9f * ((float) (su) / (float) (max_su))), 31);
@@ -645,8 +575,8 @@ public class InGameUI extends JPanel {
 
                                 graphics.dispose();
 
-                                int et = stats.get(4);
-                                // draw shovel
+                                int et = ucentity.getEt();
+                                // Draw shovel
                                 BufferedImage shovel_col = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB_PRE);
                                 if (et > 0) {
                                     Graphics2D shovel_graphics = shovel_col.createGraphics();
@@ -665,13 +595,12 @@ public class InGameUI extends JPanel {
                                     shovel_graphics.dispose();
                                 }
 
-                                // draw the shovel
                                 Image scaled = clone.getScaledInstance(64, 64, Image.SCALE_FAST);
                                 clone = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB_PRE);
                                 graphics = clone.createGraphics();
                                 graphics.setBackground(new Color(0x00FFFFFF, true));
                                 graphics.drawImage(scaled, 0, 0, null);
-                                // render the skull to indicate that unit is under supplied
+                                // Draw skull to indicate that unit is under supplied
                                 if (su < max_su * 0.4 && has_unit_su_enabled) {
                                     BufferedImage skull_col = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB_PRE);
                                     Graphics2D skull_graphics = skull_col.createGraphics();
@@ -695,9 +624,8 @@ public class InGameUI extends JPanel {
 
                                 unit_data_ar.get(y).add(clone);
                                 cachedUnitDataArImgs.put(Arrays.hashCode(hash_ar), new CachedBufferedImage(clone));
-                            }
-                            else
-                            unit_data_ar.get(y).add(cachedUnitDataArImgs.get(Arrays.hashCode(hash_ar)).image);
+                            } else
+                                unit_data_ar.get(y).add(cachedUnitDataArImgs.get(Arrays.hashCode(hash_ar)).image);
                         }
                         else {
                             unit_data_ar.get(y).add(null);
@@ -706,11 +634,8 @@ public class InGameUI extends JPanel {
                     y++;
                 }
 
-                int sel_x = (int) data_map.get("sel_x");
-                int sel_y = (int) data_map.get("sel_y");
-
-                int sel_x_frame = (sel_x - ((int)data_map.get("x")+6))*64 + 6*64;
-                int sel_y_frame = (sel_y - ((int)data_map.get("y")+2))*64 + 2*64;
+                int sel_x_frame = (sel_x - (cam_x+6))*64 + 6*64;
+                int sel_y_frame = (sel_y - (cam_y+2))*64 + 2*64;
 
                 this.interface_.unsafeLock.lock();
                 this.interface_.map_to_render = map;

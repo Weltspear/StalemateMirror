@@ -350,13 +350,6 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         return unitStats;
     }
 
-    /***
-     * Used for rendering purposes. Shouldn't be overridden by other units.
-     */
-    public boolean isEntityInFogOfWarRange(Entity entity){
-        return ((this.x-fog_of_war_range <= entity.getX() && entity.getX() <= this.x+fog_of_war_range) & (this.y-fog_of_war_range <= entity.getY() && entity.getY() <= this.y+fog_of_war_range));
-    }
-
     public void damage(int dmg){
         dmg -= armor;
         if (dmg <= 0){

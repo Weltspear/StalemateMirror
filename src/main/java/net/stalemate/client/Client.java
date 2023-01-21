@@ -80,17 +80,26 @@ public class Client {
     }
 
     public static class GameControllerClient{
-        int client_cam_x;
-        int client_cam_y;
+        int client_cam_x = 0;
+        int client_cam_y = 0;
 
         int client_sel_x;
         int client_sel_y;
 
-        int cam_x;
-        int cam_y;
-
         int sel_x;
         int sel_y;
+
+        int cbas_x;
+        int cbas_y;
+
+        int sbas_x;
+        int sbas_y;
+
+        public ClientGame getClientGame() {
+            return clientGame;
+        }
+
+        private final ClientGame clientGame;
 
         HashMap<String, Object> selected_unit = null;
 
@@ -102,27 +111,31 @@ public class Client {
         public GameControllerClient(InGameUI.KeyboardInput input, ClientMapLoader clientMapLoader){
             in = input;
             this.clientMapLoader = clientMapLoader;
+
+            this.clientGame = new ClientGame(clientMapLoader);
         }
 
         @SuppressWarnings("unchecked")
         public void receive_packet(String json){
             try {
+                this.clientGame.load(json);
+
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
                 ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
 
-                cam_x = (int) data_map.get("x");
-                cam_y = (int) data_map.get("y");
-
                 sel_x = (int) data_map.get("sel_x");
                 sel_y = (int) data_map.get("sel_y");
 
-                client_cam_x = (int) data_map.get("x");
-                client_cam_y = (int) data_map.get("y");
-
                 client_sel_x = (int) data_map.get("sel_x");
                 client_sel_y = (int) data_map.get("sel_y");
+
+                cbas_x = (int) data_map.get("cbas_x");
+                cbas_y = (int) data_map.get("cbas_y");
+
+                sbas_x = (int) data_map.get("sbas_x");
+                sbas_y = (int) data_map.get("sbas_y");
 
                 if (!(data_map.get("selected_unit_data") instanceof Integer) && data_map.get("selected_unit_data") != null){
                     selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");
@@ -158,9 +171,11 @@ public class Client {
                 String input = in.getQueue().poll();
 
                 if (Objects.equals(input, "SHIFT")){
-                    HashMap<String, Object> action = new HashMap<>();
-                    action.put("action", "TeleportCamToBase1");
-                    actions.add(action);
+                    client_cam_x = cbas_x;
+                    client_cam_y = cbas_y;
+
+                    client_sel_x = sbas_x;
+                    client_sel_y = sbas_y;
                 }
                 else if (Objects.equals(input, "UP")){
                     client_sel_y--;
@@ -608,7 +623,13 @@ public class Client {
                     client.close();
                     return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
                 }
-                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(json.unwrap(), controller.resetOffsetArn());
+                controller.receive_packet(json.unwrap());
+
+                Object[] ef = controller.getClientGame().buildView(controller.client_cam_x, controller.client_cam_y);
+
+                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(controller.resetOffsetArn(), controller.getClientGame().getChat(),
+                        (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], controller.getClientGame().getSelectedUnit(), controller.getClientGame().getMp(),
+                        controller.getClientGame().isIsItYourTurn(), controller.sel_x, controller.sel_y, controller.getClientGame().getMapPath() ,controller.client_cam_x, controller.client_cam_y);
                 if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
                     runnable.terminate();
@@ -618,7 +639,6 @@ public class Client {
                     return new Expect<>(() -> msg);
                 }
 
-                controller.receive_packet(json.unwrap());
 
                 // Escape menu connection termination
                 if (inGameUI.isTermicon()) {

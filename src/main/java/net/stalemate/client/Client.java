@@ -45,6 +45,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,9 +115,9 @@ public class Client {
         }
 
         @SuppressWarnings("unchecked")
-        public void receive_packet(String json){
+        public Expect<String, ?> receive_packet(String json){
             try {
-                this.clientGame.load(json);
+                Expect<String, ?> e = this.clientGame.load(json);
 
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                         .build();
@@ -143,8 +144,12 @@ public class Client {
                     selected_unit = null;
                     isselectorbutton_press = false;
                 }
+
+                return e;
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                return new Expect<>(() -> "Failed to parse JSON");
+            } catch (ClassCastException | NullPointerException e){
+                return new Expect<>(() -> "Incorrect packet format");
             }
         }
 
@@ -596,19 +601,19 @@ public class Client {
                     client.close();
                     return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
                 }
-                controller.receive_packet(json.unwrap());
+                Expect<String, ?> expect = controller.receive_packet(json.unwrap());
 
-                inGameUI.getRenderer().setSelectorData(controller.sel_x, controller.sel_y);
+                inGameUI.getClDataManager().setSelectorData(controller.sel_x, controller.sel_y);
 
                 // fixme: handle those exceptions
-                /*if (expect.isNone()) {
+                if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
                     runnable.terminate();
                     client.close();
                     inGameUI.getFrame().dispose();
                     String msg = "Failed to read server packet, shutting down client: " + expect.getResult().message();
                     return new Expect<>(() -> msg);
-                }*/
+                }
 
 
                 // Escape menu connection termination

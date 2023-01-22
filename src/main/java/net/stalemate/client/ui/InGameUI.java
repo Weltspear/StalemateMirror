@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InGameUI extends JPanel {
-    private final ClientDataRenderer renderer;
+    private final ClientDataManager clDataManager;
     private final KeyboardInput in_client;
     private final JDesktopPane p;
     @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
@@ -65,8 +65,8 @@ public class InGameUI extends JPanel {
                         {null, null, null}};
 
 
-    public ClientDataRenderer getRenderer() {
-        return renderer;
+    public ClientDataManager getClDataManager() {
+        return clDataManager;
     }
 
     public KeyboardInput getInput() {
@@ -112,8 +112,6 @@ public class InGameUI extends JPanel {
     BufferedImage military_points;
 
     BufferedImage selector;
-
-    final BufferedImage texture_missing;
 
     int sel_x_frame;
     int sel_y_frame;
@@ -225,28 +223,11 @@ public class InGameUI extends JPanel {
         public void keyReleased(KeyEvent e) {
 
         }
-
-        // spaghetti code gaming
-        public int getOffsetX(){
-            unsafeLock.lock();
-            try {
-                return offset_x;
-            }
-            finally {unsafeLock.unlock();}
-        }
-
-        public int getOffsetY(){
-            unsafeLock.lock();
-            try {
-                return offset_y;
-            }finally {unsafeLock.unlock();}
-        }
     }
 
-    public static class ClientDataRenderer {
+    public static class ClientDataManager {
         private final InGameUI interface_;
         private final BufferedImage fog_of_war;
-        private final HashMap<String, BufferedImage> loaded_images = new HashMap<>();
         private final ClientMapLoader mapLoader = new ClientMapLoader();
         private final BufferedImage skull;
         private final BufferedImage shovel;
@@ -328,7 +309,7 @@ public class InGameUI extends JPanel {
 
          */
 
-        public ClientDataRenderer(InGameUI interface_) {
+        public ClientDataManager(InGameUI interface_) {
             fog_of_war = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = fog_of_war.createGraphics();
             graphics2D.setColor(new Color(0,0,0, 0.5F));
@@ -340,22 +321,19 @@ public class InGameUI extends JPanel {
             skull = AssetLoader.load("assets/skull.png");
         }
 
-        public synchronized Expect<String, ?> change_render_data(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
-                                                                 boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                                                                 boolean is_it_your_turn, String map_path) {
+        public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
+                                                         boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
+                                                         boolean is_it_your_turn, String map_path) {
             if (map_path == null){
-                return new Expect<>("");
+                return;
             }
             try {
                 this.interface_.unsafeLock.lock();
-                PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                        .build();
-                ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
                 //Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
                 Expect<String, ?> m_ = mapLoader.load(map_path);
                 if (m_.isNone()){
-                    return m_;
+                    return;
                 }
 
                 ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y);
@@ -410,17 +388,7 @@ public class InGameUI extends JPanel {
                     }
                 }
 
-                if (selector == null){
-                    if (!loaded_images.containsKey("assets/ui/selectors/ui_select.png")) {
-                        if (AssetLoader.load("assets/ui/selectors/ui_select.png") != null) {
-                            loaded_images.put("assets/ui/selectors/ui_select.png", AssetLoader.load("assets/ui/selectors/ui_select.png"));
-                        } else {
-                            loaded_images.put("assets/ui/selectors/ui_select.png", this.interface_.texture_missing);
-                        }
-                    }
-
-                    selector = loaded_images.get("assets/ui/selectors/ui_select.png");
-                }
+                selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
 
                 // deal with map
                 ArrayList<ArrayList<BufferedImage>> map = new ArrayList<>();
@@ -432,14 +400,7 @@ public class InGameUI extends JPanel {
                             map.get(y).add(null);
                         }
                         else {
-                            if (!loaded_images.containsKey(texture)) {
-                                if (AssetLoader.load(texture) == null){
-                                    map.get(y).add(this.interface_.texture_missing);
-                                    continue;
-                                }
-                                loaded_images.put(texture, AssetLoader.load(texture));
-                            }
-                            map.get(y).add(loaded_images.get(texture));
+                            map.get(y).add(AssetLoader.load(texture));
                         }
                     }
                     y++;
@@ -452,60 +413,55 @@ public class InGameUI extends JPanel {
                 for (ClientGame.ClientEntity[] x_row : _entities) {
                     entities.add(new ArrayList<>());
                     for (ClientGame.ClientEntity centity: x_row) {
-                        try {
-                            if (centity == null) {
-                                entities.get(y).add(null);
-                            } else {
-                                if (centity instanceof ClientGame.ClientUnit ucentity){
-                                    BufferedImage image;
-                                    if (ucentity.isFlip()){
-                                        // Flip the image
-                                        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                        tx.translate(-ucentity.getTexture().getWidth(), 0);
-                                        AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                        image = op.filter(ucentity.getTexture(), null);
-                                    }
-                                    else{
-                                        image = ucentity.getTexture();
-                                    }
-                                    if (ucentity.isTransparent()){
-                                        BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
-                                        Graphics2D graphics = clone.createGraphics();
-
-                                        graphics.setBackground(new Color(0x00FFFFFF, true));
-                                        graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
-
-                                        graphics.drawImage(image,0,0,null);
-
-                                        graphics.dispose();
-
-                                        for (int y_ = 0; y_ < 32; y_++){
-                                            for (int x_ = 0; x_ < 32; x_++) {
-
-                                                Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
-                                                        (new Color(clone.getRGB(x_, y_))).getGreen(),
-                                                        (new Color(clone.getRGB(x_, y_))).getBlue(),
-                                                        (new Color(clone.getRGB(x_, y_), true)).getAlpha());
-
-                                                clone.setRGB(x_, y_, (new Color(original.getRed(),
-                                                        original.getGreen(),
-                                                        original.getBlue(),
-                                                        (int) (original.getAlpha() * 0.5)).getRGB()));
-
-                                            }
-                                        }
-
-                                        image = clone;
-                                    }
-                                    entities.get(y).add(image);
-                                } else{
-                                    entities.get(y).add(centity.getTexture());
+                        if (centity == null) {
+                            entities.get(y).add(null);
+                        } else {
+                            if (centity instanceof ClientGame.ClientUnit ucentity) {
+                                BufferedImage image;
+                                if (ucentity.isFlip()) {
+                                    // Flip the image
+                                    AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                                    tx.translate(-ucentity.getTexture().getWidth(), 0);
+                                    AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                                    image = op.filter(ucentity.getTexture(), null);
+                                } else {
+                                    image = ucentity.getTexture();
                                 }
+                                if (ucentity.isTransparent()) {
+                                    BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+                                    Graphics2D graphics = clone.createGraphics();
+
+                                    graphics.setBackground(new Color(0x00FFFFFF, true));
+                                    graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
+
+                                    graphics.drawImage(image, 0, 0, null);
+
+                                    graphics.dispose();
+
+                                    for (int y_ = 0; y_ < 32; y_++) {
+                                        for (int x_ = 0; x_ < 32; x_++) {
+
+                                            Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
+                                                    (new Color(clone.getRGB(x_, y_))).getGreen(),
+                                                    (new Color(clone.getRGB(x_, y_))).getBlue(),
+                                                    (new Color(clone.getRGB(x_, y_), true)).getAlpha());
+
+                                            clone.setRGB(x_, y_, (new Color(original.getRed(),
+                                                    original.getGreen(),
+                                                    original.getBlue(),
+                                                    (int) (original.getAlpha() * 0.5)).getRGB()));
+
+                                        }
+                                    }
+
+                                    image = clone;
+                                }
+                                entities.get(y).add(image);
+                            } else {
+                                entities.get(y).add(centity.getTexture());
                             }
-                        } catch (NullPointerException e) {
-                            e.printStackTrace();
-                            entities.get(y).add(this.interface_.texture_missing);
                         }
+
                         x__++;
                     }
                     x__ = 0;
@@ -670,13 +626,13 @@ public class InGameUI extends JPanel {
                 }
 
                 interface_.unsafeLock.unlock();
-                return new Expect<>("");
+                return;
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
             interface_.unsafeLock.unlock();
-            return new Expect<>(() -> "Incorrect packet format");
+            return;
         }
 
         public void setSelectorData(int sel_x, int sel_y){
@@ -696,6 +652,7 @@ public class InGameUI extends JPanel {
     class MListener extends MouseAdapter{
         @Override
         public void mouseClicked(MouseEvent e) {
+            unsafeLock.lock();
             if (!focus_desktop_pane) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     int y = 0;
@@ -748,6 +705,7 @@ public class InGameUI extends JPanel {
                     in_client.keysInQueue.add("ENTER");
                 }
             }
+            unsafeLock.unlock();
         }
 
         @Override
@@ -830,7 +788,7 @@ public class InGameUI extends JPanel {
         super(null);
         ButtonTooltips.init();
         PropertiesMatcher.loadPropertyMatcher();
-        renderer = new ClientDataRenderer(this);
+        clDataManager = new ClientDataManager(this);
 
         frame = new JFrame("Stalemate");
         frame.setMinimumSize(new Dimension(832+14,576+32+6));
@@ -859,33 +817,17 @@ public class InGameUI extends JPanel {
         in_client = new KeyboardInput();
         frame.addKeyListener(in_client);
 
-        texture_missing = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
-        Graphics2D graphics2D = texture_missing.createGraphics();
-        graphics2D.setColor(Color.magenta);
-        graphics2D.fillRect(0, 0, 32, 32);
-        graphics2D.setColor(Color.BLACK);
-        graphics2D.fillRect(0, 0, 16, 16);
-        graphics2D.fillRect(16, 16, 16, 16);
-        graphics2D.dispose();
-
-        BufferedImage empty = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
-        graphics2D = empty.createGraphics();
-        graphics2D.setColor(Color.BLACK);
-        graphics2D.fillRect(0, 0, 32, 32);
-        graphics2D.dispose();
-        renderer.loaded_images.put("empty.png", empty);
-
         monogram = AssetLoader.getMonogram();
         monogram_button = monogram.deriveFont(((float)(16)));
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);
 
-        placeholder_ui = AssetLoader.load("assets/placeholder_ui.png") != null ? AssetLoader.load("assets/placeholder_ui.png") : texture_missing;
-        placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png") != null ? AssetLoader.load("assets/placeholder_ui_2.png") : texture_missing;
-        panel = AssetLoader.load("assets/panel.png") != null ? AssetLoader.load("assets/panel.png") : texture_missing;
-        selector = AssetLoader.load("assets/ui/selectors/ui_select.png") != null ? AssetLoader.load("assets/ui/selectors/ui_select.png") : texture_missing;
-        military_points = AssetLoader.load("assets/mp.png") != null ? AssetLoader.load("assets/mp.png") : texture_missing;
+        placeholder_ui = AssetLoader.load("assets/placeholder_ui.png");
+        placeholder_ui_2 = AssetLoader.load("assets/placeholder_ui_2.png");
+        panel = AssetLoader.load("assets/panel.png");
+        selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
+        military_points = AssetLoader.load("assets/mp.png");
 
         frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
     }
@@ -1009,14 +951,14 @@ public class InGameUI extends JPanel {
             }
         }
         if (offset_x >= 64) {
-            if (cam_x + 7 < renderer.getMapLoader().getWidth()) {
+            if (cam_x + 7 < clDataManager.getMapLoader().getWidth()) {
                 cam_x++;
                 offset_x = 0;
             }
         }
 
         if (offset_y >= 64){
-            if ( cam_y + 3 < renderer.getMapLoader().getHeight()) {
+            if (cam_y + 3 < clDataManager.getMapLoader().getHeight()) {
                 cam_y++;
                 offset_y = 0;
             }

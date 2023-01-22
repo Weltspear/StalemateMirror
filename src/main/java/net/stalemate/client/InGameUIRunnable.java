@@ -50,7 +50,7 @@ public class InGameUIRunnable implements Runnable {
                 g.unsafeLock.lock();
                 Object[] ef = cgame.buildView(g.cam_x, g.cam_y);
 
-                Expect<String, ?> expect = g.getRenderer().change_render_data(cgame.getChat(),
+                g.getClDataManager().updateData(cgame.getChat(),
                         (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], cgame.getSelectedUnit(), cgame.getMp(),
                         cgame.isIsItYourTurn(), cgame.getMapPath());
 

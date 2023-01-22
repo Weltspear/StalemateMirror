@@ -18,11 +18,13 @@
 
 package net.stalemate.client;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
+import net.libutils.error.Expect;
 import net.stalemate.client.property.ClientSideProperty;
 
 import java.awt.*;
@@ -259,143 +261,149 @@ public class ClientGame {
     }
 
     @SuppressWarnings("unchecked")
-    public void load(String json) throws JsonProcessingException {
+    public Expect<String, ?> load(String json) {
         lock.lock();
 
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .build();
-        ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
-        Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
+        try {
+            PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                    .build();
+            ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
+            Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
-        map_path = (String) data_map.get("map_path");
-        mapLoader.load(map_path); // This will crash anyway if there are issues with map because map is being loaded in InGameUI too
-        selectedUnit = null;
+            map_path = (String) data_map.get("map_path");
+            mapLoader.load(map_path); // This will crash anyway if there are issues with map because map is being loaded in InGameUI too
+            selectedUnit = null;
 
-        ArrayList<HashMap<String, Object>> entity_data = (ArrayList<HashMap<String, Object>>) data_map.get("entity_data");
-        if (!(data_map.get("selected_unit_data") instanceof Integer)) {
-            HashMap<String, Object> selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");
+            ArrayList<HashMap<String, Object>> entity_data = (ArrayList<HashMap<String, Object>>) data_map.get("entity_data");
+            if (!(data_map.get("selected_unit_data") instanceof Integer)) {
+                HashMap<String, Object> selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");
 
-            // Create PropertiesToRender
-            ArrayList<ArrayList<String>> unready_properties = (ArrayList<ArrayList<String>>) selected_unit.get("properties");
-            ArrayList<ClientSideProperty> clientSideProperties = new ArrayList<>();
-            ArrayList<ClientSelectedUnit.ClientUnitQueueElement> unit_queue = null;
-            for (ArrayList<String> p : unready_properties){
-                clientSideProperties.add(new ClientSideProperty(p.get(0), p.get(1)));
-            }
-
-            // Add "big unit texture"
-            BufferedImage unit_texture = AssetLoader.load((String) selected_unit.get("texture"));
-
-            // Buttons
-            ArrayList<Object> buttons_ = (ArrayList<Object>) selected_unit.get("buttons");
-
-            ClientSelectedUnit.ClientButton[] buttons = new ClientSelectedUnit.ClientButton[9];
-
-            int idx = 0;
-            for (Object button : buttons_) {
-
-                if (!(button instanceof Integer)) {
-                    HashMap<String, Object> b = (HashMap<String, Object>) button;
-
-                    // Add textures to ArrayList
-                    BufferedImage texture = AssetLoader.load((String) b.get("texture"));
-                    String id = (String) b.get("id");
-                    String bind = (String) b.get("bind");
-                    ClientSelectedUnit.ClientButton.Mode mode = (Integer) b.get("mode") == 1 ?
-                    ClientSelectedUnit.ClientButton.Mode.StandardButton : ClientSelectedUnit.ClientButton.Mode.SelectorButton;
-
-                    buttons[idx] = new ClientSelectedUnit.ClientButton(id, bind, texture, mode);
+                // Create PropertiesToRender
+                ArrayList<ArrayList<String>> unready_properties = (ArrayList<ArrayList<String>>) selected_unit.get("properties");
+                ArrayList<ClientSideProperty> clientSideProperties = new ArrayList<>();
+                ArrayList<ClientSelectedUnit.ClientUnitQueueElement> unit_queue = null;
+                for (ArrayList<String> p : unready_properties) {
+                    clientSideProperties.add(new ClientSideProperty(p.get(0), p.get(1)));
                 }
-                idx++;
-            }
 
+                // Add "big unit texture"
+                BufferedImage unit_texture = AssetLoader.load((String) selected_unit.get("texture"));
 
-            if (!(selected_unit.get("queue") instanceof Integer)) {
-                unit_queue = new ArrayList<>();
-                ArrayList<Object> queue_ = (ArrayList<Object>) selected_unit.get("queue");
+                // Buttons
+                ArrayList<Object> buttons_ = (ArrayList<Object>) selected_unit.get("buttons");
 
-                for (Object member : queue_) {
-                    if (!(member instanceof Integer)) {
-                        HashMap<String, Object> m = (HashMap<String, Object>) member;
+                ClientSelectedUnit.ClientButton[] buttons = new ClientSelectedUnit.ClientButton[9];
 
-                        BufferedImage texture = AssetLoader.load((String) m.get("texture"));
-                        int turn_time = (int) m.get("turn_time");
+                int idx = 0;
+                for (Object button : buttons_) {
 
-                        unit_queue.add(new ClientSelectedUnit.ClientUnitQueueElement(texture, turn_time));
+                    if (!(button instanceof Integer)) {
+                        HashMap<String, Object> b = (HashMap<String, Object>) button;
+
+                        // Add textures to ArrayList
+                        BufferedImage texture = AssetLoader.load((String) b.get("texture"));
+                        String id = (String) b.get("id");
+                        String bind = (String) b.get("bind");
+                        ClientSelectedUnit.ClientButton.Mode mode = (Integer) b.get("mode") == 1 ?
+                                ClientSelectedUnit.ClientButton.Mode.StandardButton : ClientSelectedUnit.ClientButton.Mode.SelectorButton;
+
+                        buttons[idx] = new ClientSelectedUnit.ClientButton(id, bind, texture, mode);
                     }
-                    else{
-                        unit_queue.add(null);
+                    idx++;
+                }
+
+
+                if (!(selected_unit.get("queue") instanceof Integer)) {
+                    unit_queue = new ArrayList<>();
+                    ArrayList<Object> queue_ = (ArrayList<Object>) selected_unit.get("queue");
+
+                    for (Object member : queue_) {
+                        if (!(member instanceof Integer)) {
+                            HashMap<String, Object> m = (HashMap<String, Object>) member;
+
+                            BufferedImage texture = AssetLoader.load((String) m.get("texture"));
+                            int turn_time = (int) m.get("turn_time");
+
+                            unit_queue.add(new ClientSelectedUnit.ClientUnitQueueElement(texture, turn_time));
+                        } else {
+                            unit_queue.add(null);
+                        }
                     }
                 }
+
+                BufferedImage selector = null;
+
+                // Selector texture thingy
+                if (((boolean) selected_unit.get("iselectorbutton_press"))) {
+                    // iselectorbutton_data_texture
+                    selector = AssetLoader.load((String) selected_unit.get("iselectorbutton_data_selector_texture"));
+                }
+                if (selector == null) {
+                    selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
+                }
+
+                selectedUnit = new ClientSelectedUnit(clientSideProperties, unit_texture, unit_queue, buttons, selector);
+
             }
 
-            BufferedImage selector = null;
+            // Load Entities
 
-            // Selector texture thingy
-            if (((boolean) selected_unit.get("iselectorbutton_press"))){
-                // iselectorbutton_data_texture
-                selector = AssetLoader.load((String)selected_unit.get("iselectorbutton_data_selector_texture"));
-            }
-            if (selector == null){
-                selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
-            }
+            entities = new ArrayList<>();
 
-            selectedUnit = new ClientSelectedUnit(clientSideProperties, unit_texture, unit_queue, buttons, selector);
+            for (HashMap<String, Object> _entity : entity_data) {
+                String type = (String) _entity.get("type");
+                int x = (int) _entity.get("x");
+                int y = (int) _entity.get("y");
+                boolean flip = (boolean) _entity.get("flip");
+                BufferedImage texture = AssetLoader.load((String) _entity.get("texture"));
 
-        }
+                if (Objects.equals(type, "entity")) {
+                    ClientEntity entity = new ClientEntity(x, y, flip, texture);
+                    entities.add(entity);
+                } else {
+                    ArrayList<Integer> stats = (ArrayList<Integer>) _entity.get("stats");
+                    boolean transparent = (boolean) _entity.get("transparent");
+                    boolean is_our = (boolean) _entity.get("is_our");
+                    int rgb = (int) _entity.get("rgb");
+                    int fog_of_war_range = (int) _entity.get("fog_of_war_range");
 
-        // Load Entities
+                    ClientUnit unit = new ClientUnit(x, y, flip, texture, rgb, stats, transparent, fog_of_war_range, is_our);
+                    entities.add(unit);
+                }
 
-        entities = new ArrayList<>();
-
-        for (HashMap<String, Object> _entity: entity_data){
-            String type = (String) _entity.get("type");
-            int x = (int) _entity.get("x");
-            int y = (int) _entity.get("y");
-            boolean flip = (boolean) _entity.get("flip");
-            BufferedImage texture = AssetLoader.load((String) _entity.get("texture"));
-
-            if (Objects.equals(type, "entity")){
-                ClientEntity entity = new ClientEntity(x, y, flip, texture);
-                entities.add(entity);
-            }
-            else {
-                ArrayList<Integer> stats = (ArrayList<Integer>) _entity.get("stats");
-                boolean transparent = (boolean) _entity.get("transparent");
-                boolean is_our = (boolean) _entity.get("is_our");
-                int rgb = (int) _entity.get("rgb");
-                int fog_of_war_range = (int) _entity.get("fog_of_war_range");
-
-                ClientUnit unit = new ClientUnit(x,y,flip,texture,rgb,stats,transparent,fog_of_war_range,is_our);
-                entities.add(unit);
             }
 
-        }
+            mp = (int) data_map.get("mp");
+            is_it_your_turn = (boolean) data_map.get("is_it_your_turn");
 
-        mp = (int) data_map.get("mp");
-        is_it_your_turn = (boolean) data_map.get("is_it_your_turn");
+            // Build fog of war
+            fog_of_war = new boolean[mapLoader.getHeight()][mapLoader.getWidth()];
 
-        // Build fog of war
-        fog_of_war = new boolean[mapLoader.getHeight()][mapLoader.getWidth()];
-
-        for (ClientEntity entity: entities){
-            if (entity instanceof ClientUnit u){
-                if (u.is_our) {
-                    for (int y = u.getY()-u.getFogOfWarRange(); y <= u.getY()+u.getFogOfWarRange(); y++){
-                        for (int x = u.getX()-u.getFogOfWarRange(); x <= u.getX()+u.getFogOfWarRange(); x++){
-                            if (x >= 0 && y >= 0 && x < fog_of_war.length && y < fog_of_war[0].length){
-                                fog_of_war[y][x] = true;
+            for (ClientEntity entity : entities) {
+                if (entity instanceof ClientUnit u) {
+                    if (u.is_our) {
+                        for (int y = u.getY() - u.getFogOfWarRange(); y <= u.getY() + u.getFogOfWarRange(); y++) {
+                            for (int x = u.getX() - u.getFogOfWarRange(); x <= u.getX() + u.getFogOfWarRange(); x++) {
+                                if (x >= 0 && y >= 0 && x < fog_of_war.length && y < fog_of_war[0].length) {
+                                    fog_of_war[y][x] = true;
+                                }
                             }
                         }
                     }
                 }
             }
+
+            chat = (ArrayList<String>) data_map.get("chat");
+        } catch (JsonProcessingException e){
+            lock.unlock();
+            return new Expect<>(() -> "Failed to parse JSON");
+        } catch (ClassCastException | NullPointerException e){
+            lock.unlock();
+            return new Expect<>(() -> "Incorrect packet format");
         }
 
-        chat = (ArrayList<String>) data_map.get("chat");
-
         lock.unlock();
-
+        return new Expect<>("");
     }
 
     public Object[] buildView(int x, int y){

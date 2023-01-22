@@ -190,6 +190,26 @@ public class AssetLoader {
 
     public static void loadAll(){
         LOGGER.log(Level.INFO, "Loading all assets...");
+
+        BufferedImage texture_missing = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+        Graphics2D graphics2D = texture_missing.createGraphics();
+        graphics2D.setColor(Color.magenta);
+        graphics2D.fillRect(0, 0, 32, 32);
+        graphics2D.setColor(Color.BLACK);
+        graphics2D.fillRect(0, 0, 16, 16);
+        graphics2D.fillRect(16, 16, 16, 16);
+        graphics2D.dispose();
+
+        BufferedImage empty = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+        graphics2D = empty.createGraphics();
+        graphics2D.setColor(Color.BLACK);
+        graphics2D.fillRect(0, 0, 32, 32);
+        graphics2D.dispose();
+
+        img_storage.put("empty.png", empty);
+        img_storage.put("empty", empty);
+        img_storage.put("texture_missing", texture_missing);
+
         for (String res: resources){
             load(res);
         }
@@ -216,7 +236,7 @@ public class AssetLoader {
                     img_storage.put(img_path, ImageIO.read(Objects.requireNonNull(AssetLoader.class.getClassLoader().getResource(img_path))));
                 } catch (IOException e) {
                     LOGGER.log(Level.WARNING, "Failed to load " + img_path);
-                    return null;
+                    return img_storage.get("texture_missing");
                 }
             }
             return img_storage.get(img_path);

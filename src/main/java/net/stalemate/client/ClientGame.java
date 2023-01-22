@@ -399,50 +399,65 @@ public class ClientGame {
     }
 
     public Object[] buildView(int x, int y){
-        Object[] fog_of_war_and_entities = new Object[2];
-        boolean[][] fog_of_war_s = new boolean[7][15];
-        ClientEntity[][] entities_s = new ClientEntity[7][15];
+        try {
+            lock.lock();
+            Object[] fog_of_war_and_entities = new Object[2];
+            boolean[][] fog_of_war_s = new boolean[7][15];
+            ClientEntity[][] entities_s = new ClientEntity[7][15];
 
-        for (ClientEntity entity: entities){
-            if (entity.getY() >= y-1 && entity.getY() < y+6){
-                if (entity.getX() >= x-1 && entity.getX() < x+14){
-                    if (entity instanceof ClientUnit u) {
-                        if (!u.isTransparent())
-                        entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+            for (ClientEntity entity : entities) {
+                if (entity.getY() >= y - 1 && entity.getY() < y + 6) {
+                    if (entity.getX() >= x - 1 && entity.getX() < x + 14) {
+                        if (entity instanceof ClientUnit u) {
+                            if (!u.isTransparent())
+                                entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+                        }
                     }
                 }
             }
-        }
 
-        for (ClientEntity entity: entities){
-            if (entity.getY() >= y-1 && entity.getY() < y+6){
-                if (entity.getX() >= x-1 && entity.getX() < x+14){
-                    if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] == null)
-                        entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+            for (ClientEntity entity : entities) {
+                if (entity.getY() >= y - 1 && entity.getY() < y + 6) {
+                    if (entity.getX() >= x - 1 && entity.getX() < x + 14) {
+                        if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] == null)
+                            entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+                    }
                 }
             }
-        }
 
-        for (int _y = y-1; _y < y+6; _y++){
-            for (int _x = x-1; _x < x+14; _x++){
-                if (_x >= 0 && _y >= 0 && _y < mapLoader.getHeight() && _x < mapLoader.getWidth()) {
-                    boolean s = fog_of_war[_y][_x];
-                    fog_of_war_s[_y - y+1][_x - x+1] = s;
+            for (int _y = y - 1; _y < y + 6; _y++) {
+                for (int _x = x - 1; _x < x + 14; _x++) {
+                    if (_x >= 0 && _y >= 0 && _y < mapLoader.getHeight() && _x < mapLoader.getWidth()) {
+                        boolean s = fog_of_war[_y][_x];
+                        fog_of_war_s[_y - y + 1][_x - x + 1] = s;
+                    }
                 }
             }
-        }
 
-        fog_of_war_and_entities[0] = entities_s;
-        fog_of_war_and_entities[1] = fog_of_war_s;
-        return fog_of_war_and_entities;
+            fog_of_war_and_entities[0] = entities_s;
+            fog_of_war_and_entities[1] = fog_of_war_s;
+            return fog_of_war_and_entities;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public ArrayList<String> getChat(){
-        return chat;
+        try {
+            lock.lock();
+            return chat;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public ClientSelectedUnit getSelectedUnit(){
-        return selectedUnit;
+        try {
+            lock.lock();
+            return selectedUnit;
+        } finally {
+            lock.unlock();
+        }
     }
 
 

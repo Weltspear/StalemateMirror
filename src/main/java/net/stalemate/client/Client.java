@@ -80,8 +80,6 @@ public class Client {
     }
 
     public static class GameControllerClient{
-        int client_cam_x = 0;
-        int client_cam_y = 0;
 
         int client_sel_x;
         int client_sel_y;
@@ -100,19 +98,19 @@ public class Client {
         }
 
         private final ClientGame clientGame;
+        private final InGameUI inGameUI;
 
         HashMap<String, Object> selected_unit = null;
 
         final InGameUI.KeyboardInput in;
-        private final ClientMapLoader clientMapLoader;
 
         private boolean isselectorbutton_press = false;
 
-        public GameControllerClient(InGameUI.KeyboardInput input, ClientMapLoader clientMapLoader){
+        public GameControllerClient(InGameUI.KeyboardInput input, InGameUI inGameUI, ClientGame clientGame){
             in = input;
-            this.clientMapLoader = clientMapLoader;
 
-            this.clientGame = new ClientGame(clientMapLoader);
+            this.clientGame = clientGame;
+            this.inGameUI = inGameUI;
         }
 
         @SuppressWarnings("unchecked")
@@ -171,8 +169,10 @@ public class Client {
                 String input = in.getQueue().poll();
 
                 if (Objects.equals(input, "SHIFT")){
-                    client_cam_x = cbas_x;
-                    client_cam_y = cbas_y;
+                    inGameUI.unsafeLock.lock();
+                    inGameUI.cam_x = cbas_x;
+                    inGameUI.cam_y = cbas_y;
+                    inGameUI.unsafeLock.unlock();
 
                     client_sel_x = sbas_x;
                     client_sel_y = sbas_y;
@@ -254,41 +254,13 @@ public class Client {
                 }
             }
 
-            // offset stuff
-            int offx = in.getOffsetX();
-            int offy = in.getOffsetY();
 
-            if (clientMapLoader.isMapLoaded()) {
-                if (offx <= -64) {
-                    if (client_cam_x + 5 >= 0) { // (client_cam_x + 6 >= 0 && client_cam_y + 2 >= 0) && (client_cam_y + 2 < clientMapLoader.getHeight()) && client_cam_x + 6 < clientMapLoader.getWidth()
-                        client_cam_x--;
-                        reset_x_offset = true;
-                    }
-                }
-                if (offx >= 64) {
-                    if (client_cam_x + 7 < clientMapLoader.getWidth()) {
-                        client_cam_x++;
-                        reset_x_offset = true;
-                    }
-                }
+            inGameUI.unsafeLock.lock();
 
-                if (offy >= 64){
-                    if ( client_cam_y + 3 < clientMapLoader.getHeight()) {
-                        client_cam_y++;
-                        reset_y_offset = true;
-                    }
-                }
-                if (offy <= -64){
-                    if (client_cam_y + 1 >= 0) {
-                        client_cam_y--;
-                        reset_y_offset = true;
-                    }
-                }
-            }
+            packet.put("cam_x", inGameUI.cam_x);
+            packet.put("cam_y", inGameUI.cam_y);
 
-
-            packet.put("cam_x", client_cam_x);
-            packet.put("cam_y", client_cam_y);
+            inGameUI.unsafeLock.unlock();
 
             packet.put("sel_x", client_sel_x);
             packet.put("sel_y", client_sel_y);
@@ -586,10 +558,11 @@ public class Client {
             client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
 
 
+            ClientGame cgame = new ClientGame(new ClientMapLoader());
             InGameUI inGameUI = new InGameUI();
-            InGameUIRunnable runnable = new InGameUIRunnable(inGameUI);
+            InGameUIRunnable runnable = new InGameUIRunnable(inGameUI, cgame);
             (new Thread(runnable)).start();
-            GameControllerClient controller = new GameControllerClient(inGameUI.getInput(), inGameUI.getRenderer().getMapLoader());
+            GameControllerClient controller = new GameControllerClient(inGameUI.getInput(), inGameUI, cgame);
 
             int tick = 0;
 
@@ -625,19 +598,17 @@ public class Client {
                 }
                 controller.receive_packet(json.unwrap());
 
-                Object[] ef = controller.getClientGame().buildView(controller.client_cam_x, controller.client_cam_y);
+                inGameUI.getRenderer().setSelectorData(controller.sel_x, controller.sel_y);
 
-                Expect<String, ?> expect = inGameUI.getRenderer().change_render_data(controller.resetOffsetArn(), controller.getClientGame().getChat(),
-                        (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], controller.getClientGame().getSelectedUnit(), controller.getClientGame().getMp(),
-                        controller.getClientGame().isIsItYourTurn(), controller.sel_x, controller.sel_y, controller.getClientGame().getMapPath() ,controller.client_cam_x, controller.client_cam_y);
-                if (expect.isNone()) {
+                // fixme: handle those exceptions
+                /*if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
                     runnable.terminate();
                     client.close();
                     inGameUI.getFrame().dispose();
                     String msg = "Failed to read server packet, shutting down client: " + expect.getResult().message();
                     return new Expect<>(() -> msg);
-                }
+                }*/
 
 
                 // Escape menu connection termination

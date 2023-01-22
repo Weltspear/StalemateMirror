@@ -124,6 +124,9 @@ public class InGameUI extends JPanel {
 
     private EscapeMenu escapeMenu = null;
 
+    public int cam_x;
+    public int cam_y;
+
     public class KeyboardInput implements KeyListener {
 
         private final ConcurrentLinkedQueue<String> keysInQueue = new ConcurrentLinkedQueue<>();
@@ -248,6 +251,9 @@ public class InGameUI extends JPanel {
         private final BufferedImage skull;
         private final BufferedImage shovel;
 
+        private int tsel_x;
+        private int tsel_y;
+
         static class CachedBufferedImage{
             public BufferedImage image;
 
@@ -334,9 +340,12 @@ public class InGameUI extends JPanel {
             skull = AssetLoader.load("assets/skull.png");
         }
 
-        public synchronized Expect<String, ?> change_render_data(boolean[] resetOffsets, ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
+        public synchronized Expect<String, ?> change_render_data(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                                                  boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                                                                 boolean is_it_your_turn, int sel_x, int sel_y, String map_path, int cam_x, int cam_y) {
+                                                                 boolean is_it_your_turn, String map_path) {
+            if (map_path == null){
+                return new Expect<>("");
+            }
             try {
                 this.interface_.unsafeLock.lock();
                 PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
@@ -349,7 +358,7 @@ public class InGameUI extends JPanel {
                     return m_;
                 }
 
-                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(cam_x, cam_y);
+                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y);
 
                 ArrayList<BufferedImage> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
@@ -634,8 +643,9 @@ public class InGameUI extends JPanel {
                     y++;
                 }
 
-                int sel_x_frame = (sel_x - (cam_x+6))*64 + 6*64;
-                int sel_y_frame = (sel_y - (cam_y+2))*64 + 2*64;
+                // if no new sel_x and sel_y have been received in a long time fall back to previous
+                this.interface_.sel_x_frame = (tsel_x - (this.interface_.cam_x+6))*64 + 6*64;
+                this.interface_.sel_y_frame = (tsel_y - (this.interface_.cam_y+2))*64 + 2*64;
 
                 this.interface_.unsafeLock.lock();
                 this.interface_.map_to_render = map;
@@ -652,17 +662,8 @@ public class InGameUI extends JPanel {
                 this.interface_.mp = mp;
                 this.interface_.is_it_your_turn = is_it_your_turn;
                 this.interface_.id_array = button_ids;
-                this.interface_.sel_x_frame = sel_x_frame;
-                this.interface_.sel_y_frame = sel_y_frame;
                 this.interface_.chat = chat;
                 this.interface_.unsafeLock.unlock();
-
-                if (resetOffsets[0]){
-                    this.interface_.offset_x = 0;
-                }
-                if (resetOffsets[1]){
-                    this.interface_.offset_y = 0;
-                }
 
                 if (cachedUnitDataArImgs.size() > 100){
                     cachedUnitDataArImgs.clear();
@@ -676,6 +677,18 @@ public class InGameUI extends JPanel {
 
             interface_.unsafeLock.unlock();
             return new Expect<>(() -> "Incorrect packet format");
+        }
+
+        public void setSelectorData(int sel_x, int sel_y){
+            interface_.unsafeLock.lock();
+            tsel_x = sel_x;
+            tsel_y = sel_y;
+            int sel_x_frame = (sel_x - (this.interface_.cam_x+6))*64 + 6*64;
+            int sel_y_frame = (sel_y - (this.interface_.cam_y+2))*64 + 2*64;
+
+            this.interface_.sel_x_frame = sel_x_frame;
+            this.interface_.sel_y_frame = sel_y_frame;
+            interface_.unsafeLock.unlock();
         }
 
     }
@@ -987,6 +1000,32 @@ public class InGameUI extends JPanel {
 
         if (offset_direction != OffsetDirection.None){
             do_render_prev = false;
+        }
+
+        if (offset_x <= -64) {
+            if (cam_x + 5 >= 0) {
+                cam_x--;
+                offset_x = 0;
+            }
+        }
+        if (offset_x >= 64) {
+            if (cam_x + 7 < renderer.getMapLoader().getWidth()) {
+                cam_x++;
+                offset_x = 0;
+            }
+        }
+
+        if (offset_y >= 64){
+            if ( cam_y + 3 < renderer.getMapLoader().getHeight()) {
+                cam_y++;
+                offset_y = 0;
+            }
+        }
+        if (offset_y <= -64){
+            if (cam_y + 1 >= 0) {
+                cam_y--;
+                offset_y = 0;
+            }
         }
 
         unsafeLock.unlock();

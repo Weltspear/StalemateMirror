@@ -406,7 +406,19 @@ public class ClientGame {
         for (ClientEntity entity: entities){
             if (entity.getY() >= y-1 && entity.getY() < y+6){
                 if (entity.getX() >= x-1 && entity.getX() < x+14){
-                    entities_s[entity.getY()-y+1][entity.getX()-x+1] = entity;
+                    if (entity instanceof ClientUnit u) {
+                        if (!u.isTransparent())
+                        entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+                    }
+                }
+            }
+        }
+
+        for (ClientEntity entity: entities){
+            if (entity.getY() >= y-1 && entity.getY() < y+6){
+                if (entity.getX() >= x-1 && entity.getX() < x+14){
+                    if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] == null)
+                        entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
                 }
             }
         }

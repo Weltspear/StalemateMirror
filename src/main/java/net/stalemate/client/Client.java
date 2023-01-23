@@ -107,6 +107,8 @@ public class Client {
 
         private boolean isselectorbutton_press = false;
 
+        private boolean first_packet = true;
+
         public GameControllerClient(InGameUI.KeyboardInput input, InGameUI inGameUI, ClientGame clientGame){
             in = input;
 
@@ -135,6 +137,18 @@ public class Client {
 
                 sbas_x = (int) data_map.get("sbas_x");
                 sbas_y = (int) data_map.get("sbas_y");
+
+                if (first_packet){
+                    client_sel_x = sbas_x;
+                    client_sel_y = sbas_y;
+
+                    inGameUI.unsafeLock.lock();
+                    inGameUI.cam_x = cbas_x;
+                    inGameUI.cam_y = cbas_y;
+                    inGameUI.unsafeLock.unlock();
+
+                    first_packet = false;
+                }
 
                 if (!(data_map.get("selected_unit_data") instanceof Integer) && data_map.get("selected_unit_data") != null){
                     selected_unit = (HashMap<String, Object>) data_map.get("selected_unit_data");

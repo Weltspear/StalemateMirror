@@ -476,6 +476,65 @@ public class ClientGame {
         }
     }
 
+    public Image drawMinimap(int cam_x, int cam_y){ // +30 -30
+        lock.lock();
+        if (!mapLoader.isMapLoaded()){
+            lock.unlock();
+            return null;
+        }
+
+        //BufferedImage tminimap = new BufferedImage(192, 192, BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage minimap = new BufferedImage(mapLoader.getWidth(), mapLoader.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage minimapLimit = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB_PRE);
+
+        ArrayList<ArrayList<String>> entire_map = mapLoader.getEntireMap();
+
+        for (int y = 0; y < mapLoader.getHeight(); y++){
+            for (int x = 0; x < mapLoader.getWidth(); x++){
+                minimap.setRGB(x, y, AssetLoader.load(entire_map.get(y).get(x)).getRGB(15, 15));
+            }
+        }
+
+        for (ClientEntity entity: entities){
+            if (entity instanceof ClientUnit u){
+                minimap.setRGB(u.getX(), u.getY(), u.getTeamColor().getRGB());
+            }
+        }
+
+        BufferedImage empty = AssetLoader.load("empty.png");
+        int ergb = empty.getRGB(0,0);
+
+        for (int y = 0; y < mapLoader.getHeight(); y++){
+            for (int x = 0; x < mapLoader.getWidth(); x++){
+                if (!fog_of_war[y][x]) {
+                    Color c = new Color(minimap.getRGB(x, y));
+                    Color d = new Color((int) (c.getRed()*0.25), (int) (c.getGreen()*0.25), (int) (c.getBlue()*0.25));
+                    minimap.setRGB(x, y, d.getRGB());
+                }
+            }
+        }
+
+        int y2 = 0;
+        int x2 = 0;
+        for (int y = cam_y-30; y < cam_y+30; y++){
+            for (int x = cam_x-30; x < cam_x+30; x++){
+                if (y < 0 || x < 0 || x >= minimap.getWidth() || y >= minimap.getHeight()){
+                    minimapLimit.setRGB(x2, y2, Color.BLACK.getRGB());
+                }
+                else{
+                    minimapLimit.setRGB(x2, y2, minimap.getRGB(x, y));
+                }
+                x2++;
+            }
+            x2 = 0;
+            y2++;
+        }
+
+        lock.unlock();
+        return minimapLimit.getScaledInstance(160, 160, Image.SCALE_FAST);
+
+    }
+
 
 
 }

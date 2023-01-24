@@ -34,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ClientMapLoader {
     private String map_path = "";
     private ArrayList<ArrayList<String>> map = new ArrayList<>();
-    private ReentrantLock lock = new ReentrantLock();
+    private final ReentrantLock lock = new ReentrantLock();
     private boolean is_map_loaded = false;
 
     public static class ClientMapLoaderError implements ErrorResult {
@@ -158,5 +158,16 @@ public class ClientMapLoader {
         }
         lock.unlock();
         return map_textures;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ArrayList<ArrayList<String>> getEntireMap(){
+        try {
+            lock.lock();
+            return (ArrayList<ArrayList<String>>) map.clone();
+        }
+        finally {
+            lock.unlock();
+        }
     }
 }

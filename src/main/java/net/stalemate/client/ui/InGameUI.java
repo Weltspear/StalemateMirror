@@ -18,11 +18,6 @@
 
 package net.stalemate.client.ui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
-import net.libutils.error.Expect;
 import net.stalemate.client.AssetLoader;
 import net.stalemate.client.ClientGame;
 import net.stalemate.client.ClientMapLoader;
@@ -51,6 +46,8 @@ public class InGameUI extends JPanel {
     @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
     private final Font monogram_button;
     private boolean focus_desktop_pane = false;
+
+    private Image minimap = null;
 
     private final JFrame frame;
     private boolean do_offset = false;
@@ -322,13 +319,15 @@ public class InGameUI extends JPanel {
         }
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
-                                                         boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                                                         boolean is_it_your_turn, ClientMapLoader clMapLoader) {
-            if (clMapLoader == null){
+                               boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
+                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap) {
+            if (!clMapLoader.isMapLoaded()){
                 return;
             }
             try {
                 this.interface_.unsafeLock.lock();
+
+                this.interface_.minimap = minimap;
 
                 if (!mapLoader.isMapLoaded()){
                     mapLoader.loadFromOther(clMapLoader);
@@ -386,7 +385,8 @@ public class InGameUI extends JPanel {
                     }
                 }
 
-                selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
+                if (selector == null)
+                    selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
 
                 // deal with map
                 ArrayList<ArrayList<BufferedImage>> map = new ArrayList<>();
@@ -630,7 +630,6 @@ public class InGameUI extends JPanel {
             }
 
             interface_.unsafeLock.unlock();
-            return;
         }
 
         public void setSelectorData(int sel_x, int sel_y){
@@ -902,13 +901,27 @@ public class InGameUI extends JPanel {
         }
 
         if (offset_direction == OffsetDirection.Left){
-            if (offset_x >= -64) {
+            if (offset_x >= -64 && clDataManager.mapLoader.isMapLoaded()) {
                 offset_x -= 4*2;
+
+                if (offset_x == -64) {
+                    if (cam_x + 5 >= 0) {
+                        cam_x--;
+                        offset_x = 0;
+                    }
+                }
             }
         }
         else if (offset_direction == OffsetDirection.Right){
-            if (offset_x <= 64) {
+            if (offset_x <= 64 && clDataManager.mapLoader.isMapLoaded()) {
                 offset_x += 4*2;
+
+                if (offset_x == 64) {
+                    if (cam_x + 7 < clDataManager.getMapLoader().getWidth()) {
+                        cam_x++;
+                        offset_x = 0;
+                    }
+                }
             }
         }
 
@@ -921,13 +934,27 @@ public class InGameUI extends JPanel {
 
 
         if (offset_direction == OffsetDirection.Up){
-            if (offset_y >= -64) {
+            if (offset_y >= -64 && clDataManager.mapLoader.isMapLoaded()) {
                 offset_y -= 4*2;
+
+                if (offset_y == -64){
+                    if (cam_y + 1 >= 0) {
+                        cam_y--;
+                        offset_y = 0;
+                    }
+                }
             }
         }
         if (offset_direction == OffsetDirection.Down){
-            if (offset_y <= 64) {
+            if (offset_y <= 64 && clDataManager.mapLoader.isMapLoaded()) {
                 offset_y += 4*2;
+
+                if (offset_y == 64){
+                    if (cam_y + 3 < clDataManager.getMapLoader().getHeight()) {
+                        cam_y++;
+                        offset_y = 0;
+                    }
+                }
             }
         }
 
@@ -942,32 +969,6 @@ public class InGameUI extends JPanel {
             do_render_prev = false;
         }
 
-        if (offset_x <= -64) {
-            if (cam_x + 5 >= 0) {
-                cam_x--;
-                offset_x = 0;
-            }
-        }
-        if (offset_x >= 64) {
-            if (cam_x + 7 < clDataManager.getMapLoader().getWidth()) {
-                cam_x++;
-                offset_x = 0;
-            }
-        }
-
-        if (offset_y >= 64){
-            if (cam_y + 3 < clDataManager.getMapLoader().getHeight()) {
-                cam_y++;
-                offset_y = 0;
-            }
-        }
-        if (offset_y <= -64){
-            if (cam_y + 1 >= 0) {
-                cam_y--;
-                offset_y = 0;
-            }
-        }
-
         unsafeLock.unlock();
     }
 
@@ -980,11 +981,11 @@ public class InGameUI extends JPanel {
 
         g.clearRect(0, 0, 900, 900);
         unsafeLock.lock();
+
         try {
             g.drawImage(placeholder_ui, 0, 384, null);
             g.drawImage(placeholder_ui_2, 0, 0, null);
             g.drawImage(panel, 640, 384, null);
-            if (queue != null)
             g.drawImage(panel, 0, 384, null);
 
             BufferedImage bufferedImage = new BufferedImage(13*64, 5*64, BufferedImage.TYPE_INT_ARGB_PRE);
@@ -1030,6 +1031,10 @@ public class InGameUI extends JPanel {
                     y += 64;
                 }
             }
+
+            // Render minimap
+            if (minimap != null && queue == null)
+                g.drawImage(minimap, 16, 400, null);
 
             // Render the queue
             if (queue != null) {

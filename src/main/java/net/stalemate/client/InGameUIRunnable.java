@@ -18,9 +18,10 @@
 
 package net.stalemate.client;
 
-import net.libutils.error.Expect;
 import net.stalemate.client.ui.InGameUI;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InGameUIRunnable implements Runnable {
@@ -44,17 +45,21 @@ public class InGameUIRunnable implements Runnable {
             lock.lock();
             long t1 = System.currentTimeMillis();
             try {
-                g.inGameUIUpdate();
-                g.repaint();
+		        g.inGameUIUpdate();
 
                 g.unsafeLock.lock();
                 Object[] ef = cgame.buildView(g.cam_x, g.cam_y);
 
-                g.getClDataManager().updateData(cgame.getChat(),
-                        (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], cgame.getSelectedUnit(), cgame.getMp(),
-                        cgame.isIsItYourTurn(), cgame.getClMapLoader());
+                Image minimap = cgame.drawMinimap(g.cam_x, g.cam_y);
 
                 g.unsafeLock.unlock();
+
+                g.getClDataManager().updateData(cgame.getChat(),
+                        (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], cgame.getSelectedUnit(), cgame.getMp(),
+                        cgame.isIsItYourTurn(), cgame.getClMapLoader(), minimap);
+
+                g.repaint();
+
 
                 long t2 = System.currentTimeMillis() - t1;
                 if (8 - t2 > 0) {

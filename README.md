@@ -33,18 +33,20 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [ ] CAS bomber
   - [ ] Strategic bomber
   - [ ] Anti-Air
-  - [ ] Helicopters
   - [ ] An icon above a unit signalising that there's a plane over it
-- [ ] Minimap
+- [x] Minimap
+  - [x] Initial minimap implementation
+  - [ ] Make units on minimap blink when attacked
+- [ ] Make the entire game use one JFrame
 - [x] Unit flags
 - [ ] Terrain buffs and debuffs
 - [ ] Remove entrenchment when unit killed another unit and moved
 - [ ] Unit experience
 - [ ] Check how does multiplayer with more than 2 players work
   - [ ] If there is a player lobby with more than two players don't terminate the game
-- [ ] Remove building supply
+- [ ] Return to old supply system (Buildings don't have supply)
 - [ ] Increase SupplyStation range
-- [ ] Protocol refactor
+- [x] Protocol refactor
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

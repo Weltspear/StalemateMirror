@@ -323,17 +323,15 @@ public class InGameUI extends JPanel {
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                                          boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                                                         boolean is_it_your_turn, String map_path) {
-            if (map_path == null){
+                                                         boolean is_it_your_turn, ClientMapLoader clMapLoader) {
+            if (clMapLoader == null){
                 return;
             }
             try {
                 this.interface_.unsafeLock.lock();
-                //Map<String, Object> data_map = objectMapper.readValue(json, Map.class);
 
-                Expect<String, ?> m_ = mapLoader.load(map_path);
-                if (m_.isNone()){
-                    return;
+                if (!mapLoader.isMapLoaded()){
+                    mapLoader.loadFromOther(clMapLoader);
                 }
 
                 ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y);

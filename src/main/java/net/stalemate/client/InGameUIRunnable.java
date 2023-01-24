@@ -52,7 +52,7 @@ public class InGameUIRunnable implements Runnable {
 
                 g.getClDataManager().updateData(cgame.getChat(),
                         (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], cgame.getSelectedUnit(), cgame.getMp(),
-                        cgame.isIsItYourTurn(), cgame.getMapPath());
+                        cgame.isIsItYourTurn(), cgame.getClMapLoader());
 
                 g.unsafeLock.unlock();
 

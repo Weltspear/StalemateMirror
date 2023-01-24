@@ -48,6 +48,17 @@ public class ClientMapLoader {
 
     }
 
+    @SuppressWarnings("unchecked")
+    public void loadFromOther(ClientMapLoader clientMapLoader){
+        lock.lock();
+        clientMapLoader.lock.lock();
+        this.map = (ArrayList<ArrayList<String>>) clientMapLoader.map.clone();
+        this.is_map_loaded = true;
+        this.map_path = clientMapLoader.map_path;
+        clientMapLoader.lock.unlock();
+        lock.unlock();
+    }
+
     private record Tile(String texture_file){}
 
     public int getWidth(){

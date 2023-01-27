@@ -111,6 +111,10 @@ public class ClientMenu extends JPanel {
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
 
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
@@ -126,7 +130,7 @@ public class ClientMenu extends JPanel {
             g.drawImage(title.getScaledInstance(364, 64, Image.SCALE_FAST), 234, 230-60, null);
 
         if (status == 3) {
-            // Render connecting]
+            // Render connecting
             g.setFont(AssetLoader.getMonogram().deriveFont(25f));
             g.setColor(Color.WHITE);
             int half = ((832 + 14) - width * "Connecting...".length()) / 2;

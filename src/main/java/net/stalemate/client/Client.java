@@ -308,12 +308,12 @@ public class Client {
 
     public Expect<Integer, ?> start_client(){
         try {
-            client = new Socket(InetAddress.getByName(ip).getHostAddress(), 59657);
-
             clientMenu.setStatus(3);
             clientMenu.update();
+
+            client = new Socket(InetAddress.getByName(ip).getHostAddress(), 59657);
+
             clientMenu.clFrame();
-            frame.setVisible(false);
 
             return handle_connection();
         } catch (ConnectException e){

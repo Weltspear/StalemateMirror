@@ -755,9 +755,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     // Deselect a unit if it is in fog of war and if it is removed or dead
                     if (selected_unit != null) {
-                        if (!entities_in_range.contains(selected_unit)){
-                            entities_in_range.remove(selected_unit);
+                        if (!lgame.getAllEntitiesCopy().contains(selected_unit) || selected_unit.getHp() <= 0){
                             selected_unit = null;
+                            iselectorbuttonid = null;
                         }
                     }
 

@@ -27,6 +27,7 @@ import net.stalemate.server.Server;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,6 +61,12 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
         frame.pack();
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.setLayout(null);
+
+        // Disable F10 bind due to weird stuff happening when openning escape menu
+        Action emptyAction = new AbstractAction(){public void actionPerformed(ActionEvent e) {}};
+        KeyStroke f10 = KeyStroke.getKeyStroke("F10");
+        frame.getRootPane().getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(f10, "F10");
+        frame.getRootPane().getActionMap().put("F10", emptyAction);
 
         Font monogram = AssetLoader.getMonogram();
 

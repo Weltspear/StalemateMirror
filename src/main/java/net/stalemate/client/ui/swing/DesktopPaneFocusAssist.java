@@ -32,6 +32,7 @@ public class DesktopPaneFocusAssist extends JDesktopPane{
     public DesktopPaneFocusAssist(JComponent componentToRegainFocus) {
         super();
         this.setOpaque(true);
+        this.setFocusable(true);
         this.componentToRegainFocus = componentToRegainFocus;
     }
 

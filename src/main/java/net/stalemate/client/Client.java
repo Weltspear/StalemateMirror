@@ -453,7 +453,8 @@ public class Client {
                 }
             }
 
-            frame.setVisible(true);
+            frame.validate();
+            frame.repaint();
             LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame, srv_desc.unwrap().replace("<br>", "\n"));
 
             boolean has_connected_to_lb = false;
@@ -528,13 +529,13 @@ public class Client {
                     return new Expect<>(1);
                 }
             }
-            frame.setVisible(false);
             lobbySelectMenu.clFrame();
 
             LOGGER.log(Level.INFO, "Connected to lobby!");
 
+            frame.validate();
+            frame.repaint();
             LobbyMenu lobbyMenu = new LobbyMenu(frame);
-            frame.setVisible(true);
 
             // waiting in lobby
             while (true) {
@@ -572,13 +573,14 @@ public class Client {
             }
 
             lobbyMenu.clFrame();
-            frame.setVisible(false);
+            frame.validate();
+            frame.repaint();
 
             client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
 
 
             ClientGame cgame = new ClientGame(new ClientMapLoader());
-            InGameUI inGameUI = new InGameUI();
+            InGameUI inGameUI = new InGameUI(frame);
             InGameUIRunnable runnable = new InGameUIRunnable(inGameUI, cgame);
             (new Thread(runnable)).start();
             GameControllerClient controller = new GameControllerClient(inGameUI.getInput(), inGameUI, cgame);
@@ -599,7 +601,7 @@ public class Client {
                     client.close();
                     LOGGER.log(Level.WARNING, "Failed to read packet: " + json.getResult().message());
                     runnable.terminate();
-                    inGameUI.getFrame().dispose();
+                    inGameUI.clFrame();
                     String msg = "Failed to read packet: " + json.getResult().message();
                     return new Expect<>(() -> msg);
                 }
@@ -611,7 +613,7 @@ public class Client {
                     String cause = input.readLine();
                     LOGGER.log(Level.WARNING, "Lobby was terminated. Additional information: " + cause);
                     runnable.terminate();
-                    inGameUI.getFrame().dispose();
+                    inGameUI.clFrame();
                     client.close();
                     return new Expect<>(() -> "Lobby was terminated. Additional information: " + cause);
                 }
@@ -619,12 +621,11 @@ public class Client {
 
                 inGameUI.getClDataManager().setSelectorData(controller.sel_x, controller.sel_y);
 
-                // fixme: handle those exceptions
                 if (expect.isNone()) {
                     LOGGER.log(Level.WARNING, "Failed to read server packet, shutting down client: " + expect.getResult().message());
                     runnable.terminate();
                     client.close();
-                    inGameUI.getFrame().dispose();
+                    inGameUI.clFrame();
                     String msg = "Failed to read server packet, shutting down client: " + expect.getResult().message();
                     return new Expect<>(() -> msg);
                 }
@@ -634,7 +635,7 @@ public class Client {
                 if (inGameUI.isTermicon()) {
                     runnable.terminate();
                     client.close();
-                    inGameUI.getFrame().dispose();
+                    inGameUI.clFrame();
                     return new Expect<>(1);
                 }
 
@@ -648,7 +649,7 @@ public class Client {
                 client.close();
                 runnable.terminate();
                 String msg = "Failed to get result " + result.getResult().message();
-                inGameUI.getFrame().dispose();
+                inGameUI.clFrame();
                 return new Expect<>(() -> msg);
             }
             client.close();
@@ -660,7 +661,7 @@ public class Client {
             }
 
             runnable.terminate();
-            inGameUI.getFrame().dispose();
+            inGameUI.clFrame();
 
             return new Expect<>(1);
 

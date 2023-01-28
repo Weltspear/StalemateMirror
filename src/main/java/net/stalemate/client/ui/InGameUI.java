@@ -35,7 +35,10 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -45,12 +48,17 @@ public class InGameUI extends JPanel {
     private final JDesktopPane p;
     @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
     private final Font monogram_button;
+    private final MListener m;
     private boolean focus_desktop_pane = false;
+
+    private boolean isdead = false; // it is here because of weird issues with javax.swing
 
     private Image minimap = null;
 
     private final JFrame frame;
     private boolean do_offset = false;
+
+    private boolean hasFirstPackedBeenReceived = false;
 
     public JFrame getFrame(){return frame;}
 
@@ -58,8 +66,8 @@ public class InGameUI extends JPanel {
      * Ids of buttons to be rendered
      */
     String[][] id_array = {{null, null, null},
-                        {null, null, null},
-                        {null, null, null}};
+            {null, null, null},
+            {null, null, null}};
 
 
     public ClientDataManager getClDataManager() {
@@ -159,60 +167,58 @@ public class InGameUI extends JPanel {
         @Override
         public void keyPressed(KeyEvent e) {
             lock.lock();
-
-            if (!isTypingChatMessage) {
-                if (e.getKeyCode() == KeyboardBindMapper.move_up) {
-                    keysInQueue.add("UP");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
-                    keysInQueue.add("DOWN");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
-                    keysInQueue.add("LEFT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
-                    keysInQueue.add("RIGHT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
-                    keysInQueue.add("ENTER");
-                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                    keysInQueue.add("ESCAPE");
-                } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
-                    keysInQueue.add("SPACE");
-                } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
-                    keysInQueue.add(String.valueOf(e.getKeyChar()));
-                } else if (e.getKeyCode() == KeyboardBindMapper.lock_camera) {
-                    unsafeLock.lock();
-                    if (!dis_offset) {
-                        dis_offset = true;
-                        offset_direction = OffsetDirection.None;
+            if (!focus_desktop_pane) {
+                if (!isTypingChatMessage) {
+                    if (e.getKeyCode() == KeyboardBindMapper.move_up) {
+                        keysInQueue.add("UP");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_down) {
+                        keysInQueue.add("DOWN");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_left) {
+                        keysInQueue.add("LEFT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.move_right) {
+                        keysInQueue.add("RIGHT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.confirm) {
+                        keysInQueue.add("ENTER");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                        keysInQueue.add("ESCAPE");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.finish_turn) {
+                        keysInQueue.add("SPACE");
+                    } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
+                        keysInQueue.add(String.valueOf(e.getKeyChar()));
+                    } else if (e.getKeyCode() == KeyboardBindMapper.lock_camera) {
+                        unsafeLock.lock();
+                        if (!dis_offset) {
+                            dis_offset = true;
+                            offset_direction = OffsetDirection.None;
+                        } else
+                            dis_offset = false;
+                        unsafeLock.unlock();
+                    } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
+                        keysInQueue.add("SHIFT");
+                    } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
+                        isTypingChatMessage = true;
+                    } else if (e.getKeyCode() == KeyEvent.VK_F1) {
+                        keysInQueue.add("TAB");
+                    } else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
+                        spawnEscapeMenu();
                     }
-                    else
-                        dis_offset = false;
-                    unsafeLock.unlock();
-                } else if (e.getKeyCode() == KeyboardBindMapper.goto_first_built_base) {
-                    keysInQueue.add("SHIFT");
-                } else if (e.getKeyCode() == KeyboardBindMapper.chat) {
-                    isTypingChatMessage = true;
-                } else if (e.getKeyCode() == KeyEvent.VK_F1){
-                    keysInQueue.add("TAB");
-                }
-                else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
-                    spawnEscapeMenu();
-                }
-            } else {
-                if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
-                    currentMSG += String.valueOf(e.getKeyChar());
-                } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
-                    currentMSG = "";
-                    isTypingChatMessage = false;
-                } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    isTypingChatMessage = false;
-                    if (!currentMSG.isEmpty())
-                        chatMSGS.add(currentMSG);
-                    currentMSG = "";
-                } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-                    if (currentMSG.length() - 1 >= 0)
-                        currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                } else {
+                    if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
+                        currentMSG += String.valueOf(e.getKeyChar());
+                    } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
+                        currentMSG = "";
+                        isTypingChatMessage = false;
+                    } else if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        isTypingChatMessage = false;
+                        if (!currentMSG.isEmpty())
+                            chatMSGS.add(currentMSG);
+                        currentMSG = "";
+                    } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                        if (currentMSG.length() - 1 >= 0)
+                            currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                    }
                 }
             }
-
             lock.unlock();
         }
 
@@ -326,6 +332,8 @@ public class InGameUI extends JPanel {
             }
             try {
                 this.interface_.unsafeLock.lock();
+
+                this.interface_.hasFirstPackedBeenReceived = true;
 
                 this.interface_.minimap = minimap;
 
@@ -746,30 +754,30 @@ public class InGameUI extends JPanel {
                 }
 
                 if (offset_direction == OffsetDirection.None)
-                if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
-                    if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
+                    if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
+                        if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
 
-                        int x_selector = 448;
-                        int y_selector = 256;
+                            int x_selector = 448;
+                            int y_selector = 256;
 
-                        int x_diff = e.getX() - (x_selector - offset_x);
-                        int y_diff = e.getY() - (y_selector - offset_y);
+                            int x_diff = e.getX() - (x_selector - offset_x);
+                            int y_diff = e.getY() - (y_selector - offset_y);
 
-                        InGameUI.this.x_prev = x_selector + (int)(Math.floor((float)x_diff/64))*64 - offset_x;
-                        InGameUI.this.y_prev = y_selector + (int)(Math.floor((float)y_diff/64))*64 - offset_y;
+                            InGameUI.this.x_prev = x_selector + (int)(Math.floor((float)x_diff/64))*64 - offset_x;
+                            InGameUI.this.y_prev = y_selector + (int)(Math.floor((float)y_diff/64))*64 - offset_y;
 
-                        InGameUI.this.do_render_prev = true;
-                        InGameUI.this.do_offset = true;
+                            InGameUI.this.do_render_prev = true;
+                            InGameUI.this.do_offset = true;
+                        }
+                        else {
+                            InGameUI.this.x_prev = ((e.getX()) / (64));
+                            InGameUI.this.y_prev = ((e.getY()) / (64));
+                            InGameUI.this.do_render_prev = true;
+                            InGameUI.this.do_offset = false;
+                        }
+                    } else {
+                        InGameUI.this.do_render_prev = false;
                     }
-                    else {
-                        InGameUI.this.x_prev = ((e.getX()) / (64));
-                        InGameUI.this.y_prev = ((e.getY()) / (64));
-                        InGameUI.this.do_render_prev = true;
-                        InGameUI.this.do_offset = false;
-                    }
-                } else {
-                    InGameUI.this.do_render_prev = false;
-                }
                 else
                     do_render_prev = false;
 
@@ -781,38 +789,39 @@ public class InGameUI extends JPanel {
         }
     }
 
-    public InGameUI(){
+    public InGameUI(JFrame frame){
         super(null);
         ButtonTooltips.init();
         PropertiesMatcher.loadPropertyMatcher();
         clDataManager = new ClientDataManager(this);
 
-        frame = new JFrame("Stalemate");
-        frame.setMinimumSize(new Dimension(832+14,576+32+6));
-        frame.setSize(new Dimension(832+32,576+32+6));
-        MListener m = new MListener();
+        this.frame = frame;
+        this.frame.setMinimumSize(new Dimension(832+14,576+32+6));
+        this.frame.setSize(new Dimension(832+32,576+32+6));
+        this.m = new MListener();
 
         this.addMouseMotionListener(m);
         this.addMouseListener(m);
+
+        in_client = new KeyboardInput();
+        this.addKeyListener(in_client);
+        this.requestFocusInWindow();
 
         p = new JDesktopPane();
         p.setBackground(new Color(0x00FFFFFF, true));
         p.setVisible(true);
         p.setSize(new Dimension(832+14,576));
         p.setPreferredSize(new Dimension(832+14,576));
+        p.setFocusable(true);
         this.add(p);
 
         this.setMinimumSize(new Dimension(832+14,576+32+6));
         this.setSize(new Dimension(832+32,576+32+6));
 
-        frame.setResizable(false);
-        frame.add(this);
-        frame.setVisible(true);
-        frame.pack();
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.frame.setResizable(false);
+        this.frame.add(this);
 
-        in_client = new KeyboardInput();
-        frame.addKeyListener(in_client);
+        this.frame.pack();
 
         monogram = AssetLoader.getMonogram();
         monogram_button = monogram.deriveFont(((float)(16)));
@@ -826,7 +835,23 @@ public class InGameUI extends JPanel {
         selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
         military_points = AssetLoader.load("assets/mp.png");
 
-        frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
+        this.frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
+
+        this.setFocusable(true);
+        this.requestFocus();
+    }
+
+    public void clFrame(){
+        unsafeLock.lock();
+        for (JInternalFrame frame: p.getAllFrames()){
+            frame.dispose();
+        }
+        this.remove(p);
+        this.removeKeyListener(in_client);
+        this.removeMouseListener(m);
+        this.removeMouseMotionListener(m);
+        isdead = true;
+        unsafeLock.unlock();
     }
 
     private volatile boolean spawnEscapeMenu = false;
@@ -852,23 +877,37 @@ public class InGameUI extends JPanel {
         return termicon;
     }
 
+    private void terminateEscapeMenu(){
+        p.remove(escapeMenu);
+        escapeMenu.dispose();
+        escapeMenu = null;
+        focus_desktop_pane = false;
+        this.addKeyListener(in_client);
+        this.addMouseListener(m);
+        this.addMouseMotionListener(m);
+        this.requestFocus();
+    }
+
+    private void prepareDesktopPane(){
+        this.removeKeyListener(in_client);
+        this.removeMouseListener(m);
+        this.removeMouseMotionListener(m);
+        offset_direction = OffsetDirection.None;
+        focus_desktop_pane = true;
+    }
+
     public void inGameUIUpdate(){
         unsafeLock.lock();
         if (showResults){
             spawnEscapeMenu = false;
             if (escapeMenu != null){
-                p.remove(escapeMenu);
-                escapeMenu = null;
-                focus_desktop_pane = false;
-                frame.addKeyListener(in_client);
-                frame.requestFocus();
+                terminateEscapeMenu();
             }
 
             resultMenu.setLocation((frame.getWidth()-resultMenu.getWidth())/2, (frame.getHeight()-resultMenu.getHeight())/2);
             p.add(resultMenu);
-            focus_desktop_pane = true;
             showResults = false;
-            frame.removeKeyListener(in_client);
+            prepareDesktopPane();
         }
 
         if (resultMenu != null){
@@ -881,23 +920,19 @@ public class InGameUI extends JPanel {
             escapeMenu = new EscapeMenu();
             escapeMenu.setLocation((frame.getWidth()-escapeMenu.getWidth())/2, (frame.getHeight()-escapeMenu.getHeight())/2);
             p.add(escapeMenu);
-            focus_desktop_pane = true;
             spawnEscapeMenu = false;
-            frame.removeKeyListener(in_client);
+            escapeMenu.setVisible(true);
+            prepareDesktopPane();
         }
 
         if (escapeMenu != null){
             if (escapeMenu.getStatus() == 3){
-                p.remove(escapeMenu);
-                escapeMenu = null;
-                focus_desktop_pane = false;
-                frame.addKeyListener(in_client);
-                frame.requestFocus();
+                terminateEscapeMenu();
             }
         }
         if (escapeMenu != null){
             if (escapeMenu.getStatus() == 1)
-            termicon = true;
+                termicon = true;
         }
 
         if (offset_direction == OffsetDirection.Left){
@@ -974,6 +1009,10 @@ public class InGameUI extends JPanel {
 
     public void paint(Graphics g)
     {
+        if (isdead)
+        {
+            return;
+        }
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -988,62 +1027,41 @@ public class InGameUI extends JPanel {
             g.drawImage(panel, 640, 384, null);
             g.drawImage(panel, 0, 384, null);
 
-            BufferedImage bufferedImage = new BufferedImage(13*64, 5*64, BufferedImage.TYPE_INT_ARGB_PRE);
-            Graphics2D g2 = bufferedImage.createGraphics();
+            if (hasFirstPackedBeenReceived) {
+                BufferedImage bufferedImage = new BufferedImage(13 * 64, 5 * 64, BufferedImage.TYPE_INT_ARGB_PRE);
+                Graphics2D g2 = bufferedImage.createGraphics();
 
-            int y = 0;
-            for (ArrayList<BufferedImage> row_x: map_to_render){
-                int x_count = 0;
-                for (BufferedImage x : row_x){
-                    g2.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
-                    x_count++;
+                int y = 0;
+                for (ArrayList<BufferedImage> row_x : map_to_render) {
+                    int x_count = 0;
+                    for (BufferedImage x : row_x) {
+                        g2.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
+                        x_count++;
+                    }
+                    y++;
                 }
-                y++;
-            }
 
-            renderImagesScaled(entity_render, offset_x, offset_y, g2);
-            renderImagesScaled(fog_of_war, offset_x, offset_y, g2);
-            renderImages(unit_data_ar, offset_x, offset_y, g2);
+                renderImagesScaled(entity_render, offset_x, offset_y, g2);
+                renderImagesScaled(fog_of_war, offset_x, offset_y, g2);
+                renderImages(unit_data_ar, offset_x, offset_y, g2);
 
-            if (selector != null && do_render_prev && do_offset){
-                g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev-64,null);
-            }
-
-            if (selector != null)
-                g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame-offset_x,sel_y_frame-offset_y, null);
-
-            g2.dispose();
-            g.drawImage(bufferedImage, 0, 64, null);
-
-            // Render the buttons
-            int i = 0;
-            int x = 0;
-            y = 0;
-            for (BufferedImage button : buttons){
-                if (button != null){
-                    g.drawImage(button.getScaledInstance(64, 64, Image.SCALE_FAST), 640+x, 384+y, null);
+                if (selector != null && do_render_prev && do_offset) {
+                    g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev - 64, null);
                 }
-                i++;
-                x+=64;
-                if (i == 3){
-                    i = 0;
-                    x = 0;
-                    y += 64;
-                }
-            }
 
-            // Render minimap
-            if (minimap != null && queue == null)
-                g.drawImage(minimap, 16, 400, null);
+                if (selector != null)
+                    g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame - offset_x, sel_y_frame - offset_y, null);
 
-            // Render the queue
-            if (queue != null) {
-                i = 0;
-                x = 0;
+                g2.dispose();
+                g.drawImage(bufferedImage, 0, 64, null);
+
+                // Render the buttons
+                int i = 0;
+                int x = 0;
                 y = 0;
-                for (BufferedImage m : queue) {
-                    if (m != null) {
-                        g.drawImage(m.getScaledInstance(64, 64, Image.SCALE_FAST), x, 384 + y, null);
+                for (BufferedImage button : buttons) {
+                    if (button != null) {
+                        g.drawImage(button.getScaledInstance(64, 64, Image.SCALE_FAST), 640 + x, 384 + y, null);
                     }
                     i++;
                     x += 64;
@@ -1053,142 +1071,170 @@ public class InGameUI extends JPanel {
                         y += 64;
                     }
                 }
-            }
 
-            // Render the binds
-            g.setColor(Color.BLACK);
-            g.setFont(monogram_button);
+                // Render minimap
+                if (minimap != null && queue == null)
+                    g.drawImage(minimap, 16, 400, null);
 
-            i = 0;
-            x = 0;
-            y = 0;
-            for (String bind : binds){
-                if (bind != null){
-                    // g.drawImage(bind.getScaledInstance(64, 64, Image.SCALE_FAST), 640+x, 384+y, null);
-                    g.drawString(bind, 640+x+8, 383+y+11);
-                }
-                i++;
-                x+=64;
-                if (i == 3){
+                // Render the queue
+                if (queue != null) {
                     i = 0;
                     x = 0;
-                    y += 64;
-                }
-            }
-
-            // Render the time of production
-            g.setColor(Color.BLACK);
-            g.setFont(monogram_button);
-
-            i = 0;
-            x = 0;
-            y = 0;
-            for (String bind : unit_times){
-                if (bind != null){
-                    g.drawString(bind, x+8, 383+y+11);
-                }
-                i++;
-                x+=64;
-                if (i == 3){
-                    i = 0;
-                    x = 0;
-                    y += 64;
-                }
-            }
-
-            // Render the unit
-            if (unit_img != null) g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192+32, 384+32, null);
-
-            // Render the stats
-            if (propertiesToRender != null && monogram != null){
-                // Find name of a unit
-                ClientSideProperty name = null;
-                for (ClientSideProperty property: propertiesToRender.properties){
-                    if (property.key().equals("name")){
-                        name = property;
+                    y = 0;
+                    for (BufferedImage m : queue) {
+                        if (m != null) {
+                            g.drawImage(m.getScaledInstance(64, 64, Image.SCALE_FAST), x, 384 + y, null);
+                        }
+                        i++;
+                        x += 64;
+                        if (i == 3) {
+                            i = 0;
+                            x = 0;
+                            y += 64;
+                        }
                     }
                 }
-                @SuppressWarnings("unchecked") ArrayList<ClientSideProperty> properties = (ArrayList<ClientSideProperty>) propertiesToRender.properties.clone();
-                properties.remove(name);
-                PropertiesToRender propertiesToRender2 = new PropertiesToRender(properties);
+
+                // Render the binds
+                g.setColor(Color.BLACK);
+                g.setFont(monogram_button);
+
+                i = 0;
+                x = 0;
+                y = 0;
+                for (String bind : binds) {
+                    if (bind != null) {
+                        // g.drawImage(bind.getScaledInstance(64, 64, Image.SCALE_FAST), 640+x, 384+y, null);
+                        g.drawString(bind, 640 + x + 8, 383 + y + 11);
+                    }
+                    i++;
+                    x += 64;
+                    if (i == 3) {
+                        i = 0;
+                        x = 0;
+                        y += 64;
+                    }
+                }
+
+                // Render the time of production
+                g.setColor(Color.BLACK);
+                g.setFont(monogram_button);
+
+                i = 0;
+                x = 0;
+                y = 0;
+                for (String bind : unit_times) {
+                    if (bind != null) {
+                        g.drawString(bind, x + 8, 383 + y + 11);
+                    }
+                    i++;
+                    x += 64;
+                    if (i == 3) {
+                        i = 0;
+                        x = 0;
+                        y += 64;
+                    }
+                }
+
+                // Render the unit
+                if (unit_img != null)
+                    g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192 + 32, 384 + 32, null);
+
+                // Render the stats
+                if (propertiesToRender != null && monogram != null) {
+                    // Find name of a unit
+                    ClientSideProperty name = null;
+                    for (ClientSideProperty property : propertiesToRender.properties) {
+                        if (property.key().equals("name")) {
+                            name = property;
+                        }
+                    }
+                    @SuppressWarnings("unchecked") ArrayList<ClientSideProperty> properties = (ArrayList<ClientSideProperty>) propertiesToRender.properties.clone();
+                    properties.remove(name);
+                    PropertiesToRender propertiesToRender2 = new PropertiesToRender(properties);
+
+                    g.setColor(Color.BLACK);
+                    g.setFont(monogram.deriveFont((float) (32)).deriveFont(Font.BOLD));
+
+                    // Get font char size
+                    FontMetrics metrics = g.getFontMetrics(monogram.deriveFont((float) (27)).deriveFont(Font.BOLD));
+                    int width = metrics.stringWidth("A");
+
+                    if (name == null) {
+                        name = new ClientSideProperty("name", "");
+                    }
+
+                    int h = ((224 - (name.value().length() * width)) / 2);
+
+                    g.drawString(name.value(), 192 + 32 + 64 + 128 + h, 384 + 30); // 416-640
+
+
+                    g.setFont(monogram.deriveFont(Font.PLAIN, 23f));
+
+                    int y__ = 1;
+                    for (ClientSideProperty clientSideProperty : propertiesToRender2.properties) {
+                        if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null) {
+                            if (!Objects.equals("true", clientSideProperty.value()))
+                                g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192 + 32 + 64 + 128, 384 + 43 + 13 * y__);
+                            else
+                                g.drawString("(" + PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ")", 192 + 32 + 64 + 128, 384 + 43 + 13 * y__);
+                            y__++;
+                        }
+                    }
+                }
 
                 g.setColor(Color.BLACK);
-                g.setFont(monogram.deriveFont((float)(32)).deriveFont(Font.BOLD));
+                if (monogram != null)
+                    g.setFont(monogram.deriveFont((float) (19)));
+                if (military_points != null)
+                    g.drawImage(military_points.getScaledInstance(17, 17, Image.SCALE_FAST), 20, 10, null);
+                g.drawString("" + mp, 40, 22);
+                g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
 
-                // Get font char size
-                FontMetrics metrics = g.getFontMetrics(monogram.deriveFont((float)(27)).deriveFont(Font.BOLD));
-                int width = metrics.stringWidth("A");
 
-                if (name == null){
-                    name = new ClientSideProperty("name", "");
+                if (selector != null && do_render_prev) {
+                    if (!do_offset)
+                        g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), (x_prev * 64), (y_prev * 64), null);
                 }
 
-                int h = ((224 - (name.value().length() * width))/2);
-
-                g.drawString(name.value(),192+32+64+128+h, 384+30); // 416-640
-
-
-                g.setFont(monogram.deriveFont(Font.PLAIN, 23f));
-
-                int y__ = 1;
-                for (ClientSideProperty clientSideProperty: propertiesToRender2.properties){
-                    if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null){
-                        if (!Objects.equals("true", clientSideProperty.value()))
-                        g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192+32+64+128, 384+43+13*y__);
-                        else
-                            g.drawString("(" + PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ")", 192+32+64+128, 384+43+13*y__);
-                        y__++;
+                // Render currently written chat message
+                if (in_client != null)
+                    if (in_client.isTypingChatMessage()) {
+                        if (monogram != null) {
+                            g.setColor(Color.WHITE);
+                            g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                        }
+                        String m = "[Chat]: " + in_client.getCurrentMSG();
+                        g.drawString(m, 500, 383 - 40);
                     }
+
+                // Render chat
+                y = 0;
+                for (String msg : chat) {
+                    if (monogram != null) {
+                        g.setColor(Color.WHITE);
+                        g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
+                    }
+                    g.drawString(msg, 500, 233 + (y * 10));
+                    y++;
+                }
+
+                if (p != null) {
+                    // Evil things to get JDesktopPanel to work
+                    BufferedImage clone = new BufferedImage(832 + 32, 576 + 32 + 6, BufferedImage.TYPE_INT_ARGB_PRE);
+                    Graphics2D graphics = clone.createGraphics();
+                    if (focus_desktop_pane) {
+                        graphics.setColor(new Color(0, 0, 0, 0.5F));
+                        graphics.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
+                    }
+                    p.printAll(graphics);
+                    graphics.dispose();
+                    g.drawImage(clone, 0, 0, null);
                 }
             }
-
-            g.setColor(Color.BLACK);
-            if (monogram != null)
-            g.setFont(monogram.deriveFont((float)(19)));
-            if (military_points != null)
-            g.drawImage(military_points.getScaledInstance(17,17,Image.SCALE_FAST), 20, 10, null);
-            g.drawString(""+mp, 40, 22);
-            g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
-
-
-            if (selector != null && do_render_prev){
-                if (!do_offset)
-                    g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), (x_prev*64), (y_prev*64),null);
-            }
-
-            // Render currently written chat message
-            if (in_client != null)
-            if (in_client.isTypingChatMessage()) {
-                if (monogram != null) {
-                    g.setColor(Color.WHITE);
-                    g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
-                }
-                String m = "[Chat]: " + in_client.getCurrentMSG();
-                g.drawString(m, 500, 383 - 40);
-            }
-
-            // Render chat
-            y = 0;
-            for (String msg: chat){
-                if (monogram != null) {
-                    g.setColor(Color.WHITE);
-                    g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
-                }
-                g.drawString(msg, 500, 233 + (y * 10));
-                y++;
-            }
-
-            if (p != null){
-                // Evil things to get JDesktopPanel to work
-                BufferedImage clone = new BufferedImage(832+32,576+32+6, BufferedImage.TYPE_INT_ARGB_PRE);
-                Graphics2D graphics = clone.createGraphics();
-                if (focus_desktop_pane) {
-                    graphics.setColor(new Color(0, 0, 0, 0.5F));
-                    graphics.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
-                }
-                p.printAll(graphics);
-                graphics.dispose();
-                g.drawImage(clone, 0, 0, null);
+            else {
+                g.setColor(Color.BLACK);
+                g.drawRect(0,64, 64*13, 64*5);
             }
 
             g.dispose();

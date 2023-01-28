@@ -130,8 +130,10 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
                 p.add(messageBox);
             }
             this.frame.add(this);
+            this.frame.revalidate();
+            this.frame.repaint();
+            this.requestFocus();
             status = 0;
-            frame.setVisible(true);
         }
         else if (status == 2){
             frame.setVisible(false);

@@ -850,6 +850,7 @@ public class InGameUI extends JPanel {
         this.removeKeyListener(in_client);
         this.removeMouseListener(m);
         this.removeMouseMotionListener(m);
+        frame.remove(this);
         isdead = true;
         unsafeLock.unlock();
     }

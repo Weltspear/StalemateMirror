@@ -49,7 +49,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
         }
 
         if (!isProductionBlocked){
-            buttons.set(0, new TrainButton(Infantry.class, 2, 2) {
+            buttons.set(0, new TrainButton(Infantry.class, 1, 1) {
                 @Override
                 public String bind() {
                     return "I";
@@ -65,7 +65,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_infantry";
                 }
             });
-            buttons.set(1, new TrainButton(Artillery.class, 3, 3) {
+            buttons.set(1, new TrainButton(Artillery.class, 1, 2) {
                 @Override
                 public String bind() {
                     return "A";
@@ -81,7 +81,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_artillery";
                 }
             });
-            buttons.set(2, new TrainButton(AntiTank.class, 3, 3) {
+            buttons.set(2, new TrainButton(AntiTank.class, 2, 3) {
                 @Override
                 public String bind() {
                     return "T";
@@ -113,7 +113,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_engineer_unit";
                 }
             });
-            buttons.set(4, new TrainButton(MotorizedUnit.class, 2, 2) {
+            buttons.set(4, new TrainButton(MotorizedUnit.class, 1, 2) {
                 @Override
                 public String bind() {
                     return "M";
@@ -129,7 +129,7 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                     return "button_train_motorized_unit_unit";
                 }
             });
-            buttons.set(5, new TrainButton(MachineGunner.class, 2, 3) {
+            buttons.set(5, new TrainButton(MachineGunner.class, 1, 3) {
                 @Override
                 public String bind() {
                     return "G";

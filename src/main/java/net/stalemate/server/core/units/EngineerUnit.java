@@ -241,7 +241,7 @@ public class EngineerUnit extends Unit {
             buttons.add(new BuildMenuButton());
         }
         else{
-            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 3, 3, false) {
+            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -262,7 +262,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_military_tent";
                 }
             });
-            buttons.add(new ConstructBuildingButton(TankFactory.class, 4, 3, false) {
+            buttons.add(new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -283,7 +283,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_tank_factory";
                 }
             });
-            buttons.add(new ConstructBuildingButton(SupplyStation.class, 3, 4, false) {
+            buttons.add(new ConstructBuildingButton(SupplyStation.class, 1, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -304,7 +304,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_supply_station";
                 }
             });
-            buttons.add(new ConstructBuildingButton(FortificationEmpty.class, 3, 4, true) {
+            buttons.add(new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -325,7 +325,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_fortification";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Radar.class, 4, 4, false) {
+            buttons.add(new ConstructBuildingButton(Radar.class, 1, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";

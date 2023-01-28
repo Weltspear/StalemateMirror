@@ -35,7 +35,8 @@ tooltips:
   button_set_deployment_point: "Sets unit deployment point"
   button_cancel_train: "Cancels training of a unit without returning it's cost"
 
-  button_train_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/4)</p>'
+  button_train_light_tank: 'Trains Light Tank<br>Production time: 3<br><p color=green>(0/0/3)</p>'
+  button_train_tankette: 'Trains Tankette<br>Production time: 4<br><p color=green>(0/0/4)</p>'
   button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 4<br><p color=green>(0/0/5)</p>'
 
   # For old server

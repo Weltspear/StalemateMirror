@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class Radar extends Unit implements IConstructableBuilding, IBuilding, PriorityTurnUpdate {
     public Radar(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 7, 7, 1, 0, 0), new AnimationController(), "Radar");
+        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, -1, -1, 1, 0, 0), new AnimationController(), "Radar");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/building_radar.png");

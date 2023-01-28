@@ -25,16 +25,16 @@ import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.MapObject;
 import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.gamemodes.CaptureTheCity;
 import net.stalemate.server.core.gamemode.gamemodes.Sandbox;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
 import net.stalemate.server.core.units.*;
 import net.stalemate.server.core.units.buildings.Fortification;
-import net.stalemate.server.core.units.buildings.MilitaryTentBase;
+import net.stalemate.server.core.units.buildings.MilitaryTent;
 import net.stalemate.server.core.units.buildings.TankFactory;
 import net.stalemate.server.core.util.IGameController;
-import net.stalemate.server.core.controller.Game;
 
 import java.awt.*;
 import java.io.File;
@@ -87,7 +87,7 @@ public class MapLoader {
     }
 
     static {
-        EntityRegistry.addEntity("base", MilitaryTentBase.class);
+        EntityRegistry.addEntity("base", MilitaryTent.class);
         EntityRegistry.addEntity("fortification", Fortification.class);
         // addEntity("supply_station", SupplyStation.class);
         EntityRegistry.addEntity("tank_factory", TankFactory.class);

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class TankFactory extends AbstractFactoryBuilding implements IConstructableBuilding {
     public TankFactory(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, 6, 6, 1, 0, 0), new AnimationController(), "Tank Factory");
+        super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, -1, -1, 1, 0, 0), new AnimationController(), "Tank Factory");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/tank_factory.png");

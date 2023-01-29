@@ -766,6 +766,40 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         selected_unit_data.put("properties", selected_unit.getProperties().serialize());
                         selected_unit_data.put("texture", selected_unit.getTextureFileName());
 
+                        selected_unit_data.put("x", selected_unit.getX());
+                        selected_unit_data.put("y", selected_unit.getY());
+
+                        int sel_r = 0;
+                        if (iselectorbuttonid != null){
+                            if (selected_unit.getButtonsEnemy() != null && !team.getTeamUnits().contains(selected_unit)){
+                                for (Unit.IButton b : selected_unit.getButtonsEnemy()) {
+                                    if (b != null)
+                                    if (b.identifier().equals(iselectorbuttonid)){
+                                        if (b instanceof Unit.ISelectorButton bb){
+                                            sel_r = bb.selector_range();
+                                        } else if (b instanceof Unit.ISelectorButtonUnit bb){
+                                            sel_r = bb.selector_range();
+                                        }
+                                    }
+                                }
+                            }
+                            else if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null){
+                                for (Unit.IButton b : selected_unit.getButtons()) {
+                                    if (b != null)
+                                    if (b.identifier().equals(iselectorbuttonid)){
+                                        if (b instanceof Unit.ISelectorButton bb){
+                                            sel_r = bb.selector_range();
+                                        } else if (b instanceof Unit.ISelectorButtonUnit bb){
+                                            sel_r = bb.selector_range();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (sel_r != 0)
+                        selected_unit_data.put("sel_r", sel_r);
+
                         ArrayList<Object> buttons = new ArrayList<>();
                         Unit.IButton iselectorbutton_used = null;
 

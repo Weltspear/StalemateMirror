@@ -100,6 +100,8 @@ public class InGameUI extends JPanel {
 
     ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
+    // selector range
+    ArrayList<ArrayList<BufferedImage>> _selr = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> entity_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> unit_data_ar = new ArrayList<>();
     ArrayList<BufferedImage> buttons = new ArrayList<>();
@@ -325,7 +327,7 @@ public class InGameUI extends JPanel {
         }
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
-                               boolean[][] fog_of_war, ClientGame.ClientSelectedUnit selectedUnit, int mp,
+                               boolean[][] fog_of_war, boolean[][] selr, ClientGame.ClientSelectedUnit selectedUnit, int mp,
                                boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap) {
             if (!clMapLoader.isMapLoaded()){
                 return;
@@ -474,6 +476,7 @@ public class InGameUI extends JPanel {
                     y++;
                 }
 
+                // Fog of war
                 ArrayList<ArrayList<BufferedImage>> fog_of_war_ = new ArrayList<>();
                 y = 0;
                 for (boolean[] x_row : fog_of_war) {
@@ -483,6 +486,24 @@ public class InGameUI extends JPanel {
                             fog_of_war_.get(y).add(this.fog_of_war);
                         } else {
                             fog_of_war_.get(y).add(null);
+                        }
+                    }
+                    y++;
+                }
+
+                // sel_r
+
+                BufferedImage slr_img = AssetLoader.load("selr");
+
+                ArrayList<ArrayList<BufferedImage>> sel_r = new ArrayList<>();
+                y = 0;
+                for (boolean[] x_row : selr) {
+                    sel_r.add(new ArrayList<>());
+                    for (boolean texture : x_row) {
+                        if (texture) {
+                            sel_r.get(y).add(slr_img);
+                        } else {
+                            sel_r.get(y).add(null);
                         }
                     }
                     y++;
@@ -625,6 +646,7 @@ public class InGameUI extends JPanel {
                 this.interface_.is_it_your_turn = is_it_your_turn;
                 this.interface_.id_array = button_ids;
                 this.interface_.chat = chat;
+                this.interface_._selr = sel_r;
                 this.interface_.unsafeLock.unlock();
 
                 if (cachedUnitDataArImgs.size() > 100){
@@ -1045,6 +1067,7 @@ public class InGameUI extends JPanel {
                 renderImagesScaled(entity_render, offset_x, offset_y, g2);
                 renderImagesScaled(fog_of_war, offset_x, offset_y, g2);
                 renderImages(unit_data_ar, offset_x, offset_y, g2);
+                renderImagesScaled(_selr, offset_x, offset_y, g2);
 
                 if (selector != null && do_render_prev && do_offset) {
                     g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev - 64, null);

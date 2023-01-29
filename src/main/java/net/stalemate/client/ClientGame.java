@@ -72,6 +72,9 @@ public class ClientGame {
         private final ArrayList<ClientUnitQueueElement> queue;
         private final ClientButton[] buttons;
         private final BufferedImage iselectorbutton_press;
+        private final int x;
+        private final int y;
+        private final int sel_r;
 
         public BufferedImage getISelectorButtonPress() {
             return iselectorbutton_press;
@@ -79,12 +82,15 @@ public class ClientGame {
 
         public ClientSelectedUnit(ArrayList<ClientSideProperty> properties, BufferedImage texture,
                                   ArrayList<ClientUnitQueueElement> queue, ClientButton[] buttons,
-                                  BufferedImage iselectorbutton_press) {
+                                  BufferedImage iselectorbutton_press, int x, int y, int sel_r) {
             this.properties = properties;
             this.texture = texture;
             this.queue = queue;
             this.buttons = buttons;
             this.iselectorbutton_press = iselectorbutton_press;
+            this.x = x;
+            this.y = y;
+            this.sel_r = sel_r;
         }
 
         public ArrayList<ClientSideProperty> getProperties() {
@@ -101,6 +107,18 @@ public class ClientGame {
 
         public ClientButton[] getButtons() {
             return buttons;
+        }
+
+        public int getSelR() {
+            return sel_r;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public int getX() {
+            return x;
         }
 
         public static class ClientButton{
@@ -288,6 +306,15 @@ public class ClientGame {
                 // Add "big unit texture"
                 BufferedImage unit_texture = AssetLoader.load((String) selected_unit.get("texture"));
 
+                // x, y, selector range
+                int x = (int) selected_unit.get("x");
+                int y = (int) selected_unit.get("y");
+
+                int sel_r = 0;
+                if (selected_unit.containsKey("sel_r")){
+                    sel_r = (int) selected_unit.get("sel_r");
+                }
+
                 // Buttons
                 ArrayList<Object> buttons_ = (ArrayList<Object>) selected_unit.get("buttons");
 
@@ -341,7 +368,7 @@ public class ClientGame {
                     selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
                 }
 
-                selectedUnit = new ClientSelectedUnit(clientSideProperties, unit_texture, unit_queue, buttons, selector);
+                selectedUnit = new ClientSelectedUnit(clientSideProperties, unit_texture, unit_queue, buttons, selector, x, y, sel_r);
 
             }
 
@@ -408,9 +435,10 @@ public class ClientGame {
     public Object[] buildView(int x, int y){
         try {
             lock.lock();
-            Object[] fog_of_war_and_entities = new Object[2];
+            Object[] fog_of_war_and_entities = new Object[3];
             boolean[][] fog_of_war_s = new boolean[7][15];
             ClientEntity[][] entities_s = new ClientEntity[7][15];
+            boolean[][] sel_range = new boolean[7][15];
 
             for (ClientEntity entity : entities) {
                 if (entity.getY() >= y - 1 && entity.getY() < y + 6) {
@@ -441,8 +469,34 @@ public class ClientGame {
                 }
             }
 
+            if (selectedUnit != null){
+                if (selectedUnit.getSelR() > 0){
+                    for (int _y = y - 1; _y < y + 6; _y++) {
+                        for (int _x = x - 1; _x < x + 14; _x++) {
+                            if (_x >= 0 && _y >= 0 && _y < mapLoader.getHeight() && _x < mapLoader.getWidth()) {
+                                if (_x > selectedUnit.getX() || _y > selectedUnit.getY() ||
+                                        _x < selectedUnit.getX() || _y < selectedUnit.getY()){
+                                    if (_x <= selectedUnit.getX() + selectedUnit.getSelR() &&
+                                        _x >= selectedUnit.getX() - selectedUnit.getSelR()){
+                                        if (_y <= selectedUnit.getY() + selectedUnit.getSelR() &&
+                                                _y >= selectedUnit.getY() - selectedUnit.getSelR()){
+                                            int arny = _y - y + 1;
+                                            int arnx = _x - x + 1;
+                                            if (arnx >= 0 && arnx < 15 && arny >= 0 && arny < 7){
+                                                sel_range[arny][arnx] = true;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             fog_of_war_and_entities[0] = entities_s;
             fog_of_war_and_entities[1] = fog_of_war_s;
+            fog_of_war_and_entities[2] = sel_range;
             return fog_of_war_and_entities;
         } finally {
             lock.unlock();

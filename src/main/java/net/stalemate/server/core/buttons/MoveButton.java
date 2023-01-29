@@ -21,6 +21,7 @@ package net.stalemate.server.core.buttons;
 import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.util.IGameController;
 
@@ -55,7 +56,8 @@ public class MoveButton implements Unit.ISelectorButton {
 
     @Override
     public void action(int x, int y, Unit unit, IGameController gameController) {
-        if (!unit.hasTurnEnded() & unit.unitStats().getSupply() - 1 > 0)
+        if (unit instanceof IUnitMoveAmount u_move)
+        if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 1 > 0 && u_move.getMoveAmount() > 0)
         if ((x != unit.getX()) || (y != unit.getY())) {
             if (gameController.getMapObject(x, y).isPassable) {
                 boolean isPassable = true;
@@ -78,9 +80,12 @@ public class MoveButton implements Unit.ISelectorButton {
 
                     unit.setX(x);
                     unit.setY(y);
-                    unit.endTurn();
                     unit.consumeSupply(1);
+                    u_move.setMoveAmount(u_move.getMoveAmount()-1);
                     unit.move();
+                    if (u_move.getMoveAmount() == 0){
+                        unit.endTurn();
+                    }
                 }
             }
         }

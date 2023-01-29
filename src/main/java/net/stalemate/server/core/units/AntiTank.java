@@ -24,13 +24,14 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class AntiTank extends Unit implements IMechanized {
+public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount {
     public AntiTank(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 18, 18, 0, 1, 2), new AnimationController(), "Anti-Tank");
 
@@ -72,6 +73,30 @@ public class AntiTank extends Unit implements IMechanized {
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, properties);
         return properties;
+    }
+
+    private int move_amount = 2;
+
+    @Override
+    public void setMoveAmount(int m) {
+        move_amount = m;
+    }
+
+    @Override
+    public int getTurnMoveAmount() {
+        return 2;
+    }
+
+    @Override
+    public int getMoveAmount() {
+        return move_amount;
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        setMoveAmount(getTurnMoveAmount());
     }
 }

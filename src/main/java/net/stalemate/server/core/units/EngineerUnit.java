@@ -25,6 +25,8 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.util.IGameController;
@@ -33,7 +35,7 @@ import net.stalemate.server.core.units.buildings.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-public class EngineerUnit extends Unit {
+public class EngineerUnit extends Unit implements IUnitMoveAmount{
     public static class RepairButton implements ISelectorButtonUnit{
         @Override
         public String bind() {
@@ -375,5 +377,35 @@ public class EngineerUnit extends Unit {
         }
 
         return buttons;
+    }
+
+    private int move_amount = 2;
+
+    @Override
+    public void setMoveAmount(int m) {
+        move_amount = m;
+    }
+
+    @Override
+    public int getTurnMoveAmount() {
+        return 2;
+    }
+
+    @Override
+    public int getMoveAmount() {
+        return move_amount;
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        setMoveAmount(getTurnMoveAmount());
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+        return p;
     }
 }

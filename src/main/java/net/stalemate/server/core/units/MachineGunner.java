@@ -24,11 +24,13 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.HPSacrificeSU;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class MachineGunner extends Unit{
+public class MachineGunner extends Unit implements IUnitMoveAmount {
 
     private volatile boolean mode = true;
 
@@ -144,5 +146,35 @@ public class MachineGunner extends Unit{
             buttons.set(2, new DefensiveModeButton());
         }
         return buttons;
+    }
+
+    private int move_amount = 2;
+
+    @Override
+    public void setMoveAmount(int m) {
+        move_amount = m;
+    }
+
+    @Override
+    public int getTurnMoveAmount() {
+        return 2;
+    }
+
+    @Override
+    public int getMoveAmount() {
+        return move_amount;
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        setMoveAmount(getTurnMoveAmount());
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+        return p;
     }
 }

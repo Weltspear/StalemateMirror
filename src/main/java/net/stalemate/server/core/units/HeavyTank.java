@@ -23,12 +23,14 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class HeavyTank extends Unit implements IMechanized {
+public class HeavyTank extends Unit implements IMechanized, IUnitMoveAmount {
     public HeavyTank(int x, int y, IGameController game){
         super(x, y, game, new Unit.UnitStats(20, 20, 1, 1, 3, 3, 21, 21, 1, 0, 0), new AnimationController(), "Heavy Tank");
 
@@ -56,5 +58,35 @@ public class HeavyTank extends Unit implements IMechanized {
         buttons.add(new AttackButton(attack_range));
         buttons.add(new MoveButton(movement_range));
         return buttons;
+    }
+
+    private int move_amount = 2;
+
+    @Override
+    public void setMoveAmount(int m) {
+        move_amount = m;
+    }
+
+    @Override
+    public int getTurnMoveAmount() {
+        return 2;
+    }
+
+    @Override
+    public int getMoveAmount() {
+        return move_amount;
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        setMoveAmount(getTurnMoveAmount());
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+        return p;
     }
 }

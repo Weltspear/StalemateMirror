@@ -25,13 +25,15 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Artillery extends Unit implements IMechanized {
+public class Artillery extends Unit implements IMechanized, IUnitMoveAmount {
     @SuppressWarnings("all")
     public static class ShellingButton implements ISelectorButton{
         private final int attack_range;
@@ -130,5 +132,35 @@ public class Artillery extends Unit implements IMechanized {
         buttons.add(new MotorizeButton());
         // buttons.add(new ShellingButton(attack_range));
         return buttons;
+    }
+
+    private int move_amount = 2;
+
+    @Override
+    public void setMoveAmount(int m) {
+        move_amount = m;
+    }
+
+    @Override
+    public int getTurnMoveAmount() {
+        return 2;
+    }
+
+    @Override
+    public int getMoveAmount() {
+        return move_amount;
+    }
+
+    @Override
+    public void turnUpdate() {
+        super.turnUpdate();
+        setMoveAmount(getTurnMoveAmount());
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+        return p;
     }
 }

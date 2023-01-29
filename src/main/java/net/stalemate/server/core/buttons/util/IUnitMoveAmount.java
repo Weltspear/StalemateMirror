@@ -16,9 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate;
+package net.stalemate.server.core.buttons.util;
 
-public class StVersion {
-    public static final String version = "v0.3.xa-dev";
-    public static final int packet_version = 6;
+import net.stalemate.server.core.properties.Properties;
+
+public interface IUnitMoveAmount {
+
+    /***
+     * Sets the amount of moves remaining for the unit this turn
+     */
+    void setMoveAmount(int m);
+
+    /***
+     * The amount of moves available each turn
+     */
+    int getTurnMoveAmount();
+    int getMoveAmount();
+
+    static void addMoveAmountProperty(int m, boolean has_turn_ended, Properties properties){
+        if (has_turn_ended){
+            properties.put("move_amount", String.valueOf(0));
+        }else{
+            properties.put("move_amount", String.valueOf(m));
+        }
+    }
+
 }

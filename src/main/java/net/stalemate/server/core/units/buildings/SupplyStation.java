@@ -68,14 +68,12 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         }
 
         ArrayList<Integer[]> coords_to_resupply = new ArrayList<>();
-        coords_to_resupply.add(new Integer[]{x-1, y});
-        coords_to_resupply.add(new Integer[]{x+1, y});
-        coords_to_resupply.add(new Integer[]{x, y+1});
-        coords_to_resupply.add(new Integer[]{x, y-1});
-        coords_to_resupply.add(new Integer[]{x+1, y+1});
-        coords_to_resupply.add(new Integer[]{x-1, y+1});
-        coords_to_resupply.add(new Integer[]{x+1, y-1});
-        coords_to_resupply.add(new Integer[]{x-1, y-1});
+
+        for (int _y = y-2; _y <= y+2; _y++){
+            for (int _x = x-2; _x <= x+2; _x++){
+                coords_to_resupply.add(new Integer[]{_x, _y});
+            }
+        }
 
         for (Integer[] c: coords_to_resupply){
             for (Entity e: game.getEntities(c[0], c[1])){

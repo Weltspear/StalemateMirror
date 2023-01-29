@@ -109,7 +109,6 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
     @Override
     public void turnUpdate(){
         super.turnUpdate();
-        this.supply -= 1;
     }
 
     @Override

@@ -16,28 +16,29 @@ tooltips:
   button_motorized_unit_other_demotorize: "Transforms a unit back into it's original form"
 
   button_repair: "Repairs mechanized units<br><p color=green>(0/4/0)</p>"
-  button_engineer_unit_build_menu_build_military_tent: "Constructs Base<br>Construction Time: 3<br><p color=green>(0/0/3)</p>"
-  button_engineer_unit_build_menu_build_tank_factory: "Constructs Tank Factory<br>Construction Time: 4<br><p color=green>(0/0/3)</p>" # 3
-  button_engineer_unit_build_menu_build_supply_station: "Constructs Supply Station which increases your income per turn by 1<br>Construction Time: 3<br><p color=green>(0/0/4)</p>" # 4
-  button_engineer_unit_build_menu_build_fortification: "Constructs Fortification <br>Construction Time: 3<br><p color=green>(0/0/4)</p>"
-  button_engineer_unit_build_menu_build_radar: "Constructs Radar <br>Construction Time: 4<br><p color=green>(0/0/4)</p>"
+  button_engineer_unit_build_menu_build_military_tent: "Builds Base<br>Construction Time: 1<br><p color=green>(0/0/3)</p>"
+  button_engineer_unit_build_menu_build_tank_factory: "Builds Tank Factory<br>Construction Time: 2<br><p color=green>(0/0/3)</p>" # 3
+  button_engineer_unit_build_menu_build_supply_station: "Builds Supply Station<br>Construction Time: 1<br><p color=green>(0/0/3)</p>" # 4
+  button_engineer_unit_build_menu_build_fortification: "Builds Fortification<br>Construction Time: 2<br><p color=green>(0/0/3)</p>"
+  button_engineer_unit_build_menu_build_radar: "Builds Radar<br>Construction Time: 1<br><p color=green>(0/0/2)</p>"
+  button_engineer_unit_build_menu_build_factory: "Builds Factory which increases your income per turn by 1<br>Construction Time: 2<br><p color=green>(0/0/3)</p>"
 
   button_engineer_unit_build_menu: "Enters build menu"
   button_engineer_unit_build_menu_exit: "Exits build menu"
 
-  button_train_infantry: "Trains Infantry<br>Production time: 2<br><p color=green>(0/0/2)</p>"
-  button_train_machine_gunner: "Trains Heavy Infantry<br>Production time: 2<br><p color=green>(0/0/3)</p>"
-  button_train_artillery: 'Trains Artillery<br>Production time: 3<br><p color=green>(0/0/3)</p>'
-  button_train_anti_tank: 'Trains Anti-Tank<br>Production time: 3<br><p color=green>(0/0/3)</p>'
+  button_train_infantry: "Trains Infantry<br>Production time: 1<br><p color=green>(0/0/1)</p>"
+  button_train_machine_gunner: "Trains Heavy Infantry<br>Production time: 1<br><p color=green>(0/0/3)</p>"
+  button_train_artillery: 'Trains Artillery<br>Production time: 1<br><p color=green>(0/0/2)</p>'
+  button_train_anti_tank: 'Trains Anti-Tank<br>Production time: 2<br><p color=green>(0/0/3)</p>'
   button_train_engineer_unit: 'Trains Engineer<br>Production time: 1<br><p color=green>(0/0/1)</p>'
-  button_train_motorized_unit_unit: 'Trains Motorized Unit<br>Production time: 2<br><p color=green>(0/0/2)</p>'
+  button_train_motorized_unit_unit: 'Trains Supply Truck<br>Production time: 1<br><p color=green>(0/0/2)</p>'
 
   button_set_deployment_point: "Sets unit deployment point"
   button_cancel_train: "Cancels training of a unit without returning it's cost"
 
-  button_train_light_tank: 'Trains Light Tank<br>Production time: 3<br><p color=green>(0/0/3)</p>'
-  button_train_tankette: 'Trains Tankette<br>Production time: 4<br><p color=green>(0/0/4)</p>'
-  button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 4<br><p color=green>(0/0/5)</p>'
+  button_train_light_tank: 'Trains Light Tank<br>Production time: 2<br><p color=green>(0/0/3)</p>'
+  button_train_tankette: 'Trains Tankette<br>Production time: 2<br><p color=green>(0/0/2)</p>'
+  button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 2<br><p color=green>(0/0/3)</p>'
 
   # For old server
   button_produce_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/6)</p>'

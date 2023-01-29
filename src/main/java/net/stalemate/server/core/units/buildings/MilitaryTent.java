@@ -157,7 +157,6 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
     @Override
     public void turnUpdate(){
         super.turnUpdate();
-        this.supply -= 1;
     }
 
     @Override

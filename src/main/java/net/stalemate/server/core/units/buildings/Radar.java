@@ -22,11 +22,11 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.Scrap;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.util.IGameController;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -42,10 +42,17 @@ public class Radar extends Unit implements IConstructableBuilding, IBuilding, Pr
     }
 
     @Override
-    public @Nullable ArrayList<IButton> getButtons() {
+    public ArrayList<IButton> getButtons() {
         ArrayList<IButton> buttons = new ArrayList<>();
         buttons.add(new Scrap());
         return buttons;
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        p.rm("ended_turn");
+        return p;
     }
 
     @Override
@@ -61,6 +68,5 @@ public class Radar extends Unit implements IConstructableBuilding, IBuilding, Pr
     @Override
     public void turnUpdate() {
         super.turnUpdate();
-        this.supply--;
     }
 }

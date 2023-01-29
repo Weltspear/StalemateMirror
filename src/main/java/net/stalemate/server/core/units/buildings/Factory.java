@@ -19,57 +19,54 @@
 package net.stalemate.server.core.units.buildings;
 
 import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
+import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
+import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class UnderConstructionBuilding extends Unit implements IBuilding {
-    private final Unit outBuilding;
-    private int constructionTime;
-    private int initialConstructionTime;
-
-    /***
-     * @param outBuilding Building to be deployed. It has to have the same coordinates as this entity
-     */
-    public UnderConstructionBuilding(int x, int y, IGameController g, Unit outBuilding, int constructionTime, AnimationController a) {
-        super(x, y, g, new UnitStats(1, outBuilding.unitStats().getMaxHp(), 0, 0, 0, 0, 0, -1, 0, 0, 0), a, outBuilding.getName());
-        this.outBuilding = outBuilding;
-        this.constructionTime = constructionTime;
-        this.initialConstructionTime = constructionTime;
+public class Factory extends Unit implements IBuilding, IConstructableBuilding {
+    public Factory(int x, int y, IGameController game) {
+        super(x, y, game, new UnitStats(10, 10, 0, 0, 0,0,-1, -1,0, 0, 0), new AnimationController(), "Factory");
+        Animation idle = new Animation(1);
+        idle.addFrame("texture_missing");
+        anim.addAnimation("idle", idle);
+        anim.setCurrentAnimation("idle");
     }
 
     @Override
-    public void endTurn() {
-        super.endTurn();
-        constructionTime--;
+    public void turnUpdate() {
+        super.turnUpdate();
 
-        this.hp += (int)((1/(float)initialConstructionTime)*((float)(outBuilding.getMaxHp())));
-
-        if (hp > max_hp){hp=max_hp;}
-
-        if (constructionTime == 0){
-            game.rmEntity(this);
-            game.addEntity(outBuilding);
-        }
-
-        if (hp <= 0){
-            outBuilding.setHp(-1);
-        }
+        game.getUnitsTeam(this).setMilitaryPoints(game.getUnitsTeam(this)
+                .getMilitaryPoints() + 1);
     }
 
     @Override
     public ArrayList<IButton> getButtons() {
-        return new ArrayList<>();
+        ArrayList<IButton> buttons = new ArrayList<>();
+        buttons.add(new Scrap());
+        return buttons;
+    }
+
+    @Override
+    public AnimationController underConstructionAC() {
+        AnimationController anim = new AnimationController();
+        Animation idle = new Animation(1);
+        idle.addFrame("texture_missing");
+        anim.addAnimation("idle", idle);
+        anim.setCurrentAnimation("idle");
+        return anim;
     }
 
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
         p.rm("ended_turn");
-        p.put("construction_time", "" + constructionTime);
         return p;
     }
 }

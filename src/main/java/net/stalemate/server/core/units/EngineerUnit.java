@@ -325,7 +325,7 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_fortification";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Radar.class, 1, 3, false) {
+            buttons.add(new ConstructBuildingButton(Radar.class, 1, 2, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -346,8 +346,29 @@ public class EngineerUnit extends Unit {
                     return "button_engineer_unit_build_menu_build_radar";
                 }
             });
+            buttons.add(new ConstructBuildingButton(Factory.class, 2, 3, false) {
+                @Override
+                public String selector_texture() {
+                    return "assets/ui/selectors/ui_repair.png";
+                }
 
-            for (int i = 0; i < 3; i++){
+                @Override
+                public String bind() {
+                    return "E";
+                }
+
+                @Override
+                public String texture() {
+                    return "texture_missing";
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_engineer_unit_build_menu_build_factory";
+                }
+            });
+
+            for (int i = 0; i < 2; i++){
                 buttons.add(null);
             }
             buttons.add(new ExitBuildMenuButton());

@@ -23,6 +23,7 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.Scrap;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.util.IGameController;
@@ -91,12 +92,6 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
                 }
             }
         }
-
-        if (supply - 20 >= 0) {
-            game.getUnitsTeam(this).setMilitaryPoints(game.getUnitsTeam(this)
-                    .getMilitaryPoints() + 1);
-            supply -= 20;
-        }
     }
 
     @Override
@@ -107,5 +102,12 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
         return anim;
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties p = super.getProperties();
+        p.rm("ended_turn");
+        return p;
     }
 }

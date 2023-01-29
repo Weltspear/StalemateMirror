@@ -124,6 +124,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
                                 unit.setSupply(unit.getMaxSupply());
                             }
                         }
+                        unit.move();
                     }
                 }
             }

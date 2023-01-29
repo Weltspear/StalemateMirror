@@ -116,6 +116,12 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount{
                 eu.isInBuildingMode = true;
             }
         }
+
+        @Override
+        public boolean canBeUsedWhenOtherTeamsTurn(){
+            return true;
+        }
+
     }
 
     public static class ExitBuildMenuButton implements IStandardButton{
@@ -139,6 +145,11 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount{
             if (unit instanceof EngineerUnit eu){
                 eu.isInBuildingMode = false;
             }
+        }
+
+        @Override
+        public boolean canBeUsedWhenOtherTeamsTurn(){
+            return true;
         }
     }
 

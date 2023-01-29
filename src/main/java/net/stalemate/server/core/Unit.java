@@ -104,6 +104,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
          * @return Button identifier
          */
         String identifier();
+
+        default boolean canBeUsedWhenOtherTeamsTurn(){
+            return false;
+        }
     }
 
     public enum Layer{

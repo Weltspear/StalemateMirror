@@ -416,17 +416,22 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     }
                     else if (action.get("action").equals("IStandardButtonPress")) {
-                        if (lgame.getTeamDoingTurn() == team) {
+                        if (selected_unit != null) {
+
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
-                            if (selected_unit != null) {
-                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
-                                    for (Unit.IButton ibutton : selected_unit.getButtons()) {
+                            if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
+                                for (Unit.IButton ibutton : selected_unit.getButtons()) {
+                                    if (ibutton != null)
+                                    if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                         doActionIStandardButtonIfCorrect(params, ibutton);
                                     }
-                                } else {
-                                    if (selected_unit.getButtonsEnemy() != null) {
-                                        for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
+                                }
+                            } else {
+                                if (selected_unit.getButtonsEnemy() != null) {
+                                    for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
+                                        if (ibutton != null)
+                                        if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                             doActionIStandardButtonIfCorrect(params, ibutton);
                                         }
                                     }
@@ -436,19 +441,24 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     }
 
                     else if (action.get("action").equals("ISelectorButtonPress")) {
-                        if (lgame.getTeamDoingTurn() == team) {
+                        if (selected_unit != null && iselectorbuttonid == null) {
+
                             Map<String, Object> params = (Map<String, Object>) action.get("params");
 
-                            if (selected_unit != null & iselectorbuttonid == null) {
-                                if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
-                                    for (Unit.IButton button : selected_unit.getButtons()) {
-                                        prepareISelectorButton(params, button);
-                                    }
-                                } else {
-                                    if (selected_unit.getButtonsEnemy() != null) {
-                                        for (Unit.IButton button : selected_unit.getButtonsEnemy()) {
-                                            prepareISelectorButton(params, button);
+                            if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
+                                for (Unit.IButton ibutton : selected_unit.getButtons()) {
+                                    if (ibutton != null)
+                                        if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                            prepareISelectorButton(params, ibutton);
                                         }
+                                }
+                            } else {
+                                if (selected_unit.getButtonsEnemy() != null) {
+                                    for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
+                                        if (ibutton != null)
+                                            if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                                prepareISelectorButton(params, ibutton);
+                                            }
                                     }
                                 }
                             }
@@ -456,22 +466,22 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     }
 
                     else if (action.get("action").equals("ISBSelect")) {
-                        if (lgame.getTeamDoingTurn() == team) {
-                            if (selected_unit != null && iselectorbuttonid != null) {
-                                if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (!team.getTeamUnits().contains(selected_unit) && selected_unit.getButtonsEnemy() != null)) {
-                                    boolean isSelectedUnitEnemyTeam = !(selected_unit.getButtons() != null
-                                            && team.getTeamUnits().contains(selected_unit));
-                                    for (Unit.IButton button : isSelectedUnitEnemyTeam && selected_unit.getButtonsEnemy() != null ?
+                        if (selected_unit != null && iselectorbuttonid != null) {
+                            if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (!team.getTeamUnits().contains(selected_unit) && selected_unit.getButtonsEnemy() != null)) {
+                                boolean isSelectedUnitEnemyTeam = !(selected_unit.getButtons() != null
+                                        && team.getTeamUnits().contains(selected_unit));
+                                for (Unit.IButton button : isSelectedUnitEnemyTeam && selected_unit.getButtonsEnemy() != null ?
                                         selected_unit.getButtonsEnemy() : isSelectedUnitEnemyTeam
-                                            ? new ArrayList<Unit.IButton>() : selected_unit.getButtons() != null
-                                            ? selected_unit.getButtons() : new ArrayList<Unit.IButton>()) {
-                                        if (button != null)
-                                            if (button.identifier().equals(iselectorbuttonid)) {
+                                        ? new ArrayList<Unit.IButton>() : selected_unit.getButtons() != null
+                                        ? selected_unit.getButtons() : new ArrayList<Unit.IButton>()) {
+                                    if (button != null)
+                                        if (button.identifier().equals(iselectorbuttonid)) {
+                                            if (lgame.getTeamDoingTurn() == team || button.canBeUsedWhenOtherTeamsTurn()) {
                                                 if (button instanceof Unit.ISelectorButton) {
                                                     if (viewMode == getButtonViewMode(button))
-                                                    if (selector_x >= 0 && selector_y >= 0) {
-                                                        ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
-                                                    }
+                                                        if (selector_x >= 0 && selector_y >= 0) {
+                                                            ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
+                                                        }
                                                     iselectorbuttonid = null;
                                                 } else if (button instanceof Unit.ISelectorButtonUnit) {
                                                     if (viewMode == getButtonViewMode(button)) {
@@ -498,10 +508,11 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                     }
                                                 }
                                             }
-                                    }
+                                        }
                                 }
                             }
                         }
+
                     }
 
                     else if (action.get("action").equals("ISBCancel")) {

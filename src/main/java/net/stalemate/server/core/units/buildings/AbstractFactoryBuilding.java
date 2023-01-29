@@ -131,6 +131,11 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
             AbstractFactoryBuilding.this.deployment_x = d_x;
             AbstractFactoryBuilding.this.deployment_y = d_y;
         }
+
+        @Override
+        public boolean canBeUsedWhenOtherTeamsTurn(){
+            return true;
+        }
     }
 
     /***

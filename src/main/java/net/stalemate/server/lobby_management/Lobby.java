@@ -360,6 +360,41 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                 Game.LockGame lgame = game.getLockedGame();
 
+                int sel_x_tmp = (int) data_map.get("sel_x");
+                int sel_y_tmp = (int) data_map.get("sel_y");
+
+                cam_x = (int) data_map.get("cam_x");
+                cam_y = (int) data_map.get("cam_y");
+
+                if (iselectorbuttonid != null & selected_unit != null) {
+                    int range = -1;
+
+                    // Get selector button
+                    if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (selected_unit.getButtonsEnemy() != null && !team.getTeamUnits().contains(selected_unit)))
+                        for (Unit.IButton button : Objects.requireNonNull((selected_unit.getButtons() != null
+                                && team.getTeamUnits().contains(selected_unit)) ? selected_unit.getButtons() : selected_unit.getButtonsEnemy())) {
+                            if (button != null)
+                                if (button.identifier().equals(iselectorbuttonid)) {
+                                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
+                                        if (button instanceof Unit.ISelectorButton) {
+                                            range = ((Unit.ISelectorButton) button).selector_range();
+                                        } else {
+                                            range = ((Unit.ISelectorButtonUnit) button).selector_range();
+                                        }
+                                    }
+                                }
+                        }
+
+                    if (((selected_unit.getX() - range) <= sel_x_tmp) && ((selected_unit.getX() + range) >= sel_x_tmp)) {
+                        if (((selected_unit.getY() - range) <= sel_y_tmp) && ((selected_unit.getY() + range) >= sel_y_tmp)) {
+                            performSelectorMove(sel_y_tmp, sel_x_tmp);
+                        }
+                    }
+                }
+                else {
+                    performSelectorMove(sel_y_tmp, sel_x_tmp);
+                }
+
                 for (Map<String, Object> action : actions) {
                     if (action.get("action").equals("TypeChat")){
                         String msg = (String) action.get("msg");
@@ -499,42 +534,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         selected_unit = null;
                         viewMode = viewMode == ViewMode.GROUND ? ViewMode.AIR : ViewMode.GROUND;
                     }
-                }
-
-
-                int sel_x_tmp = (int) data_map.get("sel_x");
-                int sel_y_tmp = (int) data_map.get("sel_y");
-
-                cam_x = (int) data_map.get("cam_x");
-                cam_y = (int) data_map.get("cam_y");
-
-                if (iselectorbuttonid != null & selected_unit != null) {
-                    int range = -1;
-
-                    // Get selector button
-                    if ((team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) || (selected_unit.getButtonsEnemy() != null && !team.getTeamUnits().contains(selected_unit)))
-                        for (Unit.IButton button : Objects.requireNonNull((selected_unit.getButtons() != null
-                                && team.getTeamUnits().contains(selected_unit)) ? selected_unit.getButtons() : selected_unit.getButtonsEnemy())) {
-                            if (button != null)
-                                if (button.identifier().equals(iselectorbuttonid)) {
-                                    if (button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit) {
-                                        if (button instanceof Unit.ISelectorButton) {
-                                            range = ((Unit.ISelectorButton) button).selector_range();
-                                        } else {
-                                            range = ((Unit.ISelectorButtonUnit) button).selector_range();
-                                        }
-                                    }
-                                }
-                        }
-
-                    if (((selected_unit.getX() - range) <= sel_x_tmp) && ((selected_unit.getX() + range) >= sel_x_tmp)) {
-                        if (((selected_unit.getY() - range) <= sel_y_tmp) && ((selected_unit.getY() + range) >= sel_y_tmp)) {
-                            performSelectorMove(sel_y_tmp, sel_x_tmp);
-                        }
-                    }
-                }
-                else {
-                    performSelectorMove(sel_y_tmp, sel_x_tmp);
                 }
 
             } catch (JsonProcessingException | ClassCastException | NullPointerException e) {

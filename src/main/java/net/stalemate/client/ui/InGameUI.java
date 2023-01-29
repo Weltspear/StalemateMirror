@@ -725,6 +725,8 @@ public class InGameUI extends JPanel {
                             }
                         }
                     }
+
+                    in_client.keysInQueue.add("ENTER");
                 }
                 else if (e.getButton() == MouseEvent.BUTTON2) {
                     in_client.keysInQueue.add("ESCAPE");

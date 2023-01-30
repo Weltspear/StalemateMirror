@@ -102,13 +102,12 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         printStatus();
 
         // Waiting for players
-        int i = 0;
-        while (players.size() != max_player_count){
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        boolean wait_for_players = true;
+        while (wait_for_players){
+            lobby_lock.lock();
+            wait_for_players = players.size() != max_player_count;
+            lobby_lock.unlock();
+            Thread.onSpinWait();
         }
         LOGGER.log(Level.INFO, "Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 

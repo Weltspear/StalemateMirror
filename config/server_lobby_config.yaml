@@ -13,3 +13,7 @@ lobbies:
     next_maps: [
       "maps/dev_combat_test.json"
     ]
+  - map: "maps/vs_default4.json"
+    next_maps: [
+      "maps/vs_default4.json"
+    ]

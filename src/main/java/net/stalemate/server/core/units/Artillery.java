@@ -104,7 +104,7 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount {
     }
 
     public Artillery(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(5, 5, 3, 1, 2, 0, 15, 15, 0, 1, 2), new AnimationController(), "Artillery");
+        super(x, y, game, new UnitStats(5, 5, 4, 1, 3, 0, 15, 15, 0, 1, 2), new AnimationController(), "Artillery");
 
         Animation idle = new Animation(15);
         idle.addFrame("assets/units/artillery_idle.png");

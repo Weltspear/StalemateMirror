@@ -19,6 +19,7 @@
 package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.buttons.util.INoMoveAttack;
 import net.stalemate.server.core.buttons.util.Invulnerable;
 import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.util.IBuilding;
@@ -113,7 +114,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
 
                 if (selected_unit.getHp() <= 0){
                     gameController.rmEntity(selected_unit);
-                    if (Math.abs(selected_unit.getX() - unit.getX()) <= 1 && Math.abs(selected_unit.getY() - unit.getY()) <= 1){
+                    if (Math.abs(selected_unit.getX() - unit.getX()) <= 1 && Math.abs(selected_unit.getY() - unit.getY()) <= 1 && !(unit instanceof INoMoveAttack)){
                         unit.setX(selected_unit.getX());
                         unit.setY(selected_unit.getY());
 

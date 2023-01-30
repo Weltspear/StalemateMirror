@@ -425,6 +425,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     }
                     else if (action.get("action").equals("IStandardButtonPress")) {
+                        iselectorbuttonid = null;
                         if (selected_unit != null) {
 
                             Map<String, Object> params = (Map<String, Object>) action.get("params");

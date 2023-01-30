@@ -52,6 +52,8 @@ public class InGameUI extends JPanel {
     private final MListener m;
     private boolean focus_desktop_pane = false;
 
+    private final Image empty;
+
     private boolean isdead = false; // it is here because of weird issues with javax.swing
 
     private Image minimap = null;
@@ -110,7 +112,7 @@ public class InGameUI extends JPanel {
     ArrayList<String> binds = new ArrayList<>();
     ArrayList<String> unit_times = new ArrayList<>();
     ArrayList<String> chat = new ArrayList<>();
-    BufferedImage unit_img = null;
+    Image unit_img = null;
     int mp = 0;
     boolean is_it_your_turn = false;
 
@@ -241,6 +243,7 @@ public class InGameUI extends JPanel {
         private final HashMap<String, Image> entity_scaled_cache = new HashMap<>();
         private final HashMap<String, Image> button_scaled_cache = new HashMap<>();
         private final HashMap<BufferedImage, Image> queue_scaled_cache = new HashMap<>();
+        private final HashMap<BufferedImage, Image> big_unit_texture_cache = new HashMap<>();
         private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
 
         private int tsel_x;
@@ -433,7 +436,7 @@ public class InGameUI extends JPanel {
                 ArrayList<Image> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
 
-                BufferedImage selected_unit_image = null;
+                Image selected_unit_image = null;
                 PropertiesToRender propertiesToRender = null;
                 BufferedImage selector = null;
 
@@ -443,7 +446,14 @@ public class InGameUI extends JPanel {
                 String[][] button_ids = {{null, null, null}, {null, null, null}, {null, null, null}};
 
                 if (selectedUnit != null) {
-                    selected_unit_image = selectedUnit.getTexture();
+                    if (big_unit_texture_cache.containsKey(selectedUnit.getTexture())) {
+                        selected_unit_image = big_unit_texture_cache.get(selectedUnit.getTexture());
+                    }
+                    else{
+                        Image f = selectedUnit.getTexture().getScaledInstance(128,128,Image.SCALE_FAST);
+                        selected_unit_image = f;
+                        big_unit_texture_cache.put(selectedUnit.getTexture(), f);
+                    }
                     propertiesToRender = new PropertiesToRender(selectedUnit.getProperties());
                     selector = selectedUnit.getISelectorButtonPress();
 
@@ -933,6 +943,8 @@ public class InGameUI extends JPanel {
 
         this.frame.setIconImage(AssetLoader.load("assets/ui/selectors/ui_attack.png"));
 
+        empty = AssetLoader.load("empty.png").getScaledInstance(64, 64, Image.SCALE_FAST);
+
         this.setFocusable(true);
         this.requestFocus();
     }
@@ -1132,7 +1144,7 @@ public class InGameUI extends JPanel {
                 for (ArrayList<Image> row_x : map_to_render) {
                     int x_count = 0;
                     for (Image x : row_x) {
-                        g2.drawImage(x != null ? x : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
+                        g2.drawImage(x != null ? x : empty, 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
                         x_count++;
                     }
                     y++;
@@ -1236,7 +1248,7 @@ public class InGameUI extends JPanel {
 
                 // Render the unit
                 if (unit_img != null)
-                    g.drawImage(unit_img.getScaledInstance(128, 128, Image.SCALE_FAST), 192 + 32, 384 + 32, null);
+                    g.drawImage(unit_img, 192 + 32, 384 + 32, null);
 
                 // Render the stats
                 if (propertiesToRender != null && monogram != null) {

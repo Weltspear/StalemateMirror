@@ -296,7 +296,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount{
                     return "button_engineer_unit_build_menu_build_tank_factory";
                 }
             });
-            buttons.add(new ConstructBuildingButton(SupplyStation.class, 1, 3, false) {
+            buttons.add(new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";

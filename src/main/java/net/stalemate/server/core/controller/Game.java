@@ -81,16 +81,15 @@ public class Game implements IGameControllerGamemode {
             return additional_params;
         }
 
-        /***
-         * For testing purposes only
-         */
         protected boolean AUTO_SKIP_TURN = false;
 
-        /***
-         * For testing purposes only
-         */
-        public void setDev(){
+        public void disableTurn(){
             AUTO_SKIP_TURN = true;
+        }
+
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+        public boolean getIsDisabledTurn(){
+            return AUTO_SKIP_TURN;
         }
 
         public Team(Color teamColor){

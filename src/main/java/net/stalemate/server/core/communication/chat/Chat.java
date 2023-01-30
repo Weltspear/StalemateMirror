@@ -37,7 +37,10 @@ public class Chat {
     public void pushMsg(Message msg){
         lock.lock();
         chat.add(msg);
-        LOGGER.log(Level.INFO, "[Chat: " + this.hashCode() + "] [" + msg.author + "]: " + msg.message);
+        if (msg.author != null)
+            LOGGER.log(Level.INFO, "[Chat: " + this.hashCode() + "] [" + msg.author + "]: " + msg.message);
+        else
+            LOGGER.log(Level.INFO, "[Chat: " + this.hashCode() + "] " + msg.message);
         lock.unlock();
     }
 

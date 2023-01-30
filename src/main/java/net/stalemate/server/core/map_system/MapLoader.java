@@ -163,7 +163,7 @@ public class MapLoader {
             for (HashMap<String, Object> team : (ArrayList<HashMap<String, Object>>) map_data.get("team_data")) {
                 Game.Team t = new Game.Team(new Color(((ArrayList<Integer>) (team.get("rgb"))).get(0), ((ArrayList<Integer>) (team.get("rgb"))).get(1), ((ArrayList<Integer>) (team.get("rgb"))).get(2)));
                 if ((boolean) team.get("enable_dev")) {
-                    t.setDev();
+                    t.disableTurn();
                 }
                 teams.add(t);
                 team_id_hashmap.put((String) team.get("id"), t);

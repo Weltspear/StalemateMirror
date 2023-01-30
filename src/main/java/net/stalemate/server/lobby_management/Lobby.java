@@ -35,7 +35,6 @@ import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.map_system.MapLoader;
 import net.stalemate.server.core.units.util.IBase;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
@@ -97,6 +96,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         lbstart();
     }
 
+    @SuppressWarnings("busyWaiting")
     public void lbstart(){
         LOGGER.log(Level.INFO,"Lobby started!");
         printStatus();
@@ -138,17 +138,27 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
             boolean terminate_lobby = false;
             lobby_lock.lock();
+            int conterm = 0;
             for (Player player: players){
                 if (player.isConnectionTerminated){
-                    terminate_lobby = true;
-                    break;
+                    if (!player.getTeam().getIsDisabledTurn()) {
+                        player.getTeam().disableTurn();
+                        chat.pushMsg(new Message(null,player.nickname + " disconnected"));
+                    }
+                    conterm++;
                 }
             }
+
             lobby_lock.unlock();
-            if (terminate_lobby) {
+
+            lobby_lock.lock();
+            boolean cnterm = conterm == players.size();
+            lobby_lock.unlock();
+
+            if (cnterm){
                 lobby_lock.lock();
-                for (Player player: players){
-                    player.terminateConnection("Another player has disconnected");
+                for (Player player : players){
+                    player.terminateConnection("Lobby Terminated");
                 }
                 lobby_lock.unlock();
                 resetLobby();

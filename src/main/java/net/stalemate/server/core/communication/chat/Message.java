@@ -30,7 +30,10 @@ public class Message {
 
     public String read(){
         timesRead++;
-        return "<" + author + ">: " + message + "\n";
+        if (author != null)
+            return "<" + author + ">: " + message + "\n";
+        else
+            return message + "\n";
     }
 
     public int getTimesRead(){

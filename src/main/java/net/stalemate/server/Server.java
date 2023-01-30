@@ -52,7 +52,7 @@ public class Server {
                 Socket client = serverSocket.accept();
                 LOGGER.log(Level.INFO,"Connection established from remote address" + client.getRemoteSocketAddress().toString());
                 ConnectionHandler connection_handler = new ConnectionHandler(client, lobbyHandler);
-                new Thread(connection_handler).start();
+                new Thread(connection_handler, "ConHandler+" + client.getRemoteSocketAddress().toString()).start();
             }
         }
         catch (Exception e){

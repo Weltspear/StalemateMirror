@@ -34,8 +34,10 @@ public class LobbyHandler {
     public LobbyHandler(){
         lobbies.addAll(LobbyConfigLoader.loadLobbiesFromConfig());
 
+        int i = 0;
         for (Lobby lobby : lobbies){
-            (new Thread(lobby)).start();
+            (new Thread(lobby, "Lobby+"+i)).start();
+            i++;
         }
     }
 

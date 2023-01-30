@@ -36,6 +36,7 @@ import net.stalemate.server.core.map_system.MapLoader;
 import net.stalemate.server.core.units.util.IBase;
 
 import java.util.*;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +48,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
     ArrayList<Player> players = new ArrayList<>();
     private int max_player_count = 2;
     Chat chat;
+    private final Semaphore playerWaitSemaphore = new Semaphore(0);
 
     final ArrayList<String> next_maps;
     int current_next_map = 0;
@@ -102,13 +104,12 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         printStatus();
 
         // Waiting for players
-        boolean wait_for_players = true;
-        while (wait_for_players){
-            lobby_lock.lock();
-            wait_for_players = players.size() != max_player_count;
-            lobby_lock.unlock();
-            Thread.onSpinWait();
+        try {
+            playerWaitSemaphore.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
         LOGGER.log(Level.INFO, "Game Started! [" + currentPlayerCount() + "/" + getMaxPlayerCount() + "]");
 
         lobby_lock.lock();
@@ -953,7 +954,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             } else {
                 Player player = new Player();
                 players.add(player);
-                return player;
+                try {
+                    return player;
+                } finally {
+                    if ((players.size() == max_player_count)){
+                        playerWaitSemaphore.release();
+                    }
+                }
             }
         } finally {
             lobby_lock.unlock();

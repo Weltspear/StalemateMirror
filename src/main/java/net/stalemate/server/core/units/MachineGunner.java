@@ -55,6 +55,7 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
         public void action(Unit unit, IGameController gameController) {
             if (!hasTurnEnded){
                 mode = true;
+                attack_range--;
                 endTurn();
             }
         }
@@ -80,13 +81,14 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
         public void action(Unit unit, IGameController gameController) {
             if (!hasTurnEnded){
                 mode = false;
+                attack_range++;
                 endTurn();
             }
         }
     }
 
     public MachineGunner(int x, int y, IGameController game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 1, 3, 0, 20, 20, 0, 1, 2), new AnimationController(), "Heavy Infantry");
+        super(x, y, game, new UnitStats(12, 12, 1, 1, 3, 0, 20, 20, 0, 1, 2), new AnimationController(), "Heavy Infantry");
 
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/machine_gunner_idle_1.png");

@@ -206,10 +206,10 @@ public class AssetLoader {
         graphics2D.fillRect(0, 0, 32, 32);
         graphics2D.dispose();
 
-        BufferedImage selr = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+        BufferedImage selr = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB_PRE);
         graphics2D = selr.createGraphics();
         graphics2D.setColor(new Color(255,255,255, 47));
-        graphics2D.fillRect(0, 0, 32, 32);
+        graphics2D.fillRect(0, 0, 64, 64);
         graphics2D.dispose();
 
         img_storage.put("empty.png", empty);

@@ -99,14 +99,14 @@ public class InGameUI extends JPanel {
 
     private OffsetDirection offset_direction = OffsetDirection.None;
 
-    ArrayList<ArrayList<BufferedImage>> map_to_render = new ArrayList<>();
+    ArrayList<ArrayList<Image>> map_to_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> fog_of_war = new ArrayList<>();
     // selector range
     ArrayList<ArrayList<BufferedImage>> _selr = new ArrayList<>();
-    ArrayList<ArrayList<BufferedImage>> entity_render = new ArrayList<>();
+    ArrayList<ArrayList<Image>> entity_render = new ArrayList<>();
     ArrayList<ArrayList<BufferedImage>> unit_data_ar = new ArrayList<>();
-    ArrayList<BufferedImage> buttons = new ArrayList<>();
-    ArrayList<BufferedImage> queue = null;
+    ArrayList<Image> buttons = new ArrayList<>();
+    ArrayList<Image> queue = null;
     ArrayList<String> binds = new ArrayList<>();
     ArrayList<String> unit_times = new ArrayList<>();
     ArrayList<String> chat = new ArrayList<>();
@@ -238,6 +238,11 @@ public class InGameUI extends JPanel {
         private final BufferedImage skull;
         private final BufferedImage shovel;
 
+        private final HashMap<String, Image> entity_scaled_cache = new HashMap<>();
+        private final HashMap<String, Image> button_scaled_cache = new HashMap<>();
+        private final HashMap<BufferedImage, Image> queue_scaled_cache = new HashMap<>();
+        private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
+
         private int tsel_x;
         private int tsel_y;
 
@@ -316,15 +321,94 @@ public class InGameUI extends JPanel {
          */
 
         public ClientDataManager(InGameUI interface_) {
-            fog_of_war = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+            fog_of_war = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
             Graphics2D graphics2D = fog_of_war.createGraphics();
             graphics2D.setColor(new Color(0,0,0, 0.5F));
-            graphics2D.fillRect(0, 0, 32, 32);
+            graphics2D.fillRect(0, 0, 64, 64);
             graphics2D.dispose();
             this.interface_ = interface_;
 
             shovel = AssetLoader.load("assets/shovel.png");
             skull = AssetLoader.load("assets/skull.png");
+        }
+
+        public Image unit2image(ClientGame.ClientUnit e){
+            BufferedImage image;
+
+            String cached = e.getTextureLoc();
+
+            if (e.isFlip()){
+                cached = cached+"+flip";
+            }
+
+            if (SpecialTeamReprReg.getTeamRepr(e.getTextureLoc()) != null){
+                cached = cached+"+rgb"+e.getTeamColor();
+            }
+
+            if (e.isTransparent()){
+                cached = cached+"+transparent";
+            }
+
+            if (entity_scaled_cache.containsKey(cached)){
+                return entity_scaled_cache.get(cached);
+            }
+            else {
+                if (SpecialTeamReprReg.getTeamRepr(e.getTextureLoc()) != null) {
+                    image = new BufferedImage(e.getTexture().getWidth(), e.getTexture().getHeight(), e.getTexture().getType());
+                    Graphics g = image.getGraphics();
+                    g.drawImage(e.getTexture(), 0, 0, null);
+                    g.dispose();
+
+                    SpecialTeamReprReg.TeamRepr teamRepr = SpecialTeamReprReg.getTeamRepr(e.getTextureLoc());
+                    for (int[] c : teamRepr.getCoords()) {
+                        image.setRGB(c[0], c[1], e.getTeamColor().getRGB());
+                    }
+                }
+                else {
+                    image = e.getTexture();
+                }
+
+                if (e.isFlip()) {
+                    // Flip the image
+                    AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+                    tx.translate(-image.getWidth(), 0);
+                    AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+                    image = op.filter(image, null);
+                }
+
+                if (e.isTransparent()) {
+                    BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+                    Graphics2D graphics = clone.createGraphics();
+
+                    graphics.setBackground(new Color(0x00FFFFFF, true));
+                    graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
+
+                    graphics.drawImage(image, 0, 0, null);
+
+                    graphics.dispose();
+
+                    for (int y_ = 0; y_ < 32; y_++) {
+                        for (int x_ = 0; x_ < 32; x_++) {
+
+                            Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
+                                    (new Color(clone.getRGB(x_, y_))).getGreen(),
+                                    (new Color(clone.getRGB(x_, y_))).getBlue(),
+                                    (new Color(clone.getRGB(x_, y_), true)).getAlpha());
+
+                            clone.setRGB(x_, y_, (new Color(original.getRed(),
+                                    original.getGreen(),
+                                    original.getBlue(),
+                                    (int) (original.getAlpha() * 0.5)).getRGB()));
+
+                        }
+                    }
+
+                    image = clone;
+                }
+                Image img_d = image.getScaledInstance(64, 64, Image.SCALE_FAST);
+                entity_scaled_cache.put(cached, img_d);
+                return img_d;
+            }
         }
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
@@ -346,14 +430,14 @@ public class InGameUI extends JPanel {
 
                 ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y);
 
-                ArrayList<BufferedImage> buttons = new ArrayList<>();
+                ArrayList<Image> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
 
                 BufferedImage selected_unit_image = null;
                 PropertiesToRender propertiesToRender = null;
                 BufferedImage selector = null;
 
-                ArrayList<BufferedImage> unit_queue = null;
+                ArrayList<Image> unit_queue = null;
                 ArrayList<String> unit_queue_turn_time = new ArrayList<>();
 
                 String[][] button_ids = {{null, null, null}, {null, null, null}, {null, null, null}};
@@ -368,7 +452,14 @@ public class InGameUI extends JPanel {
                     if (selectedUnit.getQueue() != null) {
                         unit_queue = new ArrayList<>();
                         for (ClientGame.ClientSelectedUnit.ClientUnitQueueElement queueElement : selectedUnit.getQueue()) {
-                            unit_queue.add(queueElement.getTexture());
+                            if (queue_scaled_cache.containsKey(queueElement.getTexture()))
+                            unit_queue.add(queue_scaled_cache.get(queueElement.getTexture()));
+                            else{
+                                Image f = queueElement.getTexture().getScaledInstance(64, 64, Image.SCALE_FAST);
+                                queue_scaled_cache.put(queueElement.getTexture(), f);
+                                unit_queue.add(f);
+
+                            }
                             unit_queue_turn_time.add("" + queueElement.getTurn_time());
                         }
                     }
@@ -385,7 +476,16 @@ public class InGameUI extends JPanel {
 
                         if (button != null) {
                             button_ids[by][bx] = button.getId();
-                            buttons.add(button.getImage());
+
+                            if (button_scaled_cache.containsKey(button.getId())){
+                                buttons.add(button_scaled_cache.get(button.getId()));
+                            }
+                            else{
+                                Image f = button.getImage().getScaledInstance(64,64,Image.SCALE_FAST);
+                                button_scaled_cache.put(button.getId(), f);
+                                buttons.add(f);
+                            }
+
                             binds.add(button.getBind());
                         } else {
                             buttons.add(null);
@@ -400,7 +500,7 @@ public class InGameUI extends JPanel {
                     selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
 
                 // deal with map
-                ArrayList<ArrayList<BufferedImage>> map = new ArrayList<>();
+                ArrayList<ArrayList<Image>> map = new ArrayList<>();
                 int y = 0;
                 for (ArrayList<String> x_row : map_textures) {
                     map.add(new ArrayList<>());
@@ -409,14 +509,22 @@ public class InGameUI extends JPanel {
                             map.get(y).add(null);
                         }
                         else {
-                            map.get(y).add(AssetLoader.load(texture));
+                            if (map_scaled_cache.containsKey(texture)){
+                                map.get(y).add(map_scaled_cache.get(texture));
+                            }
+                            else{
+                                Image f = AssetLoader.load(texture).getScaledInstance(64, 64, Image.SCALE_FAST);
+                                map_scaled_cache.put(texture, f);
+                                map.get(y).add(f);
+                            }
+
                         }
                     }
                     y++;
                 }
 
                 // Deal with entities
-                ArrayList<ArrayList<BufferedImage>> entities = new ArrayList<>();
+                ArrayList<ArrayList<Image>> entities = new ArrayList<>();
                 y = 0;
                 int x__ = 0;
                 for (ClientGame.ClientEntity[] x_row : _entities) {
@@ -426,55 +534,11 @@ public class InGameUI extends JPanel {
                             entities.get(y).add(null);
                         } else {
                             if (centity instanceof ClientGame.ClientUnit ucentity) {
-                                BufferedImage image = ucentity.getTexture();
+                                Image image = unit2image(ucentity);
 
-                                if (SpecialTeamReprReg.getTeamRepr(ucentity.getTextureLoc()) != null){
-                                    SpecialTeamReprReg.TeamRepr teamRepr = SpecialTeamReprReg.getTeamRepr(ucentity.getTextureLoc());
-                                    for (int[] c: teamRepr.getCoords()){
-                                        image.setRGB(c[0], c[1], ucentity.getTeamColor().getRGB());
-                                    }
-                                }
-
-                                if (ucentity.isFlip()) {
-                                    // Flip the image
-                                    AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                    tx.translate(-image.getWidth(), 0);
-                                    AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                    image = op.filter(image, null);
-                                }
-
-                                if (ucentity.isTransparent()) {
-                                    BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
-                                    Graphics2D graphics = clone.createGraphics();
-
-                                    graphics.setBackground(new Color(0x00FFFFFF, true));
-                                    graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
-
-                                    graphics.drawImage(image, 0, 0, null);
-
-                                    graphics.dispose();
-
-                                    for (int y_ = 0; y_ < 32; y_++) {
-                                        for (int x_ = 0; x_ < 32; x_++) {
-
-                                            Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
-                                                    (new Color(clone.getRGB(x_, y_))).getGreen(),
-                                                    (new Color(clone.getRGB(x_, y_))).getBlue(),
-                                                    (new Color(clone.getRGB(x_, y_), true)).getAlpha());
-
-                                            clone.setRGB(x_, y_, (new Color(original.getRed(),
-                                                    original.getGreen(),
-                                                    original.getBlue(),
-                                                    (int) (original.getAlpha() * 0.5)).getRGB()));
-
-                                        }
-                                    }
-
-                                    image = clone;
-                                }
                                 entities.get(y).add(image);
                             } else {
-                                entities.get(y).add(centity.getTexture());
+                                entities.get(y).add(centity.getTexture().getScaledInstance(64, 64, Image.SCALE_FAST));
                             }
                         }
 
@@ -1065,19 +1129,19 @@ public class InGameUI extends JPanel {
                 Graphics2D g2 = bufferedImage.createGraphics();
 
                 int y = 0;
-                for (ArrayList<BufferedImage> row_x : map_to_render) {
+                for (ArrayList<Image> row_x : map_to_render) {
                     int x_count = 0;
-                    for (BufferedImage x : row_x) {
-                        g2.drawImage(x != null ? x.getScaledInstance(64, 64, Image.SCALE_FAST) : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
+                    for (Image x : row_x) {
+                        g2.drawImage(x != null ? x : Objects.requireNonNull(AssetLoader.load("empty.png")).getScaledInstance(64, 64, Image.SCALE_FAST), 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
                         x_count++;
                     }
                     y++;
                 }
 
-                renderImagesScaled(entity_render, offset_x, offset_y, g2);
-                renderImagesScaled(fog_of_war, offset_x, offset_y, g2);
+                renderImages2(entity_render, offset_x, offset_y, g2);
+                renderImages(fog_of_war, offset_x, offset_y, g2);
                 renderImages(unit_data_ar, offset_x, offset_y, g2);
-                renderImagesScaled(_selr, offset_x, offset_y, g2);
+                renderImages(_selr, offset_x, offset_y, g2);
 
                 if (selector != null && do_render_prev && do_offset) {
                     g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev - 64, null);
@@ -1093,9 +1157,9 @@ public class InGameUI extends JPanel {
                 int i = 0;
                 int x = 0;
                 y = 0;
-                for (BufferedImage button : buttons) {
+                for (Image button : buttons) {
                     if (button != null) {
-                        g.drawImage(button.getScaledInstance(64, 64, Image.SCALE_FAST), 640 + x, 384 + y, null);
+                        g.drawImage(button, 640 + x, 384 + y, null);
                     }
                     i++;
                     x += 64;
@@ -1115,9 +1179,9 @@ public class InGameUI extends JPanel {
                     i = 0;
                     x = 0;
                     y = 0;
-                    for (BufferedImage m : queue) {
+                    for (Image m : queue) {
                         if (m != null) {
-                            g.drawImage(m.getScaledInstance(64, 64, Image.SCALE_FAST), x, 384 + y, null);
+                            g.drawImage(m, x, 384 + y, null);
                         }
                         i++;
                         x += 64;
@@ -1298,6 +1362,20 @@ public class InGameUI extends JPanel {
         for (ArrayList<BufferedImage> row_x: buffered_images){
             int x_count = 0;
             for (BufferedImage x : row_x){
+                if (x != null)
+                    g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
+                x_count++;
+            }
+            y++;
+        }
+    }
+
+    private void renderImages2(ArrayList<ArrayList<Image>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
+        int y;
+        y = 0;
+        for (ArrayList<Image> row_x: buffered_images){
+            int x_count = 0;
+            for (Image x : row_x){
                 if (x != null)
                     g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
                 x_count++;

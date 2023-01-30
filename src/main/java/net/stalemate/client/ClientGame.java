@@ -211,6 +211,7 @@ public class ClientGame {
 
     public static class ClientUnit extends ClientEntity{
 
+        private final String texture_n;
         private final int hp;
         private final int max_hp;
         private final int su;
@@ -222,10 +223,11 @@ public class ClientGame {
         private final int fog_of_war_range;
         private final boolean is_our;
 
-        public ClientUnit(int x, int y, boolean flip, BufferedImage texture, int rgb,
+        public ClientUnit(int x, int y, boolean flip, BufferedImage texture, String texture_n, int rgb,
                           ArrayList<Integer> stats, boolean transparent,
                           int fog_of_war_range, boolean is_our) {
             super(x, y, flip, texture);
+            this.texture_n = texture_n;
 
             hp = stats.get(0);
             max_hp = stats.get(1);
@@ -275,6 +277,9 @@ public class ClientGame {
             return transparent;
         }
 
+        public String getTextureLoc() {
+            return texture_n;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -368,6 +373,15 @@ public class ClientGame {
                     selector = AssetLoader.load("assets/ui/selectors/ui_select.png");
                 }
 
+                int rgb = (int) selected_unit.get("rgb");
+
+                if (SpecialTeamReprReg.getTeamRepr((String) selected_unit.get("texture")) != null){
+                    SpecialTeamReprReg.TeamRepr teamRepr = SpecialTeamReprReg.getTeamRepr((String) selected_unit.get("texture"));
+                    for (int[] c: teamRepr.getCoords()){
+                        unit_texture.setRGB(c[0], c[1], rgb);
+                    }
+                }
+
                 selectedUnit = new ClientSelectedUnit(clientSideProperties, unit_texture, unit_queue, buttons, selector, x, y, sel_r);
 
             }
@@ -393,7 +407,7 @@ public class ClientGame {
                     int rgb = (int) _entity.get("rgb");
                     int fog_of_war_range = (int) _entity.get("fog_of_war_range");
 
-                    ClientUnit unit = new ClientUnit(x, y, flip, texture, rgb, stats, transparent, fog_of_war_range, is_our);
+                    ClientUnit unit = new ClientUnit(x, y, flip, texture, (String) _entity.get("texture"), rgb, stats, transparent, fog_of_war_range, is_our);
                     entities.add(unit);
                 }
 

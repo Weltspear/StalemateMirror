@@ -18,6 +18,7 @@
 
 package net.stalemate;
 
+import net.stalemate.client.SpecialTeamReprReg;
 import net.stalemate.client.ui.MainMenu;
 import net.stalemate.client.AssetLoader;
 import net.stalemate.server.Server;
@@ -40,6 +41,7 @@ public class Main {
         }
         else {
             AssetLoader.loadAll();
+            SpecialTeamReprReg.makeAll();
 
             GraphicsEnvironment ge =
                     GraphicsEnvironment.getLocalGraphicsEnvironment();

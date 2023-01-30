@@ -21,6 +21,7 @@ package net.stalemate.client.ui;
 import net.stalemate.client.AssetLoader;
 import net.stalemate.client.ClientGame;
 import net.stalemate.client.ClientMapLoader;
+import net.stalemate.client.SpecialTeamReprReg;
 import net.stalemate.client.config.ButtonTooltips;
 import net.stalemate.client.config.KeyboardBindMapper;
 import net.stalemate.client.config.PropertiesMatcher;
@@ -425,16 +426,23 @@ public class InGameUI extends JPanel {
                             entities.get(y).add(null);
                         } else {
                             if (centity instanceof ClientGame.ClientUnit ucentity) {
-                                BufferedImage image;
+                                BufferedImage image = ucentity.getTexture();
+
+                                if (SpecialTeamReprReg.getTeamRepr(ucentity.getTextureLoc()) != null){
+                                    SpecialTeamReprReg.TeamRepr teamRepr = SpecialTeamReprReg.getTeamRepr(ucentity.getTextureLoc());
+                                    for (int[] c: teamRepr.getCoords()){
+                                        image.setRGB(c[0], c[1], ucentity.getTeamColor().getRGB());
+                                    }
+                                }
+
                                 if (ucentity.isFlip()) {
                                     // Flip the image
                                     AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-                                    tx.translate(-ucentity.getTexture().getWidth(), 0);
+                                    tx.translate(-image.getWidth(), 0);
                                     AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-                                    image = op.filter(ucentity.getTexture(), null);
-                                } else {
-                                    image = ucentity.getTexture();
+                                    image = op.filter(image, null);
                                 }
+
                                 if (ucentity.isTransparent()) {
                                     BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
                                     Graphics2D graphics = clone.createGraphics();

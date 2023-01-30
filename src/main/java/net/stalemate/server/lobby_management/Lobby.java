@@ -785,6 +785,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         HashMap<String, Object> selected_unit_data = new HashMap<>();
                         selected_unit_data.put("properties", selected_unit.getProperties().serialize());
                         selected_unit_data.put("texture", selected_unit.getTextureFileName());
+                        selected_unit_data.put("rgb", lgame.getUnitsTeam(selected_unit).getTeamColor().getRGB());
 
                         selected_unit_data.put("x", selected_unit.getX());
                         selected_unit_data.put("y", selected_unit.getY());

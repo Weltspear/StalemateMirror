@@ -36,10 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,6 +46,7 @@ public class InGameUI extends JPanel {
     private final JDesktopPane p;
     @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
     private final Font monogram_button;
+    private final Font monogram_button_small;
     private final MListener m;
     private boolean focus_desktop_pane = false;
 
@@ -130,7 +128,11 @@ public class InGameUI extends JPanel {
 
     int x_prev = 0;
     int y_prev = 0;
+    // do render preview
     boolean do_render_prev = false;
+
+    private int smallify_button = -1;
+    private int smallify_button_renders = 3;
 
     private EscapeMenu escapeMenu = null;
 
@@ -192,6 +194,16 @@ public class InGameUI extends JPanel {
                         keysInQueue.add("SPACE");
                     } else if ("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM".contains(String.valueOf(e.getKeyChar()))) {
                         keysInQueue.add(String.valueOf(e.getKeyChar()));
+                        if (binds != null){
+                            int btn_idx = 0;
+                            for (String bind: binds){
+                                if (Objects.equals(bind.toLowerCase(Locale.ROOT),String.valueOf(e.getKeyChar()).toLowerCase(Locale.ROOT))){
+                                    smallify_button = btn_idx;
+                                    smallify_button_renders = 3;
+                                }
+                                btn_idx++;
+                            }
+                        }
                     } else if (e.getKeyCode() == KeyboardBindMapper.lock_camera) {
                         unsafeLock.lock();
                         if (!dis_offset) {
@@ -776,11 +788,15 @@ public class InGameUI extends JPanel {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     int y = 0;
                     int x = 0;
+                    int button_idx = 0;
                     for (String bind : binds) {
                         if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
                                 && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
                             if (bind != null) {
+                                InGameUI.this.smallify_button = button_idx;
+                                InGameUI.this.smallify_button_renders = 3;
                                 in_client.keysInQueue.add(bind);
+                                break;
                             }
                         }
                         x++;
@@ -788,6 +804,7 @@ public class InGameUI extends JPanel {
                             x = 0;
                             y++;
                         }
+                        button_idx++;
                     }
 
                     // Move cam
@@ -941,6 +958,7 @@ public class InGameUI extends JPanel {
 
         monogram = AssetLoader.getMonogram();
         monogram_button = monogram.deriveFont(((float)(16)));
+        monogram_button_small = monogram.deriveFont(((float)(14.4)));
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);
@@ -1165,10 +1183,12 @@ public class InGameUI extends JPanel {
                 renderImages(unit_data_ar, offset_x, offset_y, g2);
                 renderImages(_selr, offset_x, offset_y, g2);
 
+                // Preview selector
                 if (selector != null && do_render_prev && do_offset) {
                     g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev - 64, null);
                 }
 
+                // Normal Selector
                 if (selector != null)
                     g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame - offset_x, sel_y_frame - offset_y, null);
 
@@ -1179,8 +1199,13 @@ public class InGameUI extends JPanel {
                 int i = 0;
                 int x = 0;
                 y = 0;
+                int btn_idx = 0;
                 for (Image button : buttons) {
                     if (button != null) {
+                        if (btn_idx == smallify_button){
+                            g.drawImage(button.getScaledInstance(57, 57, Image.SCALE_FAST), 640 + x + 3, 384 + y + 3, null);
+                        }
+                        else
                         g.drawImage(button, 640 + x, 384 + y, null);
                     }
                     i++;
@@ -1190,6 +1215,7 @@ public class InGameUI extends JPanel {
                         x = 0;
                         y += 64;
                     }
+                    btn_idx++;
                 }
 
                 // Render minimap
@@ -1222,10 +1248,20 @@ public class InGameUI extends JPanel {
                 i = 0;
                 x = 0;
                 y = 0;
+                btn_idx = 0;
                 for (String bind : binds) {
                     if (bind != null) {
-                        // g.drawImage(bind.getScaledInstance(64, 64, Image.SCALE_FAST), 640+x, 384+y, null);
-                        g.drawString(bind, 640 + x + 8, 383 + y + 11);
+                        if (btn_idx == smallify_button) {
+                            g.setFont(monogram_button_small);
+                            g.drawString(bind, 640 + x + 8 + 3, 383 + y + 11 + 3);
+                            smallify_button_renders--;
+                            if (smallify_button_renders == 0)
+                                smallify_button = -1;
+                            g.setFont(monogram_button);
+                        }
+                        else{
+                            g.drawString(bind, 640 + x + 8, 383 + y + 11);
+                        }
                     }
                     i++;
                     x += 64;
@@ -1234,6 +1270,7 @@ public class InGameUI extends JPanel {
                         x = 0;
                         y += 64;
                     }
+                    btn_idx++;
                 }
 
                 // Render the time of production
@@ -1333,7 +1370,7 @@ public class InGameUI extends JPanel {
 
                 if (selector != null && do_render_prev) {
                     if (!do_offset)
-                        g.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), (x_prev * 64), (y_prev * 64), null);
+                        g.drawImage(AssetLoader.load("bhighlight"), (x_prev * 64), (y_prev * 64), null);
                 }
 
                 // Render currently written chat message

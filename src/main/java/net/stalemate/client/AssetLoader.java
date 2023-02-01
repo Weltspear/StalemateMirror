@@ -212,9 +212,16 @@ public class AssetLoader {
         graphics2D.fillRect(0, 0, 64, 64);
         graphics2D.dispose();
 
+        BufferedImage bhighlight = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB_PRE);
+        graphics2D = bhighlight.createGraphics();
+        graphics2D.setColor(new Color(255,255,255, 32));
+        graphics2D.fillRect(0, 0, 64, 64);
+        graphics2D.dispose();
+
         img_storage.put("empty.png", empty);
         img_storage.put("empty", empty);
         img_storage.put("selr", selr);
+        img_storage.put("bhighlight", bhighlight);
         img_storage.put("texture_missing", texture_missing);
 
         for (String res: resources){

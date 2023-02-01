@@ -36,6 +36,9 @@ public class KeyboardBindMapper {
     public static int goto_first_built_base = 0;
     public static int chat = 0;
 
+    public static int cam_speed_up = 0;
+    public static int cam_speed_down = 0;
+
     public static void makeBinds(HashMap<String, String> binds){
         move_up = AWTKeyStroke.getAWTKeyStroke(binds.get("move_up")).getKeyCode();
         move_left = AWTKeyStroke.getAWTKeyStroke(binds.get("move_left")).getKeyCode();
@@ -49,6 +52,8 @@ public class KeyboardBindMapper {
         lock_camera = AWTKeyStroke.getAWTKeyStroke(binds.get("lock_camera")).getKeyCode();
         goto_first_built_base = AWTKeyStroke.getAWTKeyStroke(binds.get("goto_first_built_base")).getKeyCode();
         chat = AWTKeyStroke.getAWTKeyStroke(binds.get("chat")).getKeyCode();
+        cam_speed_up = AWTKeyStroke.getAWTKeyStroke(binds.get("cam_speed_up")).getKeyCode();
+        cam_speed_down = AWTKeyStroke.getAWTKeyStroke(binds.get("cam_speed_down")).getKeyCode();
     }
 
 }

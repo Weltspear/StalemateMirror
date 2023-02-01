@@ -21,3 +21,6 @@ config:
         "goto_first_built_base": "SHIFT"
         "chat": "BACK_SLASH"
 
+        "cam_speed_up": "PAGE_UP"
+        "cam_speed_down": "PAGE_DOWN"
+

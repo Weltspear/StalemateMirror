@@ -91,6 +91,8 @@ public class InGameUI extends JPanel {
     private int offset_y = 0;
     private boolean dis_offset = false; // if true camera is locked
 
+    private int camera_speed = 1;
+
     enum OffsetDirection{
         None,
         Left,
@@ -206,6 +208,23 @@ public class InGameUI extends JPanel {
                         keysInQueue.add("TAB");
                     } else if (e.getKeyCode() == KeyEvent.VK_F10 && !isTypingChatMessage) {
                         spawnEscapeMenu();
+                    } else if (e.getKeyCode() == KeyboardBindMapper.cam_speed_up){
+                        if (camera_speed * 2 != 8) {
+                            camera_speed *= 2;
+                            //offset_x = 0;
+                            //offset_y = 0;
+                            //offset_y = ((offset_y/8)/camera_speed)*8;
+                            //offset_x = ((offset_x/8)/camera_speed)*8;
+                        }
+                    } else if (e.getKeyCode() == KeyboardBindMapper.cam_speed_down){
+                        if (camera_speed != 1) {
+                            camera_speed /= 2;
+
+                            //offset_x = ((offset_x/8)/camera_speed)*8;
+                            //offset_y = ((offset_y/8)/camera_speed)*8;
+                            //offset_x = 0;
+                            //offset_y = 0;
+                        }
                     }
                 } else {
                     if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
@@ -1046,9 +1065,9 @@ public class InGameUI extends JPanel {
 
         if (offset_direction == OffsetDirection.Left){
             if (offset_x >= -64 && clDataManager.mapLoader.isMapLoaded()) {
-                offset_x -= 4*2;
+                offset_x -= 4*2*camera_speed;
 
-                if (offset_x == -64) {
+                if (offset_x <= -64) {
                     if (cam_x + 5 >= 0) {
                         cam_x--;
                         offset_x = 0;
@@ -1058,9 +1077,9 @@ public class InGameUI extends JPanel {
         }
         else if (offset_direction == OffsetDirection.Right){
             if (offset_x <= 64 && clDataManager.mapLoader.isMapLoaded()) {
-                offset_x += 4*2;
+                offset_x += 4*2*camera_speed;
 
-                if (offset_x == 64) {
+                if (offset_x >= 64) {
                     if (cam_x + 7 < clDataManager.getMapLoader().getWidth()) {
                         cam_x++;
                         offset_x = 0;
@@ -1079,9 +1098,9 @@ public class InGameUI extends JPanel {
 
         if (offset_direction == OffsetDirection.Up){
             if (offset_y >= -64 && clDataManager.mapLoader.isMapLoaded()) {
-                offset_y -= 4*2;
+                offset_y -= 4*2*camera_speed;
 
-                if (offset_y == -64){
+                if (offset_y <= -64){
                     if (cam_y + 1 >= 0) {
                         cam_y--;
                         offset_y = 0;
@@ -1091,9 +1110,9 @@ public class InGameUI extends JPanel {
         }
         if (offset_direction == OffsetDirection.Down){
             if (offset_y <= 64 && clDataManager.mapLoader.isMapLoaded()) {
-                offset_y += 4*2;
+                offset_y += 4*2*camera_speed;
 
-                if (offset_y == 64){
+                if (offset_y >= 64){
                     if (cam_y + 3 < clDataManager.getMapLoader().getHeight()) {
                         cam_y++;
                         offset_y = 0;
@@ -1301,6 +1320,7 @@ public class InGameUI extends JPanel {
                 g.drawString("" + mp, 40, 22);
                 g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
 
+                g.drawString("Camera speed: " + camera_speed, 690, 22);
 
                 if (selector != null && do_render_prev) {
                     if (!do_offset)

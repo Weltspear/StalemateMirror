@@ -211,19 +211,10 @@ public class InGameUI extends JPanel {
                     } else if (e.getKeyCode() == KeyboardBindMapper.cam_speed_up){
                         if (camera_speed * 2 != 8) {
                             camera_speed *= 2;
-                            //offset_x = 0;
-                            //offset_y = 0;
-                            //offset_y = ((offset_y/8)/camera_speed)*8;
-                            //offset_x = ((offset_x/8)/camera_speed)*8;
                         }
                     } else if (e.getKeyCode() == KeyboardBindMapper.cam_speed_down){
                         if (camera_speed != 1) {
                             camera_speed /= 2;
-
-                            //offset_x = ((offset_x/8)/camera_speed)*8;
-                            //offset_y = ((offset_y/8)/camera_speed)*8;
-                            //offset_x = 0;
-                            //offset_y = 0;
                         }
                     }
                 } else {

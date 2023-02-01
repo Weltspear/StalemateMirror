@@ -197,7 +197,7 @@ public class InGameUI extends JPanel {
                         if (binds != null){
                             int btn_idx = 0;
                             for (String bind: binds){
-                                if (Objects.equals(bind.toLowerCase(Locale.ROOT),String.valueOf(e.getKeyChar()).toLowerCase(Locale.ROOT))){
+                                if (Objects.equals(bind != null ? bind.toLowerCase(Locale.ROOT) : "",String.valueOf(e.getKeyChar()).toLowerCase(Locale.ROOT))){
                                     smallify_button = btn_idx;
                                     smallify_button_renders = 3;
                                 }

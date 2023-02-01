@@ -27,11 +27,12 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.INoMoveAttack;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttack {
+public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttack, IUnitName {
 
     private volatile boolean mode = true;
 
@@ -178,6 +179,24 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, p);
         return p;
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

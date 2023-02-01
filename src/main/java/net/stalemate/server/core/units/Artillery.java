@@ -28,12 +28,13 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Artillery extends Unit implements IMechanized, IUnitMoveAmount {
+public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
     @SuppressWarnings("all")
     public static class ShellingButton implements ISelectorButton{
         private final int attack_range;
@@ -161,6 +162,24 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount {
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, p);
         return p;
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

@@ -23,6 +23,7 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
 
@@ -199,6 +200,9 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
                 if (!isBlocked) {
                     game.getUnitsTeam(this).addUnit(currently_processed_unit.unit);
+                    if (currently_processed_unit.unit instanceof IUnitName uname){
+                        uname.setUnitName(game.getUnitNameGen().genName(currently_processed_unit.unit.getName()));
+                    }
                     game.addEntity(currently_processed_unit.unit);
                     currently_processed_unit = null;
                 }

@@ -1297,11 +1297,29 @@ public class InGameUI extends JPanel {
 
                     g.drawString(name.value(), 192 + 32 + 64 + 128 + h, 384 + 30); // 416-640
 
+                    Font monogram23 = monogram.deriveFont(Font.PLAIN, 23f);
 
-                    g.setFont(monogram.deriveFont(Font.PLAIN, 23f));
+                    g.setFont(monogram23);
 
                     int y__ = 1;
                     for (ClientSideProperty clientSideProperty : propertiesToRender2.properties) {
+                        if (clientSideProperty.key().equals("uname")){
+                            if (clientSideProperty.value().isEmpty()){
+                                continue;
+                            }
+                            g.setFont(monogram.deriveFont(Font.PLAIN, 16f));
+
+                            FontMetrics metrics_16 = g.getFontMetrics();
+                            int width_16 = metrics_16.stringWidth("A");
+
+                            int h2 = ((224 - ((clientSideProperty.value().length()+4) * width_16)) / 2);
+
+                            g.drawString("<" + clientSideProperty.value() + ">", 192 + 32 + 64 + 128 + h2, 384 + 43 + 13 * 11);
+                            g.setFont(monogram23);
+
+                            continue;
+                        }
+
                         if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null) {
                             if (!Objects.equals("true", clientSideProperty.value()))
                                 g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192 + 32 + 64 + 128, 384 + 43 + 13 * y__);

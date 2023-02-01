@@ -26,11 +26,12 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class Tankette extends Unit implements IMechanized, IUnitMoveAmount {
+public class Tankette extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
     private int move_amount = 3;
 
     public Tankette(int x, int y, IGameController game) {
@@ -92,6 +93,24 @@ public class Tankette extends Unit implements IMechanized, IUnitMoveAmount {
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, p);
         return p;
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

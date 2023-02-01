@@ -24,12 +24,26 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class MotorizedUnitOther extends Unit implements IUnitMoveAmount {
+public class MotorizedUnitOther extends Unit implements IUnitMoveAmount, IUnitName {
     private final Unit contained_unit;
+
+    @Override
+    public String getUnitName() {
+        if (contained_unit instanceof IUnitName uname)
+            return uname.getUnitName();
+        else
+            return "";
+    }
+
+    @Override
+    public void setUnitName(String n) {
+
+    }
 
     public class DemotorizeButton implements IStandardButton{
         @Override
@@ -117,6 +131,7 @@ public class MotorizedUnitOther extends Unit implements IUnitMoveAmount {
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+        IUnitName.addNameProperty(getUnitName(), p);
         return p;
     }
 }

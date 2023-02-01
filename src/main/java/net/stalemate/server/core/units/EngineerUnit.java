@@ -29,13 +29,14 @@ import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 import net.stalemate.server.core.units.buildings.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
-public class EngineerUnit extends Unit implements IUnitMoveAmount{
+public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
     public static class RepairButton implements ISelectorButtonUnit{
         @Override
         public String bind() {
@@ -417,6 +418,24 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount{
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, p);
         return p;
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

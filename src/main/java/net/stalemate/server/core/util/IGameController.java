@@ -23,6 +23,7 @@ import net.stalemate.server.core.MapObject;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.event.EventListenerRegistry;
+import net.stalemate.server.core.name.UnitNameGen;
 
 import java.util.ArrayList;
 
@@ -46,4 +47,6 @@ public interface IGameController {
     EventListenerRegistry getEvReg();
 
     Game.StandardNeutralTeam getNeutralTeam();
+
+    UnitNameGen getUnitNameGen();
 }

@@ -27,6 +27,7 @@ import net.stalemate.server.core.event.EventListenerRegistry;
 import net.stalemate.server.core.event.OnEvent;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
+import net.stalemate.server.core.name.UnitNameGen;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.util.*;
 
@@ -45,6 +46,7 @@ public class Game implements IGameControllerGamemode {
 
     // Additional map parameters
     private final HashMap<String, Object> aparams;
+    private final UnitNameGen ng = new UnitNameGen();
     public HashMap<String, Object> getAparams(){return aparams;}
 
     @Deprecated
@@ -56,6 +58,8 @@ public class Game implements IGameControllerGamemode {
     public IGamemode getMode() {
         return mode;
     }
+
+    public UnitNameGen getUnitNameGen(){return ng;}
 
     public Team getTeamDoingTurn(){
         try {
@@ -543,6 +547,17 @@ public class Game implements IGameControllerGamemode {
             try{
                 lock.lock();
                 return Game.this.getNeutralTeam();
+            }
+            finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public UnitNameGen getUnitNameGen() {
+            try{
+                lock.lock();
+                return Game.this.getUnitNameGen();
             }
             finally {
                 lock.unlock();

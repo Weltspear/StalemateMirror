@@ -27,11 +27,12 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount {
+public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
     public AntiTank(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 18, 18, 0, 1, 2), new AnimationController(), "Anti-Tank");
 
@@ -74,6 +75,12 @@ public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount {
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, properties);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, properties);
         return properties;
     }
 
@@ -98,5 +105,17 @@ public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount {
     public void turnUpdate() {
         super.turnUpdate();
         setMoveAmount(getTurnMoveAmount());
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

@@ -26,11 +26,12 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
+import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class HeavyTank extends Unit implements IMechanized, IUnitMoveAmount {
+public class HeavyTank extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
     public HeavyTank(int x, int y, IGameController game){
         super(x, y, game, new Unit.UnitStats(20, 20, 1, 1, 3, 3, 21, 21, 1, 0, 0), new AnimationController(), "Heavy Tank");
 
@@ -87,6 +88,24 @@ public class HeavyTank extends Unit implements IMechanized, IUnitMoveAmount {
     public Properties getProperties() {
         Properties p = super.getProperties();
         IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
+
+        if (uname.isEmpty()){
+            uname = game.getUnitNameGen().genName(name);
+        }
+
+        IUnitName.addNameProperty(uname, p);
         return p;
+    }
+
+    private String uname = "";
+
+    @Override
+    public String getUnitName() {
+        return uname;
+    }
+
+    @Override
+    public void setUnitName(String n) {
+        uname = n;
     }
 }

@@ -19,6 +19,7 @@
 package net.stalemate.client.ui.swing;
 
 import javax.swing.*;
+import java.lang.reflect.InvocationTargetException;
 
 public class DesktopPaneFocusAssist extends JDesktopPane{
     private final JComponent componentToRegainFocus;
@@ -38,12 +39,21 @@ public class DesktopPaneFocusAssist extends JDesktopPane{
 
     public void updateAssist(){
         if (this.getAllFrames().length == 0) {
-            componentToRegainFocus.requestFocus();
+            try {
+                SwingUtilities.invokeAndWait(componentToRegainFocus::requestFocus);
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             ((Disable) componentToRegainFocus).enableWhole();
             hasDisabled = false;
         }
         else if (!hasDisabled) {
-            requestFocus();
+
+            try {
+                SwingUtilities.invokeAndWait(this::requestFocus);
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             ((Disable) componentToRegainFocus).disableWhole();
             hasDisabled = true;
         }

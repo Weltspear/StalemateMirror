@@ -20,7 +20,9 @@ package net.stalemate.client;
 
 import net.stalemate.client.ui.InGameUI;
 
+import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -58,7 +60,12 @@ public class InGameUIRunnable implements Runnable {
                         (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], (boolean[][])ef[2], cgame.getSelectedUnit(), cgame.getMp(),
                         cgame.isIsItYourTurn(), cgame.getClMapLoader(), minimap);
 
-                g.repaint();
+
+                try {
+                    SwingUtilities.invokeAndWait(g::repaint);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
 
 
                 long t2 = System.currentTimeMillis() - t1;

@@ -40,6 +40,7 @@ public class Main {
             }
         }
         else {
+            //System.setProperty("sun.java2d.opengl", "true");
             AssetLoader.loadAll();
             SpecialTeamReprReg.makeAll();
 

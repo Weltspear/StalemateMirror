@@ -29,6 +29,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -142,19 +143,32 @@ public class LobbySelectMenu extends JPanel {
     }
 
     public int getStatus(){
-        return status;
+        lock.lock();
+        try {
+            return status;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void clFrame(){
-        frame.remove(this);
+        try {
+            SwingUtilities.invokeAndWait(() -> frame.remove(this));
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setStatus(int i){
+        lock.lock();
         status = i;
+        lock.unlock();
     }
 
     public void setText(String s){
+        lock.lock();
         label.setText(s);
+        lock.unlock();
     }
 
     @Override

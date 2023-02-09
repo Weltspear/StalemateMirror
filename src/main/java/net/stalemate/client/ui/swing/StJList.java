@@ -23,8 +23,10 @@ import net.stalemate.client.AssetLoader;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class StJList extends JPanel{
     private final JList<String> jList = new JList<>();
@@ -64,7 +66,15 @@ public class StJList extends JPanel{
     }
 
     public int getSelectedIndex(){
-        return jList.getSelectedIndex();
+        AtomicInteger sel_idx = new AtomicInteger();
+
+        try {
+            SwingUtilities.invokeAndWait(() -> sel_idx.set(jList.getSelectedIndex()));
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
+        return sel_idx.get();
     }
 
     public void setStrings(ArrayList<String> strings){
@@ -72,7 +82,11 @@ public class StJList extends JPanel{
         s.addAll(strings);
 
         if (!Objects.equals(strings, last)) {
-            jList.setModel(s);
+            try {
+                SwingUtilities.invokeAndWait(() -> jList.setModel(s));
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             last = strings;
         }
     }

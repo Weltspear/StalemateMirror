@@ -25,13 +25,14 @@ import net.stalemate.client.ui.swing.StalemateStyle;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ClientMenu extends JPanel {
 
     private final JFrame frame;
-    private final ReentrantLock lock = new ReentrantLock();
 
     private final BufferedImage background;
     private final BufferedImage title;
@@ -41,7 +42,9 @@ public class ClientMenu extends JPanel {
 
     private boolean alr_added_ok_button = false;
 
-    public int status = 0;
+    private final ActionListener oldconnect;
+
+    public volatile int status = 0;
 
     private final static Color StalemateGreen = new Color(35, 115, 0);
 
@@ -51,15 +54,10 @@ public class ClientMenu extends JPanel {
     }
 
     public String getTxt(){
-        lock.lock();
-        try {
-            if (entry.getText().equals("Enter IP")){
-                return "";
-            }
-            return entry.getText();
-        } finally {
-            lock.unlock();
+        if (entry.getText().equals("Enter IP")){
+            return "";
         }
+        return entry.getText();
     }
 
     public ClientMenu(JFrame f){
@@ -80,7 +78,9 @@ public class ClientMenu extends JPanel {
         StalemateStyle.makeButton(connect);
         connect.setLocation((832-14-connect.getWidth())/2, 320);
         connect.setFont(monogram.deriveFont(16f));
-        connect.addActionListener(a -> status = 1);
+
+        oldconnect = a -> status = 1;
+        connect.addActionListener(oldconnect);
         this.add(connect);
 
         background = AssetLoader.load("assets/background.png");
@@ -89,23 +89,41 @@ public class ClientMenu extends JPanel {
     }
 
     public void update(){
-        lock.lock();
+        try {
+            SwingUtilities.invokeAndWait(this::repaint);
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+
         if (status != 0 && !alr_added_ok_button){
-            this.remove(connect);
-            this.remove(entry);
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    this.remove(connect);
+                    this.remove(entry);
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
 
         if (status == 4 && !alr_added_ok_button){
-            // Repurposing pf connect button
-            this.add(connect);
-            connect.setSelected(false);
-            connect.setText("OK");
-            connect.addActionListener(a -> status = -1);
-            alr_added_ok_button = true;
+            // Repurposing of connect button
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    this.add(connect);
+                    connect.setSelected(false);
+                    connect.setText("OK");
+                    connect.addActionListener(a -> status = -1
+                    );
+                    connect.removeActionListener(oldconnect);
+
+                    alr_added_ok_button = true;
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             // add display of ok button here {status = -1;}
         }
-        this.repaint();
-        lock.unlock();
     }
 
     @Override
@@ -118,8 +136,6 @@ public class ClientMenu extends JPanel {
 
         this.setBackground(StalemateGreen);
         g.drawImage(background, 0, 0, null);
-
-        lock.lock();
 
         // title char size
         FontMetrics metrics = g.getFontMetrics(AssetLoader.getMonogram().deriveFont((float) (25)).deriveFont(Font.BOLD));
@@ -145,18 +161,17 @@ public class ClientMenu extends JPanel {
         }
 
         this.paintComponents(g);
-        lock.unlock();
     }
 
     public void setStatus(int status){
-        lock.lock();
         this.status = status;
-        lock.unlock();
     }
 
     public void clFrame(){
-        lock.lock();
-        frame.remove(this);
-        lock.unlock();
+        try {
+            SwingUtilities.invokeAndWait(() -> frame.remove(this));
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 }

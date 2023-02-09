@@ -30,6 +30,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
@@ -116,11 +117,20 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
 
     public void update(){
         lock.lock();
-        this.repaint();
+        try {
+            SwingUtilities.invokeAndWait(this::repaint);
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
 
         if (status == 1){
             // frame.setVisible(false);
-            this.frame.remove(this);
+            try {
+                SwingUtilities.invokeAndWait(() -> this.frame.remove(this));
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
             Client client = new Client(this.frame);
             Expect<?, ?> expect = client.start_client();
             if (expect.isNone()){
@@ -129,17 +139,28 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
                 messageBox.setVisible(true);
                 p.add(messageBox);
             }
-            this.frame.add(this);
-            this.frame.revalidate();
-            this.frame.repaint();
-            this.requestFocus();
+
+
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    this.frame.add(this);
+                    this.frame.revalidate();
+                    this.requestFocus();
+                });
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
             status = 0;
         }
         else if (status == 2){
-            frame.setVisible(false);
-            Server server = new Server();
-            server.start_server();
-            frame.setVisible(true);
+            try {
+                SwingUtilities.invokeAndWait(() -> frame.setVisible(false));
+                Server server = new Server();
+                server.start_server();
+                SwingUtilities.invokeAndWait(() -> frame.setVisible(true));
+            } catch (InterruptedException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
         p.updateAssist();
         lock.unlock();
@@ -206,15 +227,21 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
 
     @Override
     public void disableWhole() {
-        play.setEnabled(false);
-        start_srv.setEnabled(false);
-        exit.setEnabled(false);
-        options.setEnabled(false);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                play.setEnabled(false);
+                start_srv.setEnabled(false);
+                exit.setEnabled(false);
+                options.setEnabled(false);
 
-        play.setVisible(false);
-        start_srv.setVisible(false);
-        exit.setVisible(false);
-        options.setVisible(false);
+                play.setVisible(false);
+                start_srv.setVisible(false);
+                exit.setVisible(false);
+                options.setVisible(false);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
         areButtonsDisabled = true;
     }
 
@@ -234,15 +261,21 @@ public class MainMenu extends JPanel implements DesktopPaneFocusAssist.Disable {
 
     @Override
     public void enableWhole() {
-        play.setEnabled(true);
-        start_srv.setEnabled(true);
-        exit.setEnabled(true);
-        options.setEnabled(true);
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                play.setEnabled(true);
+                start_srv.setEnabled(true);
+                exit.setEnabled(true);
+                options.setEnabled(true);
 
-        play.setVisible(true);
-        start_srv.setVisible(true);
-        exit.setVisible(true);
-        options.setVisible(true);
+                play.setVisible(true);
+                start_srv.setVisible(true);
+                exit.setVisible(true);
+                options.setVisible(true);
+            });
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
         areButtonsDisabled = false;
     }
 }

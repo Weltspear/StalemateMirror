@@ -27,6 +27,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -41,7 +42,7 @@ public class LobbyMenu extends JPanel {
     /***
      * 1 -> disconnect
      */
-    private int status = 0;
+    private volatile int status = 0;
 
     public LobbyMenu(JFrame frame){
         this.frame = frame;
@@ -83,21 +84,18 @@ public class LobbyMenu extends JPanel {
     }
 
     public void clFrame(){
-        frame.remove(this);
+        try {
+            SwingUtilities.invokeAndWait(() -> frame.remove(this));
+        } catch (InterruptedException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setNicks(ArrayList<String> nicks){
-        lock.lock();
         stJList.setStrings(nicks);
-        lock.unlock();
     }
 
     public int getStatus() {
-        lock.lock();
-        try {
-            return status;
-        } finally {
-            lock.unlock();
-        }
+        return status;
     }
 }

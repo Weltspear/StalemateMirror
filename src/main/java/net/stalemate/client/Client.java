@@ -453,8 +453,10 @@ public class Client {
                 }
             }
 
-            frame.validate();
-            frame.repaint();
+            SwingUtilities.invokeAndWait(() ->{
+                frame.validate();
+                frame.repaint();
+            });
             LobbySelectMenu lobbySelectMenu = new LobbySelectMenu(frame, srv_desc.unwrap().replace("<br>", "\n"));
 
             boolean has_connected_to_lb = false;
@@ -533,8 +535,10 @@ public class Client {
 
             LOGGER.log(Level.INFO, "Connected to lobby!");
 
-            frame.validate();
-            frame.repaint();
+            SwingUtilities.invokeAndWait(() ->{
+                frame.validate();
+                frame.repaint();
+            });
             LobbyMenu lobbyMenu = new LobbyMenu(frame);
 
             // waiting in lobby
@@ -573,8 +577,10 @@ public class Client {
             }
 
             lobbyMenu.clFrame();
-            frame.validate();
-            frame.repaint();
+            SwingUtilities.invokeAndWait(() ->{
+                frame.validate();
+                frame.repaint();
+            });
 
             client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
 

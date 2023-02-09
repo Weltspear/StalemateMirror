@@ -53,8 +53,6 @@ public class InGameUI extends JPanel {
 
     private final Image empty;
 
-    private boolean isdead = false; // it is here because of weird issues with javax.swing
-
     private Image minimap = null;
 
     private final JFrame frame;
@@ -988,7 +986,6 @@ public class InGameUI extends JPanel {
         this.removeMouseListener(m);
         this.removeMouseMotionListener(m);
         frame.remove(this);
-        isdead = true;
         unsafeLock.unlock();
     }
 
@@ -1147,10 +1144,6 @@ public class InGameUI extends JPanel {
 
     public void paint(Graphics g)
     {
-        if (isdead)
-        {
-            return;
-        }
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -1405,16 +1398,11 @@ public class InGameUI extends JPanel {
                 }
 
                 if (p != null) {
-                    // Evil things to get JDesktopPanel to work
-                    BufferedImage clone = new BufferedImage(832 + 32, 576 + 32 + 6, BufferedImage.TYPE_INT_ARGB_PRE);
-                    Graphics2D graphics = clone.createGraphics();
                     if (focus_desktop_pane) {
-                        graphics.setColor(new Color(0, 0, 0, 0.5F));
-                        graphics.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
+                        g.setColor(new Color(0, 0, 0, 0.5F));
+                        g.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
                     }
-                    p.printAll(graphics);
-                    graphics.dispose();
-                    g.drawImage(clone, 0, 0, null);
+                    p.printAll(g);
                 }
             }
             else {

@@ -59,9 +59,6 @@ public class Client {
     private final ClientMenu clientMenu;
     private Socket client;
 
-    private Cipher cipherDecryption;
-    private Cipher cipherEncryption;
-
     private PrintWriter output;
     private BufferedReader input;
 
@@ -343,52 +340,16 @@ public class Client {
 
             client.setTcpNoDelay(true);
             client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
-            try {
-                // Initialize encryption
-                KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-                keyPairGen.initialize(2048);
-                KeyPair keyPair = keyPairGen.generateKeyPair();
-                LOGGER.log(Level.FINE, "KeyPair generated");
-
-                // Init decryption
-                cipherDecryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-                cipherDecryption.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-                LOGGER.log(Level.FINE, "Decryption initialized");
-
-                // Initialize output and input
-                output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
-                input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
-                LOGGER.log(Level.FINE, "Input output initialized");
-
-                // Get server's public key
-                byte[] publicKeyByteServer = Base64.getDecoder().decode(input.readLine());
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                PublicKey server_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteServer));
-                LOGGER.log(Level.FINE, "Public key received!");
-
-                // Send public key to client
-                byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
-                String publicKeyString = Base64.getEncoder().encodeToString(publicKeyBytes);
-                output.println(publicKeyString);
-                LOGGER.log(Level.FINE, "Public key sent!");
-
-                // Initialize output encryption
-                LOGGER.log(Level.FINE, "Initializing encryption");
-                cipherEncryption = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // "RSA/ECB/PKCS1Padding"
-                cipherEncryption.init(Cipher.ENCRYPT_MODE, server_public_key);
-
-                initAES();
-                LOGGER.log(Level.FINE, "Symmetric encryption initialized!");
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Initialization failure closing connection");
-                client.close();
-                return new Expect<>(() -> "Initialization failure closing connection");
-            }
 
             client.setSoTimeout(Grass32ConfigClient.getLobbyTimeout() * 1000);
 
-            sendEncryptedData(String.valueOf(StVersion.packet_version));
-            Expect<String, ?> response_p = readEncryptedData();
+            // Initialize output and input
+            output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
+            input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
+            LOGGER.log(Level.FINE, "Input output initialized");
+
+            writeSafely(String.valueOf(StVersion.packet_version));
+            Expect<String, ?> response_p = readSafely();
 
             if (response_p.isNone()){
                 client.close();
@@ -397,7 +358,7 @@ public class Client {
             }
 
             if (!(response_p.unwrap().equals("ok"))){
-                Expect<String, ?> response_p2 = readEncryptedData();
+                Expect<String, ?> response_p2 = readSafely();
 
                 if (response_p2.isNone()){
                     client.close();
@@ -415,7 +376,7 @@ public class Client {
             }
 
             // Make player choose the lobby
-            Expect<String, ?> lobby_list = readEncryptedData();
+            Expect<String, ?> lobby_list = readSafely();
             if (lobby_list.isNone()) {
                 client.close();
                 LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
@@ -427,9 +388,9 @@ public class Client {
             ObjectMapper objectMapper = JsonMapper.builder().polymorphicTypeValidator(ptv).build();
             EntryTable lobby_etable = new EntryTable((HashMap<String, Object>) (objectMapper).readValue(lobby_list.unwrap(), HashMap.class));
 
-            sendEncryptedData(Grass32ConfigClient.getNickname());
+            writeSafely(Grass32ConfigClient.getNickname());
 
-            Expect<String, ?> response = readEncryptedData();
+            Expect<String, ?> response = readSafely();
 
             if (response.isNone()){
                 client.close();
@@ -438,7 +399,7 @@ public class Client {
             }
 
             if (!response.unwrap().equals("ok")){
-                Expect<String, ?> resp2 = readEncryptedData();
+                Expect<String, ?> resp2 = readSafely();
 
                 if (resp2.isNone()){
                     client.close();
@@ -479,16 +440,16 @@ public class Client {
                 }
 
                 while (lobbySelectMenu.getStatus() == 0) {
-                    sendEncryptedData("continue");
-                    readEncryptedData();
+                    writeSafely("continue");
+                    readSafely();
                 }
 
                 if (lobbySelectMenu.getStatus() == 2) {
-                    sendEncryptedData("-1");
-                    readEncryptedData();
+                    writeSafely("-1");
+                    readSafely();
 
                     // get lobby list
-                    lobby_list = readEncryptedData();
+                    lobby_list = readSafely();
                     if (lobby_list.isNone()) {
                         client.close();
                         LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
@@ -502,8 +463,8 @@ public class Client {
                     lobby_etable = new EntryTable((HashMap<String, Object>) (objectMapper).readValue(lobby_list.unwrap(), HashMap.class));
                     lobbySelectMenu.setStatus(0);
                 } else if (lobbySelectMenu.getStatus() == 1) {
-                    sendEncryptedData("" + (lobbySelectMenu.getIndex() + 1));
-                    Expect<String, ?> status = readEncryptedData();
+                    writeSafely("" + (lobbySelectMenu.getIndex() + 1));
+                    Expect<String, ?> status = readSafely();
                     if (status.isNone()) {
                         client.close();
                         LOGGER.log(Level.WARNING, "Connection lost!");
@@ -514,7 +475,7 @@ public class Client {
                     } else {
                         lobbySelectMenu.setText("Can't connect to lobby because " + (status.unwrap().equals("INCORRECT_LOBBY") ? "incorrect lobby was chosen" :
                                 status.unwrap().equals("STARTED") ? "game has already started" : status.unwrap().equals("FULL") ? "lobby is full" : "UNKNOWN"));
-                        lobby_list = readEncryptedData();
+                        lobby_list = readSafely();
                         if (lobby_list.isNone()) {
                             client.close();
                             LOGGER.log(Level.WARNING, "Failed to read lobby list: " + lobby_list.getResult().message());
@@ -543,7 +504,7 @@ public class Client {
 
             // waiting in lobby
             while (true) {
-                Expect<String, ?> msg = readEncryptedData();
+                Expect<String, ?> msg = readSafely();
                 if (msg.isNone()) {
                     client.close();
                     LOGGER.log(Level.WARNING, "Connection lost!");
@@ -573,7 +534,7 @@ public class Client {
                     lobbyMenu.clFrame();
                     return new Expect<>(1);
                 }
-                sendEncryptedData("ok");
+                writeSafely("ok");
             }
 
             lobbyMenu.clFrame();
@@ -677,98 +638,6 @@ public class Client {
         }
 
         return new Expect<>(1);
-    }
-
-    private void sendEncryptedData(String data){
-        try {
-            byte[] input = data.getBytes();
-            cipherEncryption.update(input);
-            byte[] cipherText = cipherEncryption.doFinal();
-            output.println(new String(Base64.getEncoder().encode(cipherText), StandardCharsets.UTF_8));
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    private Expect<String, ?> readEncryptedData(){
-        try {
-            byte[] decipheredText = cipherDecryption.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new Expect<>(new String(decipheredText, StandardCharsets.UTF_8));
-        } catch (IOException e){
-            return new Expect<>(() -> "Connection lost!");
-        } catch (IllegalBlockSizeException | BadPaddingException e){
-            return new Expect<>(() -> "Failed to decrypt data");
-        }
-    }
-
-    // AES encryption
-    private SecretKey aesKey;
-
-    private final Random rnd = new Random(new BigInteger((new SecureRandom()).generateSeed(30)).longValue());
-
-    private void initAES(){
-        String key_str = readEncryptedData().unwrap();
-        byte[] key_bytes = Base64.getDecoder().decode(key_str);
-        aesKey = new SecretKeySpec(key_bytes, "AES");
-    }
-
-    @Deprecated
-    private void sendEncryptedDataAES(String data){
-        Cipher cipher = null;
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            e.printStackTrace();
-        }
-        // Create random iv
-        assert cipher != null;
-        byte[] iv = new byte[cipher.getBlockSize()];
-        rnd.nextBytes(iv);
-        IvParameterSpec ivParams = new IvParameterSpec(iv);
-        // Send random IV
-        sendEncryptedData(Base64.getEncoder().encodeToString(ivParams.getIV()));
-        // Encrypt data
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivParams);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
-        try {
-            byte[] encrypted_data = cipher.doFinal(data.getBytes());
-            output.println(new String(Base64.getEncoder().encode(encrypted_data), StandardCharsets.UTF_8));
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    @Deprecated
-    private Expect<String, ?> readEncryptedDataAES(){
-        byte[] iv;
-
-        Expect<String, ?> data_read = readEncryptedData();
-        if (data_read.isNone()){
-            return new Expect<>(() -> "Failed to get initialization vector" + data_read.getResult().message());
-        }
-        iv = Base64.getDecoder().decode(data_read.unwrap());
-
-        IvParameterSpec iv_ = new IvParameterSpec(iv);
-
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
-            cipher.init(Cipher.DECRYPT_MODE, aesKey, iv_);
-
-            Expect<String, ?> data = readSafely();
-            if (data.isNone()){
-                return data;
-            }
-            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(data.unwrap()));
-            return new Expect<>(new String(received_data, StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException ignored) {
-            return new Expect<>(() -> "Decryption failure");
-        }
     }
 
     public Expect<String, ErrorResult> readSafely(){

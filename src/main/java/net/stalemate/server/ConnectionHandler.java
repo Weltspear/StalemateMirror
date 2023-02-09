@@ -51,9 +51,6 @@ public class ConnectionHandler implements Runnable{
     private PrintWriter output;
     private BufferedReader input;
 
-    private Cipher cipherEncryption;
-    private Cipher cipherDecryption;
-
     private static final Logger LOGGER = makeLog(Logger.getLogger(ConnectionHandler.class.getSimpleName()));
 
     public ConnectionHandler(Socket client, LobbyHandler lobbyHandler){
@@ -68,52 +65,12 @@ public class ConnectionHandler implements Runnable{
             client.setSoTimeout(30000);
             client.setTcpNoDelay(true);
 
-            try {
-                // Initialize encryption
-                Signature.getInstance("SHA256withRSA");
-                KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-                keyPairGen.initialize(2048);
-                KeyPair keyPair = keyPairGen.generateKeyPair();
-                LOGGER.log(Level.FINE, "KeyPair generated");
+            // Initialize output and input
+            output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
+            input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
+            LOGGER.log(Level.FINE, "Input output initialized");
 
-                // Init decryption
-                cipherDecryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-                cipherDecryption.init(Cipher.DECRYPT_MODE, keyPair.getPrivate());
-                LOGGER.log(Level.FINE,"Decryption initialized");
-
-                // Initialize output and input
-                output = new PrintWriter(new BufferedWriter(new OutputStreamWriter(client.getOutputStream(), StandardCharsets.UTF_8)), true);
-                // output = new PrintWriter(new OutputStreamWriter(new BufferedOutputStream(client.getOutputStream()), StandardCharsets.UTF_8), true);
-                input = new BufferedReader(new InputStreamReader(client.getInputStream(), StandardCharsets.UTF_8));
-                LOGGER.log(Level.FINE,"Input output initialized");
-
-                // Send public key to client
-                byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
-                String publicKeyString = Base64.getEncoder().encodeToString(publicKeyBytes);
-                output.println(publicKeyString);
-                LOGGER.log(Level.FINE,"Public key sent!");
-
-                // Get client's public key
-                byte[] publicKeyByteClient = Base64.getDecoder().decode(input.readLine());
-                KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                PublicKey client_public_key = keyFactory.generatePublic(new X509EncodedKeySpec(publicKeyByteClient));
-                LOGGER.log(Level.FINE,"Public key received!");
-
-                // Initialize output encryption
-                LOGGER.log(Level.FINE,"Initializing encryption");
-                cipherEncryption = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-                cipherEncryption.init(Cipher.ENCRYPT_MODE, client_public_key);
-
-                initAES();
-                LOGGER.log(Level.FINE,"Symmetric encryption initialized!");
-            } catch (Exception e){
-                LOGGER.log(Level.WARNING,"Initialization failure closing connection");
-                client.close();
-                isHandlerTerminated = true;
-                return;
-            }
-
-            Expect<String, ?> packet_version = readEncryptedData();
+            Expect<String, ?> packet_version = readSafely();
 
             if (packet_version.isNone()){
                 LOGGER.log(Level.WARNING,"Failed to get packet version");
@@ -126,8 +83,8 @@ public class ConnectionHandler implements Runnable{
                 int packet_v = Integer.parseInt(packet_version.unwrap());
 
                 if (!(packet_v == StVersion.packet_version)){
-                    sendEncryptedData("connection_terminated");
-                    sendEncryptedData("Server requires packet version " + StVersion.packet_version
+                    writeSafely("connection_terminated");
+                    writeSafely("Server requires packet version " + StVersion.packet_version
                             + " this packet version is supported in " + StVersion.version + ".");
                     LOGGER.log(Level.WARNING,"Client has wrong packet version");
                     client.close();
@@ -135,7 +92,7 @@ public class ConnectionHandler implements Runnable{
                     return;
                 }
                 else
-                sendEncryptedData("ok");
+                writeSafely("ok");
             } catch (Exception e){
                 LOGGER.log(Level.WARNING,"Failed to get packet version");
                 client.close();
@@ -150,11 +107,11 @@ public class ConnectionHandler implements Runnable{
                 writeSafely(ServerDescription.getDescription());
             }
 
-            sendEncryptedData(lobbyHandler.lobby_list_json());
+            writeSafely(lobbyHandler.lobby_list_json());
             LOGGER.log(Level.FINE,"Lobby list sent!");
 
             // get nickname
-            Expect<String, ?> nick = readEncryptedData();
+            Expect<String, ?> nick = readSafely();
             if (nick.isNone()){
                 LOGGER.log(Level.WARNING,"Failed to read nickname: " + nick.getResult().message());
                 client.close();
@@ -163,14 +120,14 @@ public class ConnectionHandler implements Runnable{
             }
 
             if (nick.unwrap().toLowerCase(Locale.ROOT).equals("server")){
-                sendEncryptedData("connection_terminated");
-                sendEncryptedData(String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
+                writeSafely("connection_terminated");
+                writeSafely(String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
                 LOGGER.log(Level.WARNING,"Failed to read nickname: " + String.format("Nickname \"%s\" is forbidden", nick.unwrap()));
                 client.close();
                 isHandlerTerminated = true;
                 return;
             } else{
-                sendEncryptedData("ok");
+                writeSafely("ok");
             }
 
             Lobby.Player player = null;
@@ -178,7 +135,7 @@ public class ConnectionHandler implements Runnable{
             try {
                 boolean lobby_invalid = true;
                 while (lobby_invalid) {
-                    Expect<String, ?> lb = readEncryptedData();
+                    Expect<String, ?> lb = readSafely();
                     if (lb.isNone()){
                         LOGGER.log(Level.WARNING,"Failed to get player's lobby: " + lb.getResult().message());
                         client.close();
@@ -187,7 +144,7 @@ public class ConnectionHandler implements Runnable{
                     }
 
                     if (Objects.equals(lb.unwrap(), "continue")){
-                        sendEncryptedData("ok");
+                        writeSafely("ok");
                         continue;
                     }
 
@@ -202,16 +159,16 @@ public class ConnectionHandler implements Runnable{
                     }
 
                     if (lobby < 0 | lobby > lobbyHandler.getLobbyCount() | lobby == 0) {
-                        sendEncryptedData("INCORRECT_LOBBY");
-                        sendEncryptedData(lobbyHandler.lobby_list_json());
+                        writeSafely("INCORRECT_LOBBY");
+                        writeSafely(lobbyHandler.lobby_list_json());
                     } else if (lobbyHandler.getLobby(lobby - 1).current_lobby_state().equals(Lobby.LobbyState.STARTED)) {
-                        sendEncryptedData("STARTED");
-                        sendEncryptedData(lobbyHandler.lobby_list_json());
+                        writeSafely("STARTED");
+                        writeSafely(lobbyHandler.lobby_list_json());
                     } else if (lobbyHandler.getLobby(lobby - 1).currentPlayerCount() == lobbyHandler.getLobby(lobby - 1).getMaxPlayerCount()) {
-                        sendEncryptedData("FULL");
-                        sendEncryptedData(lobbyHandler.lobby_list_json());
+                        writeSafely("FULL");
+                        writeSafely(lobbyHandler.lobby_list_json());
                     } else {
-                        sendEncryptedData("OK");
+                        writeSafely("OK");
                         player = lobbyHandler.getLobby(lobby - 1).connect_to_lobby();
                         lobby_final = lobbyHandler.getLobby(lobby-1);
                         lobby_invalid = false;
@@ -225,8 +182,8 @@ public class ConnectionHandler implements Runnable{
 
             // Waits for game start
             while (!player.hasGameStarted()){
-                sendEncryptedData(lobby_final.playerNicksString());
-                Expect<String, ?> rd = readEncryptedData();
+                writeSafely(lobby_final.playerNicksString());
+                Expect<String, ?> rd = readSafely();
                 if (rd.isNone()){
                     LOGGER.log(Level.WARNING,"Connection lost!");
                     player.terminateConnection();
@@ -238,7 +195,7 @@ public class ConnectionHandler implements Runnable{
 
             }
 
-            sendEncryptedData("start");
+            writeSafely("start");
 
             boolean terminated = false;
 
@@ -300,104 +257,6 @@ public class ConnectionHandler implements Runnable{
             client.close();
         } catch (Exception e){
             e.printStackTrace();
-        }
-    }
-
-    private void sendEncryptedData(String data){
-        try {
-            byte[] input = data.getBytes();
-            cipherEncryption.update(input);
-            byte[] cipherText = cipherEncryption.doFinal();
-            output.println(new String(Base64.getEncoder().encode(cipherText), StandardCharsets.UTF_8));//new String(cipherText, StandardCharsets.UTF_8));
-        } catch (Exception ignored){
-
-        }
-    }
-
-    private Expect<String, ?> readEncryptedData(){
-        try {
-            byte[] decipheredText = cipherDecryption.doFinal(Base64.getDecoder().decode(input.readLine()));
-            return new Expect<>(new String(decipheredText, StandardCharsets.UTF_8));
-        } catch (IOException e){
-            return new Expect<>(() -> "Connection lost!");
-        } catch (IllegalBlockSizeException | BadPaddingException e){
-            return new Expect<>(() -> "Failed to decrypt data");
-        } catch (NullPointerException e){
-            return new Expect<>(() -> "Connection lost");
-        }
-    }
-
-    // AES encryption
-    private SecretKey aesKey;
-
-    private void initAES(){
-        try {
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-            aesKey = keyGenerator.generateKey();
-
-            byte[] key = aesKey.getEncoded();
-            sendEncryptedData(new String(Base64.getEncoder().encode(key), StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException ignored) {
-
-        }
-    }
-
-    private final Random rnd = new Random(new BigInteger((new SecureRandom()).generateSeed(30)).longValue());
-
-    @Deprecated
-    private void sendEncryptedDataAES(String data) {
-        Cipher cipher = null;
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException ignored) {
-
-        }
-        // Create random iv
-        assert cipher != null;
-        byte[] iv = new byte[cipher.getBlockSize()];
-        rnd.nextBytes(iv);
-        IvParameterSpec ivParams = new IvParameterSpec(iv);
-        // Send random IV
-        sendEncryptedData(Base64.getEncoder().encodeToString(ivParams.getIV()));
-        // Encrypt data
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivParams);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-            // e.printStackTrace();
-        }
-        try {
-            byte[] encrypted_data = cipher.doFinal(data.getBytes());
-            output.println(new String(Base64.getEncoder().encode(encrypted_data), StandardCharsets.UTF_8));
-        } catch (IllegalBlockSizeException | BadPaddingException ignored) {
-
-        }
-    }
-
-    @Deprecated
-    private Expect<String, ?> readEncryptedDataAES(){
-        byte[] iv;
-
-        Expect<String, ?> data_read = readEncryptedData();
-        if (data_read.isNone()){
-            return new Expect<>(() -> "Failed to get initialization vector" + data_read.getResult().message());
-        }
-        iv = Base64.getDecoder().decode(data_read.unwrap());
-
-        IvParameterSpec iv_ = new IvParameterSpec(iv);
-
-        Cipher cipher;
-        try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); // AES/CBC/PKCS5Padding
-            cipher.init(Cipher.DECRYPT_MODE, aesKey, iv_);
-
-            Expect<String, ?> data = readSafely();
-            if (data.isNone()){
-                return data;
-            }
-            byte[] received_data = cipher.doFinal(Base64.getDecoder().decode(data.unwrap()));
-            return new Expect<>(new String(received_data, StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException ignored) {
-            return new Expect<>(() -> "Decryption failure");
         }
     }
 

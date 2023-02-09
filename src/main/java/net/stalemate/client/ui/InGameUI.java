@@ -23,6 +23,7 @@ import net.stalemate.client.ClientGame;
 import net.stalemate.client.ClientMapLoader;
 import net.stalemate.client.SpecialTeamReprReg;
 import net.stalemate.client.config.ButtonTooltips;
+import net.stalemate.client.config.Grass32ConfigClient;
 import net.stalemate.client.config.KeyboardBindMapper;
 import net.stalemate.client.config.PropertiesMatcher;
 import net.stalemate.client.property.ClientSideProperty;
@@ -1204,9 +1205,14 @@ public class InGameUI extends JPanel {
                     if (button != null) {
                         if (btn_idx == smallify_button){
                             g.drawImage(button.getScaledInstance(57, 57, Image.SCALE_FAST), 640 + x + 3, 384 + y + 3, null);
+                            if (Grass32ConfigClient.doSteelButtonOverlay())
+                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png").getScaledInstance(57, 57, Image.SCALE_FAST), 640 + x + 3, 384 + y + 3, null);
                         }
-                        else
-                        g.drawImage(button, 640 + x, 384 + y, null);
+                        else {
+                            g.drawImage(button, 640 + x, 384 + y, null);
+                            if (Grass32ConfigClient.doSteelButtonOverlay())
+                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png"), 640 + x, 384 + y, null);
+                        }
                     }
                     i++;
                     x += 64;
@@ -1242,7 +1248,10 @@ public class InGameUI extends JPanel {
                 }
 
                 // Render the binds
-                g.setColor(Color.BLACK);
+                if (!Grass32ConfigClient.doSteelButtonOverlay())
+                    g.setColor(Color.BLACK);
+                else
+                    g.setColor(Color.WHITE);
                 g.setFont(monogram_button);
 
                 i = 0;

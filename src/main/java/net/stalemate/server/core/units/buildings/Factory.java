@@ -33,7 +33,7 @@ public class Factory extends Unit implements IBuilding, IConstructableBuilding {
     public Factory(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0,0,-1, -1,0, 0, 0), new AnimationController(), "Factory");
         Animation idle = new Animation(1);
-        idle.addFrame("texture_missing");
+        idle.addFrame("assets/units/factory.png");
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
     }
@@ -57,7 +57,7 @@ public class Factory extends Unit implements IBuilding, IConstructableBuilding {
     public AnimationController underConstructionAC() {
         AnimationController anim = new AnimationController();
         Animation idle = new Animation(1);
-        idle.addFrame("texture_missing");
+        idle.addFrame("assets/units/factory_build.png");
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
         return anim;

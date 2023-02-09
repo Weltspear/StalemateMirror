@@ -5,6 +5,8 @@ config:
     timeout: 30
     lobby_timeout: 120
 
+    steel_button_overlay: false
+
     controls:
       keyb:
         # Camera movement

@@ -129,7 +129,7 @@ public class Game implements IGameControllerGamemode {
             return teamColor;
         }
 
-        protected int mp = 0;
+        protected int mp = 2;
 
         public synchronized void setMilitaryPoints(int mp){
             this.mp = mp;

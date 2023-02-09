@@ -58,6 +58,7 @@ public class AssetLoader {
             "assets/ui/buttons/build_no.png",
             "assets/ui/buttons/build_radar.png",
             "assets/ui/buttons/build_supply_station.png",
+            "assets/ui/buttons/build_factory2.png",
             "assets/ui/buttons/build_yes.png",
             "assets/ui/buttons/demotorize.png",
             "assets/ui/buttons/load_fortification.png",
@@ -82,12 +83,12 @@ public class AssetLoader {
             "assets/ui/buttons/train_machine_gunner.png",
             "assets/ui/buttons/train_motorized.png",
             "assets/ui/buttons/train_tankette.png",
-            "assets/ui/buttons/train_template.png",
             "assets/ui/selectors/ui_attack.png",
             "assets/ui/selectors/ui_move.png",
             "assets/ui/selectors/ui_repair.png",
             "assets/ui/selectors/ui_resupply.png",
             "assets/ui/selectors/ui_select.png",
+            "assets/ui/buttons/steel_button_overlay.png",
             "assets/units/anti_tank_attack_1.png",
             "assets/units/anti_tank_attack_2.png",
             "assets/units/anti_tank_attack_3.png",
@@ -150,6 +151,8 @@ public class AssetLoader {
             "assets/units/tankette_idle.png",
             "assets/units/tank_factory.png",
             "assets/units/tank_factory_build.png",
+            "assets/units/factory.png",
+            "assets/units/factory_build.png"
     };
 
     private static final String[] tiles = {"tiles/forest1.png",

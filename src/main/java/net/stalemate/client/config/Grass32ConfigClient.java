@@ -28,6 +28,7 @@ public class Grass32ConfigClient {
     private static String nickname = "unnamed";
     private static int timeout = 30;
     private static int lobby_timeout = 120;
+    private static boolean steel_button_overlay = false;
 
     @SuppressWarnings("unchecked")
     public static void loadGrass32(){
@@ -43,6 +44,7 @@ public class Grass32ConfigClient {
             nickname = (String) client_config.get("nickname");
             timeout = (int) client_config.get("timeout");
             lobby_timeout = (int) client_config.get("lobby_timeout");
+            steel_button_overlay = (boolean) client_config.get("steel_button_overlay");
 
             HashMap<String, HashMap<String, String>> controls = (HashMap<String, HashMap<String, String>>) client_config.get("controls");
 
@@ -64,5 +66,9 @@ public class Grass32ConfigClient {
 
     public static int getLobbyTimeout() {
         return lobby_timeout;
+    }
+
+    public static boolean doSteelButtonOverlay() {
+        return steel_button_overlay;
     }
 }

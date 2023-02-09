@@ -373,7 +373,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
 
                 @Override
                 public String texture() {
-                    return "texture_missing";
+                    return "assets/ui/buttons/build_factory2.png";
                 }
 
                 @Override

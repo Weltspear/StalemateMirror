@@ -33,6 +33,7 @@ import net.stalemate.server.core.communication.chat.Chat;
 import net.stalemate.server.core.communication.chat.Message;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.map_system.MapLoader;
+import net.stalemate.server.core.minimap.AttackTracker;
 import net.stalemate.server.core.units.util.IBase;
 
 import java.util.*;
@@ -228,6 +229,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
         private String iselectorbuttonid = null;
         private Chat chat;
+
+        private long lastAttackTrackerHash = -1;
 
         String nickname;
 
@@ -877,6 +880,33 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         toBeJsoned.put("selected_unit_data", selected_unit_data);
                     } else {
                         toBeJsoned.put("selected_unit_data", 0);
+                    }
+
+                    // AttackTracker
+
+                    AttackTracker attackTracker = lgame.getAttackTracker();
+                    long hash = attackTracker.getCombatCoordsHash();
+                    if (attackTracker.getCombatCoordsHash() != lastAttackTrackerHash){
+                        lastAttackTrackerHash = hash;
+                        ArrayList<int[]> coords = attackTracker.getCombatCoords();
+                        ArrayList<int[]> to_be_removed = new ArrayList<>();
+
+                        for (int[] coord : coords){
+                            boolean IsInRange = false;
+
+                            for (Entity entity : entities_in_range){
+                                if (entity.getX() == coord[0] && entity.getY() == coord[1]){
+                                    IsInRange = true;
+                                    break;
+                                }
+                            }
+
+                            if (!IsInRange){
+                                to_be_removed.add(coord);
+                            }
+                        }
+
+                        toBeJsoned.put("atk_tracker", coords);
                     }
 
                     // Chat

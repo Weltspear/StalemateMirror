@@ -52,9 +52,12 @@ public class ClientGame {
 
     private final ReentrantLock lock = new ReentrantLock();
 
+    private boolean blinkM = true;
+    private int blinkMT = 0;
+    private final ArrayList<Integer[]> coords_atk = new ArrayList<>();
+
     public ClientGame(ClientMapLoader mapLoader){
         this.mapLoader = mapLoader;
-        //this.fog_of_war = new boolean[mapLoader.getHeight()][mapLoader.getWidth()];
     }
 
     public int getMp() {
@@ -434,11 +437,32 @@ public class ClientGame {
             }
 
             chat = (ArrayList<String>) data_map.get("chat");
+
+            if (data_map.containsKey("atk_tracker")){
+                ArrayList<Object> atk_tracker = (ArrayList<Object>) data_map.get("atk_tracker");
+                for (Object atko: atk_tracker){
+                    boolean isalr = false;
+                    Integer[] atk = new Integer[3];
+                    ((ArrayList<Integer>) atko).toArray(atk);
+
+                    for (Integer[] atk2: coords_atk){
+                        if (Objects.equals(atk2[0], atk[0]) && Objects.equals(atk2[1], atk[1])){
+                            atk2[2] += 200;
+                            isalr = true;
+                        }
+                    }
+
+                    if (!isalr){
+                        coords_atk.add(new Integer[]{atk[0], atk[1], 200});
+                    }
+                }
+            }
         } catch (JsonProcessingException e){
             lock.unlock();
             return new Expect<>(() -> "Failed to parse JSON");
         } catch (ClassCastException | NullPointerException e){
             lock.unlock();
+            e.printStackTrace();
             return new Expect<>(() -> "Incorrect packet format");
         }
 
@@ -551,7 +575,6 @@ public class ClientGame {
             return null;
         }
 
-        //BufferedImage tminimap = new BufferedImage(192, 192, BufferedImage.TYPE_INT_ARGB_PRE);
         BufferedImage minimap = new BufferedImage(mapLoader.getWidth(), mapLoader.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
         BufferedImage minimapLimit = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB_PRE);
 
@@ -563,9 +586,28 @@ public class ClientGame {
             }
         }
 
+        // Attacked units blink
+
         for (ClientEntity entity: entities){
             if (entity instanceof ClientUnit u){
                 minimap.setRGB(u.getX(), u.getY(), u.getTeamColor().getRGB());
+                if (blinkM) {
+                    Integer[] coordrm = null;
+
+                    for (Integer[] coord : coords_atk) {
+                        if (coord[0] == u.getX() && coord[1] == u.getY()) {
+                            minimap.setRGB(u.getX(), u.getY(), new Color(255, 255, 153).getRGB());
+                            coord[2]--;
+                            if (coord[2] == 0){
+                                coordrm = coord;
+                            }
+                            break;
+                        }
+                    }
+
+                    if (coordrm != null)
+                        coords_atk.remove(coordrm);
+                }
             }
         }
 
@@ -596,6 +638,13 @@ public class ClientGame {
             }
             x2 = 0;
             y2++;
+        }
+
+        // blink deblink
+        blinkMT++;
+        if (blinkMT == 20){
+            blinkM = !blinkM;
+            blinkMT = 0;
         }
 
         lock.unlock();

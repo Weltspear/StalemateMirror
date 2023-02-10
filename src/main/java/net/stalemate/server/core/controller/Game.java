@@ -22,11 +22,10 @@ import net.libutils.etable.EntryTable;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.MapObject;
 import net.stalemate.server.core.Unit;
-import net.stalemate.server.core.event.EventListener;
 import net.stalemate.server.core.event.EventListenerRegistry;
-import net.stalemate.server.core.event.OnEvent;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
+import net.stalemate.server.core.minimap.AttackTracker;
 import net.stalemate.server.core.name.UnitNameGen;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.util.*;
@@ -53,6 +52,8 @@ public class Game implements IGameControllerGamemode {
     public enum Mode{
     }
     private IGamemode mode = new Versus();
+
+    private final AttackTracker attackTracker = new AttackTracker();
 
     @SuppressWarnings("unused")
     public IGamemode getMode() {
@@ -192,34 +193,10 @@ public class Game implements IGameControllerGamemode {
 
     }
 
-    public static class CombatTracker implements EventListener {
-        private int x_last_combat = -1;
-        private int y_last_combat = -1;
-
-        @OnEvent(type = OnEvent.EventType.ON_UNIT_ATTACK)
-        public void onUnitAttack(Unit attacker, Unit attacked_unit){
-            x_last_combat = attacker.getX();
-            y_last_combat = attacker.getY();
-        }
-
-        public int getX() {
-            return x_last_combat;
-        }
-
-        public int getY() {
-            return y_last_combat;
-        }
-    }
-
     private final EventListenerRegistry evReg = new EventListenerRegistry();
-    private final CombatTracker combatTracker = new CombatTracker();
 
     public EventListenerRegistry getEvReg() {
         return evReg;
-    }
-
-    public CombatTracker getCombatTracker() {
-        return combatTracker;
     }
 
     /***
@@ -232,6 +209,7 @@ public class Game implements IGameControllerGamemode {
         this.teams = teams;
         this.aparams = aparams;
 
+        evReg.addEventListener(attackTracker);
         NEUTRAL = new StandardNeutralTeam();
         teams.add(NEUTRAL);
     }
@@ -259,6 +237,10 @@ public class Game implements IGameControllerGamemode {
         return (ArrayList<Team>) teams.clone();
     }
 
+    /***
+     * Creates a list in which {@link PriorityUpdate} entities are first
+     * @see PriorityUpdate
+     */
     private ArrayList<Entity> getPrioritizedList(){
         ArrayList<Entity> prior = new ArrayList<>();
         for (Entity e : entities){
@@ -276,6 +258,10 @@ public class Game implements IGameControllerGamemode {
         return prior;
     }
 
+    /***
+     * Creates a list in which {@link PriorityTurnUpdate} entities are first
+     * @see PriorityTurnUpdate
+     */
     private ArrayList<Unit> getPrioritizedListTurn(ArrayList<Unit> entities){
         ArrayList<Unit> prior = new ArrayList<>();
         for (Unit e : entities){
@@ -323,6 +309,7 @@ public class Game implements IGameControllerGamemode {
                 }
                 teams.get(team_doing_turn).units.removeAll(to_remove_dead);
                 teams.get(team_doing_turn).setMilitaryPoints(teams.get(team_doing_turn).getMilitaryPoints() + 1);
+                attackTracker.turnUpdate();
                 team_doing_turn++;
             }
 
@@ -361,7 +348,7 @@ public class Game implements IGameControllerGamemode {
     }
 
     /***
-     * Can be thread unsafe
+     * Can cause ConcurrentModificationException
      */
     @GameUnsafe
     public synchronized void forceAddEntity(Entity entity){
@@ -369,7 +356,7 @@ public class Game implements IGameControllerGamemode {
     }
 
     /***
-     * Can be thread unsafe
+     * Can cause ConcurrentModificationException
      */
     @GameUnsafe
     @Deprecated
@@ -383,6 +370,10 @@ public class Game implements IGameControllerGamemode {
         } catch (Exception e){
             return null;
         }
+    }
+
+    public AttackTracker getAttackTracker(){
+        return attackTracker;
     }
 
     @Override
@@ -582,6 +573,16 @@ public class Game implements IGameControllerGamemode {
                 lock.lock();
                 return Game.this.getTeamDoingTurn();
             } finally {
+                lock.unlock();
+            }
+        }
+
+        public AttackTracker getAttackTracker(){
+            try{
+                lock.lock();
+                return Game.this.getAttackTracker();
+            }
+            finally {
                 lock.unlock();
             }
         }

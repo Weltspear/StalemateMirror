@@ -48,6 +48,7 @@ public class InGameUI extends JPanel {
     @SuppressWarnings("FieldCanBeLocal") private final Font monogram;
     private final Font monogram_button;
     private final Font monogram_button_small;
+    private final Font uname_monogram;
     private final MListener m;
     private boolean focus_desktop_pane = false;
 
@@ -958,6 +959,7 @@ public class InGameUI extends JPanel {
         monogram = AssetLoader.getMonogram();
         monogram_button = monogram.deriveFont(((float)(16)));
         monogram_button_small = monogram.deriveFont(((float)(14.4)));
+        uname_monogram = monogram.deriveFont(Font.PLAIN, 16f);
 
         UIManager.put("ToolTip.background", Color.BLACK);
         UIManager.put("ToolTip.foreground", Color.WHITE);
@@ -1337,7 +1339,7 @@ public class InGameUI extends JPanel {
                             if (clientSideProperty.value().isEmpty()){
                                 continue;
                             }
-                            g.setFont(monogram.deriveFont(Font.PLAIN, 16f));
+                            g.setFont(uname_monogram);
 
                             FontMetrics metrics_16 = g.getFontMetrics();
                             int width_16 = metrics_16.stringWidth("A");

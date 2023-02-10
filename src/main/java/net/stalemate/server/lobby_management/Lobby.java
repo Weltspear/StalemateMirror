@@ -751,6 +751,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     toBeJsoned.put("entity_data", entity_data);
                     toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
+                    toBeJsoned.put("team_doing_turn_color", game.getTeamDoingTurn().getTeamColor().getRGB());
 
                     toBeJsoned.put("mp", team.getMilitaryPoints());
 
@@ -905,6 +906,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                 to_be_removed.add(coord);
                             }
                         }
+
+                        coords.removeAll(to_be_removed);
 
                         toBeJsoned.put("atk_tracker", coords);
                     }

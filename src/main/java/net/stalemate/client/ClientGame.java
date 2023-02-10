@@ -43,6 +43,7 @@ public class ClientGame {
     private ClientSelectedUnit selectedUnit;
     private final ClientMapLoader mapLoader;
     private ArrayList<String> chat;
+    private Color teamDoingTurnColor = Color.WHITE;
 
     public String getMapPath() {
         return map_path;
@@ -457,6 +458,8 @@ public class ClientGame {
                     }
                 }
             }
+
+            teamDoingTurnColor = new Color((int)data_map.get("team_doing_turn_color"));
         } catch (JsonProcessingException e){
             lock.unlock();
             return new Expect<>(() -> "Failed to parse JSON");
@@ -563,6 +566,15 @@ public class ClientGame {
         try {
             lock.lock();
             return mapLoader;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public Color getTeamDoingTurnColor() {
+        try {
+            lock.lock();
+            return teamDoingTurnColor;
         } finally {
             lock.unlock();
         }

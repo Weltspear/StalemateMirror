@@ -60,6 +60,7 @@ public class InGameUI extends JPanel {
     private boolean do_offset = false;
 
     private boolean hasFirstPackedBeenReceived = false;
+    private Color teamDoingTurnColor = Color.WHITE;
 
     public JFrame getFrame(){return frame;}
 
@@ -438,7 +439,7 @@ public class InGameUI extends JPanel {
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                boolean[][] fog_of_war, boolean[][] selr, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap) {
+                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor) {
             if (!clMapLoader.isMapLoaded()){
                 return;
             }
@@ -751,6 +752,8 @@ public class InGameUI extends JPanel {
                 this.interface_.id_array = button_ids;
                 this.interface_.chat = chat;
                 this.interface_._selr = sel_r;
+                if (!teamDoingTurnColor.equals(Color.WHITE))
+                this.interface_.teamDoingTurnColor = teamDoingTurnColor;
                 this.interface_.unsafeLock.unlock();
 
                 if (cachedUnitDataArImgs.size() > 100){
@@ -1368,7 +1371,10 @@ public class InGameUI extends JPanel {
                 if (military_points != null)
                     g.drawImage(military_points.getScaledInstance(17, 17, Image.SCALE_FAST), 20, 10, null);
                 g.drawString("" + mp, 40, 22);
-                g.drawString(is_it_your_turn ? "It is your turn" : "It is not your turn", 20, 40);
+                g.drawString("Turn: ", 20, 40);
+                g.setColor(teamDoingTurnColor);
+                g.fillRect(55, 33, 8, 8);
+                g.setColor(Color.black);
 
                 g.drawString("Camera speed: " + camera_speed, 690, 22);
 

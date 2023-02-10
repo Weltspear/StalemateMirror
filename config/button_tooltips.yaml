@@ -14,6 +14,7 @@ tooltips:
 
   button_motorize: "Transforms a unit into a Motorized Unit which can be<br>transformed back into it's original form<br><p color=green>(0/3/0)</p>"
   button_motorized_unit_other_demotorize: "Transforms a unit back into it's original form"
+  button_recover: "Gives unit 2 HP<br><p color=green>(0/3/0)</p>"
 
   button_repair: "Repairs mechanized units<br><p color=green>(0/4/0)</p>"
   button_engineer_unit_build_menu_build_military_tent: "Builds Base<br>Construction Time: 1<br><p color=green>(0/0/3)</p>"

@@ -24,6 +24,7 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.HPSacrificeSU;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.RecoverButton;
 import net.stalemate.server.core.buttons.util.INoMoveAttack;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
@@ -148,6 +149,16 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
         }
         else{
             buttons.set(2, new DefensiveModeButton());
+        }
+
+        if (hp < max_hp && supply > 3){
+            if (buttons.size() < 9){
+                while (buttons.size() != 8){
+                    buttons.add(null);
+                }
+            }
+            buttons.set(7, new RecoverButton());
+
         }
         return buttons;
     }

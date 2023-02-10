@@ -21,10 +21,7 @@ package net.stalemate.server.core.units;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
-import net.stalemate.server.core.buttons.AttackButton;
-import net.stalemate.server.core.buttons.HPSacrificeSU;
-import net.stalemate.server.core.buttons.MotorizeButton;
-import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.*;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
@@ -67,6 +64,16 @@ public class Infantry extends Unit implements IUnitMoveAmount, IUnitName{
             for (int i = 0; i < 6; i++)
                 buttons.add(null);
             buttons.add(new HPSacrificeSU());
+        }
+
+        if (hp < max_hp && supply > 3){
+            if (buttons.size() < 9){
+                while (buttons.size() != 8){
+                    buttons.add(null);
+                }
+            }
+            buttons.set(7, new RecoverButton());
+
         }
         return buttons;
     }

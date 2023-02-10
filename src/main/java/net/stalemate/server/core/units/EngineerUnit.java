@@ -25,6 +25,7 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.buttons.RecoverButton;
 import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
@@ -253,6 +254,10 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                 buttons.add(null);
             }
             buttons.add(new BuildMenuButton());
+
+            if (hp < max_hp && supply > 3){
+                buttons.set(7, new RecoverButton());
+            }
         }
         else{
             buttons.add(new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {

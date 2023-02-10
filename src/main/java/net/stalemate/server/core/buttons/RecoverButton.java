@@ -21,30 +21,32 @@ package net.stalemate.server.core.buttons;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.util.IGameController;
 
-public class HPSacrificeSU implements Unit.IStandardButton {
+public class RecoverButton implements Unit.IStandardButton {
     @Override
     public String bind() {
-        return "S";
+        return "H";
     }
 
     @Override
     public String texture() {
-        return "assets/ui/buttons/sacrifice_button.png";
+        return "assets/ui/buttons/recover.png";
     }
 
     @Override
     public String identifier() {
-        return "button_hpsacrificesu";
+        return "button_recover";
     }
 
     @Override
     public void action(Unit unit, IGameController gameController) {
-        if (!unit.hasTurnEnded()){
-            if (unit.unitStats().getHp() - 1 > 0){
-                unit.consumeSupply(-2);
-                unit.setHp(unit.getHp()-1);
-                unit.endTurn();
+        if (!unit.hasTurnEnded())
+        if (unit.getSupply()-3 > 0){
+            unit.setHp(unit.getHp()+2);
+            if (unit.getHp() > unit.getMaxHp()){
+                unit.setHp(unit.getMaxHp());
             }
+            unit.setSupply(unit.getSupply()-3);
+            unit.endTurn();
         }
     }
 }

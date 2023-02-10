@@ -20,9 +20,6 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 
 ## TODO
 - [ ] Make a tutorial on how to play this game.
-- [x] Replace `System.out.println` with a logger.
-- [x] Make compression `Base64` handle unexpected things.
-- [x] Correct `ConnectionHandler` saying wrong ip after user connects.
 - [ ] Hardware acceleration (?)
 - [ ] Add Options menu
 ## `v0.3.x a` TODO:
@@ -34,19 +31,22 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
   - [ ] Strategic bomber
   - [ ] Anti-Air
   - [ ] An icon above a unit signalising that there's a plane over it
+- [ ] Terrain buffs and debuffs
+- [ ] Unit experience
 - [x] Minimap
   - [x] Initial minimap implementation
-  - [ ] Make units on minimap blink when attacked
+  - [x] Make units on minimap blink when attacked
+- [X] Better button hover highlighting
+- [X] Button press animation
 - [X] Make the entire game use one JFrame
 - [x] Unit flags
-- [ ] Terrain buffs and debuffs
 - [X] Remove entrenchment when unit killed another unit and moved
-- [ ] Unit experience
-- [ ] Check how does multiplayer with more than 2 players work
-  - [ ] If there is a player lobby with more than two players don't terminate the game
+- [X] Check how does multiplayer with more than 2 players work
+  - [X] If there is a player lobby with more than two players don't terminate the game
 - [X] Return to old supply system (Buildings don't have supply)
 - [X] Increase SupplyStation range
 - [x] Protocol refactor
+- [x] Cache uname monogram
 
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.

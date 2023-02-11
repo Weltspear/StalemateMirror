@@ -61,6 +61,7 @@ public class InGameUI extends JPanel {
 
     private boolean hasFirstPackedBeenReceived = false;
     private Color teamDoingTurnColor = Color.WHITE;
+    private String teamDoingTurnNick = "";
 
     public JFrame getFrame(){return frame;}
 
@@ -439,7 +440,7 @@ public class InGameUI extends JPanel {
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                boolean[][] fog_of_war, boolean[][] selr, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor) {
+                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor, String teamDoingTurnNick) {
             if (!clMapLoader.isMapLoaded()){
                 return;
             }
@@ -754,6 +755,9 @@ public class InGameUI extends JPanel {
                 this.interface_._selr = sel_r;
                 if (!teamDoingTurnColor.equals(Color.WHITE))
                 this.interface_.teamDoingTurnColor = teamDoingTurnColor;
+                if (!Objects.equals(teamDoingTurnNick, "neutralteam")){
+                    this.interface_.teamDoingTurnNick = teamDoingTurnNick;
+                }
                 this.interface_.unsafeLock.unlock();
 
                 if (cachedUnitDataArImgs.size() > 100){
@@ -1375,6 +1379,7 @@ public class InGameUI extends JPanel {
                 g.setColor(teamDoingTurnColor);
                 g.fillRect(55, 33, 8, 8);
                 g.setColor(Color.black);
+                g.drawString(Objects.requireNonNullElse(teamDoingTurnNick, "BOT"), 67, 40);
 
                 g.drawString("Camera speed: " + camera_speed, 690, 22);
 

@@ -131,6 +131,16 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             player.setChat(chat);
         }
 
+        HashMap<Integer, String> player_colors = new HashMap<>();
+
+        for (Player player: players){
+            player_colors.put(player.getTeam().getTeamColor().getRGB(), player.nickname);
+        }
+
+        for (Player player: players){
+            player.setPlayerColors(player_colors);
+        }
+
         lobby_lock.unlock();
 
         while (!game.hasGameEnded()){ // Hardcoded tick speed: 15
@@ -238,6 +248,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
         private ViewMode viewMode = ViewMode.GROUND;
 
+        private HashMap<Integer, String> playerColors;
+
         public Player(){
         }
 
@@ -299,7 +311,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         public boolean hasGameStarted(){
             lock.lock();
             try {
-                return (team != null && game != null);
+                return (team != null && game != null && playerColors != null && chat != null);
             } finally {
                 lock.unlock();
             }
@@ -309,6 +321,10 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             lock.lock();
             this.nickname = nickname;
             lock.unlock();
+        }
+
+        public void setPlayerColors(HashMap<Integer, String> player_colors) {
+            this.playerColors = player_colors;
         }
 
         @SuppressWarnings("unchecked")
@@ -752,6 +768,10 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     toBeJsoned.put("entity_data", entity_data);
                     toBeJsoned.put("is_it_your_turn", team == game.getTeamDoingTurn());
                     toBeJsoned.put("team_doing_turn_color", game.getTeamDoingTurn().getTeamColor().getRGB());
+                    if (!(game.getTeamDoingTurn() instanceof Game.NeutralTeam))
+                        toBeJsoned.put("team_doing_turn_nick", playerColors.get(game.getTeamDoingTurn().getTeamColor().getRGB()));
+                    else
+                        toBeJsoned.put("team_doing_turn_nick", "neutralteam");
 
                     toBeJsoned.put("mp", team.getMilitaryPoints());
 

@@ -75,6 +75,13 @@ public class Infantry extends Unit implements IUnitMoveAmount, IUnitName{
             buttons.set(7, new RecoverButton());
 
         }
+
+        if (buttons.size()==3){
+            buttons.add(null);
+        }
+
+        buttons.set(3, new ProtectUnitButton(Layer.GROUND));
+
         return buttons;
     }
 

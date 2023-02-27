@@ -43,6 +43,7 @@ public class MotorizeButton implements Unit.IStandardButton {
         if (!unit.hasTurnEnded() && unit.getSupply()-3>0){
             unit.setSupply(unit.getSupply()-3);
             unit.setEntrenchment(0);
+            unit.protectUnitWith(null);
             gameController.rmEntity(unit);
             MotorizedUnitOther u = new MotorizedUnitOther(unit.getX(), unit.getY(), gameController, unit);
             gameController.getUnitsTeam(unit).addUnit(u);

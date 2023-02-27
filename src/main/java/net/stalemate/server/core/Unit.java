@@ -312,6 +312,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
     }
 
+    public void allTeamTurnUpdate(){
+        protector = null;
+    }
+
     public void onDeath(){
 
     }
@@ -430,6 +434,19 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     public int getMaxSupply() {
         return max_supply;
+    }
+
+    /***
+     * Protector unit receives damage when attacked
+     */
+    private Unit protector = null;
+
+    public void protectUnitWith(Unit other){
+        protector = other;
+    }
+
+    public Unit getProtector(){
+        return protector;
     }
 
     public Properties getProperties(){

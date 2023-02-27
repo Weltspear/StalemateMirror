@@ -318,6 +318,7 @@ public class Game implements IGameControllerGamemode {
                     team.hasEndedItsTurn = false;
                     for (Unit unit : team.getTeamUnits()) {
                         unit.resetTurn();
+                        unit.allTeamTurnUpdate();
                     }
                 }
                 team_doing_turn = 0;

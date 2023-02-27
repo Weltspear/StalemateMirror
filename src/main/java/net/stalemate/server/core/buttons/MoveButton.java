@@ -83,6 +83,7 @@ public class MoveButton implements Unit.ISelectorButton {
                     unit.consumeSupply(1);
                     u_move.setMoveAmount(u_move.getMoveAmount()-1);
                     unit.move();
+                    unit.protectUnitWith(null);
                     if (u_move.getMoveAmount() == 0){
                         unit.endTurn();
                     }

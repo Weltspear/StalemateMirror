@@ -502,8 +502,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                         && team.getTeamUnits().contains(selected_unit));
                                 for (Unit.IButton button : isSelectedUnitEnemyTeam && selected_unit.getButtonsEnemy() != null ?
                                         selected_unit.getButtonsEnemy() : isSelectedUnitEnemyTeam
-                                        ? new ArrayList<Unit.IButton>() : selected_unit.getButtons() != null
-                                        ? selected_unit.getButtons() : new ArrayList<Unit.IButton>()) {
+                                        ? new Unit.IButton[9] : selected_unit.getButtons() != null
+                                        ? selected_unit.getButtons() : new Unit.IButton[9]) {
                                     if (button != null)
                                         if (button.identifier().equals(iselectorbuttonid)) {
                                             if (lgame.getTeamDoingTurn() == team || button.canBeUsedWhenOtherTeamsTurn()) {

@@ -60,11 +60,11 @@ public class Tankette extends Unit implements IMechanized, IUnitMoveAmount, IUni
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
 
-        buttons.add(new AttackButton(attack_range));
-        buttons.add(new MoveButton(movement_range));
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
         return buttons;
     }
 

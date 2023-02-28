@@ -333,14 +333,12 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. (It is one dimensional ArrayList)
      */
-    @Nullable
-    public abstract ArrayList<IButton> getButtons();
+    public abstract IButton[] getButtons();
 
     /***
      * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. These buttons can be used by enemy team. Can be null. (It is one dimensional ArrayList)
      */
-    @Nullable
-    public ArrayList<IButton> getButtonsEnemy(){return null;}
+    public IButton[] getButtonsEnemy(){return null;}
 
     public UnitStats unitStats(){
         return new UnitStats(hp, max_hp, attack_range, movement_range, atk, df, supply, max_supply, armor, et_gain, et_max);

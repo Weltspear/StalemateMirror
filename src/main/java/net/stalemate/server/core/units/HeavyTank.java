@@ -53,11 +53,11 @@ public class HeavyTank extends Unit implements IMechanized, IUnitMoveAmount, IUn
     }
 
     @Override
-    public ArrayList<Unit.IButton> getButtons() {
-        ArrayList<Unit.IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
 
-        buttons.add(new AttackButton(attack_range));
-        buttons.add(new MoveButton(movement_range));
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
         return buttons;
     }
 

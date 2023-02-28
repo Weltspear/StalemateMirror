@@ -42,9 +42,9 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new Scrap();
         return buttons;
     }
 

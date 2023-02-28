@@ -29,7 +29,7 @@ import java.util.ArrayList;
 public class UnderConstructionBuilding extends Unit implements IBuilding {
     private final Unit outBuilding;
     private int constructionTime;
-    private int initialConstructionTime;
+    private final int initialConstructionTime;
 
     /***
      * @param outBuilding Building to be deployed. It has to have the same coordinates as this entity
@@ -61,8 +61,8 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        return new ArrayList<>();
+    public IButton[] getButtons() {
+        return new IButton[9];
     }
 
     @Override

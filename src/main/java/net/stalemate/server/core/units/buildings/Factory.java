@@ -47,9 +47,9 @@ public class Factory extends Unit implements IBuilding, IConstructableBuilding {
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new Scrap();
         return buttons;
     }
 

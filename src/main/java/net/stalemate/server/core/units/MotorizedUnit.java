@@ -48,10 +48,10 @@ public class MotorizedUnit extends Unit implements IMechanized, IUnitMoveAmount,
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new MoveButton(movement_range));
-        buttons.add(new ResupplyButton());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new MoveButton(movement_range);
+        buttons[1] = new ResupplyButton();
         return buttons;
     }
 

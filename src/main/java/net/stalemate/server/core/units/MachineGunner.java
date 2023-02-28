@@ -128,36 +128,24 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
     }
 
     @Override
-    public ArrayList<Unit.IButton> getButtons() {
-        ArrayList<Unit.IButton> buttons = new ArrayList<>();
-        if (supply > 5) {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            buttons.add(null);
-        }
-        else {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            for (int i = 0; i < 6; i++)
-                buttons.add(null);
-            buttons.add(new HPSacrificeSU());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
+        if (supply <= 5) {
+            buttons[8] = new HPSacrificeSU();
         }
 
         if (!mode){
-            buttons.set(2, new OffensiveModeButton());
-            buttons.set(1, null);
+            buttons[2] = new OffensiveModeButton();
+            buttons[1] = null;
         }
         else{
-            buttons.set(2, new DefensiveModeButton());
+            buttons[2] = new DefensiveModeButton();
         }
 
         if (hp < max_hp && supply > 3){
-            if (buttons.size() < 9){
-                while (buttons.size() != 8){
-                    buttons.add(null);
-                }
-            }
-            buttons.set(7, new RecoverButton());
+            buttons[8] = new RecoverButton();
 
         }
         return buttons;

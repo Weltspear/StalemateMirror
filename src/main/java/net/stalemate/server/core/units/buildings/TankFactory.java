@@ -40,16 +40,12 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
+    public IButton[] getButtons() {
         boolean isProductionBlocked = checkForBlockage();
-        ArrayList<IButton> buttons = new ArrayList<>();
-
-        for (int i = 0; i < 9; i++){
-            buttons.add(null);
-        }
+        IButton[] buttons = new IButton[9];
 
         if (!isProductionBlocked){
-            buttons.set(0, new TrainButton(Tankette.class, 2, 2) {
+            buttons[0] = new TrainButton(Tankette.class, 2, 2) {
                 @Override
                 public String bind() {
                     return "T";
@@ -64,8 +60,8 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                 public String identifier() {
                     return "button_train_tankette";
                 }
-            });
-            buttons.set(1, new TrainButton(LightTank.class, 2, 3) {
+            };
+            buttons[1] = new TrainButton(LightTank.class, 2, 3) {
                 @Override
                 public String bind() {
                     return "L";
@@ -80,8 +76,8 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                 public String identifier() {
                     return "button_train_light_tank";
                 }
-            });
-            buttons.set(2, new TrainButton(HeavyTank.class, 2, 3) {
+            };
+            buttons[2] = new TrainButton(HeavyTank.class, 2, 3) {
                 @Override
                 public String bind() {
                     return "H";
@@ -96,12 +92,12 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                 public String identifier() {
                     return "button_train_heavy_tank";
                 }
-            });
+            };
         }
 
-        buttons.set(6, new DefaultCancelButton());
-        buttons.set(7, new DefaultChangeDeploymentPointButton());
-        buttons.set(8, new Scrap());
+        buttons[6] = new DefaultCancelButton();
+        buttons[7] = new DefaultChangeDeploymentPointButton();
+        buttons[8] = new Scrap();
 
         return buttons;
     }

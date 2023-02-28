@@ -126,12 +126,11 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUn
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new AttackButton(attack_range));
-        buttons.add(new MoveButton(movement_range));
-        buttons.add(new MotorizeButton());
-        // buttons.add(new ShellingButton(attack_range));
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
+        buttons[2] = new MotorizeButton();
         return buttons;
     }
 

@@ -51,36 +51,23 @@ public class Infantry extends Unit implements IUnitMoveAmount, IUnitName{
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
         if (supply > 5) {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            buttons.add(new MotorizeButton());
+            buttons[2] = new MotorizeButton();
         }
         else {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            for (int i = 0; i < 6; i++)
-                buttons.add(null);
-            buttons.add(new HPSacrificeSU());
+            buttons[8] = new HPSacrificeSU();
         }
 
         if (hp < max_hp && supply > 3){
-            if (buttons.size() < 9){
-                while (buttons.size() != 8){
-                    buttons.add(null);
-                }
-            }
-            buttons.set(7, new RecoverButton());
-
+            buttons[7] = new RecoverButton();
         }
 
-        if (buttons.size()==3){
-            buttons.add(null);
-        }
 
-        buttons.set(3, new ProtectUnitButton(Layer.GROUND));
+        buttons[3] = new ProtectUnitButton(Layer.GROUND);
 
         return buttons;
     }

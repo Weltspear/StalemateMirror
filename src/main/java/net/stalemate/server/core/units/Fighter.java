@@ -50,7 +50,7 @@ public class Fighter extends AirUnit {
     }
 
     @Override
-    public @Nullable ArrayList<IButton> getButtons() {
-        return new ArrayList<>(List.of(new IButton[]{new MoveButton(5, Layer.AIR), new AttackButton(1, Layer.AIR)}));
+    public IButton[] getButtons() {
+        return new IButton[]{new MoveButton(5, Layer.AIR), new AttackButton(1, Layer.AIR)};
     }
 }

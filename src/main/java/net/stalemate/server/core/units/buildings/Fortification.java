@@ -63,10 +63,10 @@ public class Fortification extends Unit implements IBuilding, Unflippable, Prior
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new AttackButton(attack_range));
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new Scrap();
         return buttons;
     }
 

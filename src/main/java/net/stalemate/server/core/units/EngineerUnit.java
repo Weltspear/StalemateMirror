@@ -242,25 +242,22 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
         if (!isInBuildingMode) {
-            buttons.add(new MoveButton(movement_range));
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MotorizeButton());
-            buttons.add(new RepairButton());
+            buttons[0] = new MoveButton(movement_range);
+            buttons[1] = new AttackButton(attack_range);
+            buttons[2] = new MotorizeButton();
+            buttons[3] = new RepairButton();
 
-            for (int i = 0; i < 4; i++){
-                buttons.add(null);
-            }
-            buttons.add(new BuildMenuButton());
+            buttons[8] = new BuildMenuButton();
 
             if (hp < max_hp && supply > 3){
-                buttons.set(7, new RecoverButton());
+                buttons[7] = new RecoverButton();
             }
         }
         else{
-            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
+            buttons[0] = (new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -281,7 +278,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_military_tent";
                 }
             });
-            buttons.add(new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
+            buttons[1] = (new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -302,7 +299,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_tank_factory";
                 }
             });
-            buttons.add(new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
+            buttons[2] = (new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -323,7 +320,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_supply_station";
                 }
             });
-            buttons.add(new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
+            buttons[3] = (new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -344,7 +341,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_fortification";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Radar.class, 1, 2, false) {
+            buttons[4] = (new ConstructBuildingButton(Radar.class, 1, 2, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -365,7 +362,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_radar";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Factory.class, 2, 3, false) {
+            buttons[5] = (new ConstructBuildingButton(Factory.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -387,10 +384,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                 }
             });
 
-            for (int i = 0; i < 2; i++){
-                buttons.add(null);
-            }
-            buttons.add(new ExitBuildMenuButton());
+            buttons[8] = new ExitBuildMenuButton();
         }
 
         return buttons;

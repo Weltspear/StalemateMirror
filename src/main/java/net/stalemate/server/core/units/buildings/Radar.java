@@ -42,9 +42,9 @@ public class Radar extends Unit implements IConstructableBuilding, IBuilding, Pr
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new Scrap();
         return buttons;
     }
 

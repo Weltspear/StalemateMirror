@@ -55,6 +55,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      */
     protected boolean hasMoved = false;
 
+    /***
+     * Tells the game that this unit has recently moved
+     */
     public void move(){
         hasMoved = true;
     }
@@ -312,6 +315,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
     }
 
+    /***
+     * This method is called after all teams did their turn
+     */
     public void allTeamTurnUpdate(){
         protector = null;
     }
@@ -327,8 +333,6 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
         return anim.getCurrentFrame();
     }
-
-    public void resetTurn(){hasTurnEnded = false;}
 
     /***
      * @return 3x3 grid with Button classes.
@@ -358,6 +362,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         return unitStats;
     }
 
+    /***
+     * Damages unit takes armor into account
+     */
     public void damage(int dmg){
         dmg -= armor;
         if (dmg <= 0){
@@ -441,6 +448,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      */
     private Unit protector = null;
 
+    /**
+     * Sets protector to <code>other</code>
+     * @param other new protector
+     */
     public void protectUnitWith(Unit other){
         protector = other;
     }

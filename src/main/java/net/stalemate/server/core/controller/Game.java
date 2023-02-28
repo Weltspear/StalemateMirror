@@ -317,7 +317,6 @@ public class Game implements IGameControllerGamemode {
                 for (Team team : teams) {
                     team.hasEndedItsTurn = false;
                     for (Unit unit : team.getTeamUnits()) {
-                        unit.resetTurn();
                         unit.allTeamTurnUpdate();
                     }
                 }

@@ -25,14 +25,12 @@ import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.HPSacrificeSU;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.RecoverButton;
-import net.stalemate.server.core.buttons.util.INoMoveAttack;
+import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
-import java.util.ArrayList;
-
-public class MachineGunner extends Unit implements INoMoveAttack, IUnitName {
+public class MachineGunner extends Unit implements NoMoveAttack, IUnitName {
 
     private volatile boolean mode = true;
 

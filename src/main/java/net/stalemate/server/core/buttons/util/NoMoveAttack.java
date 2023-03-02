@@ -21,5 +21,5 @@ package net.stalemate.server.core.buttons.util;
 /***
  * Unit which implements this will not move if it kills another unit
  */
-public interface INoMoveAttack {
+public interface NoMoveAttack {
 }

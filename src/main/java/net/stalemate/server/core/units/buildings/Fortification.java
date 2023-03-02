@@ -23,16 +23,14 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.Scrap;
-import net.stalemate.server.core.buttons.util.INoMoveAttack;
+import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.util.IGameController;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
 
-import java.util.ArrayList;
-
-public class Fortification extends Unit implements IBuilding, Unflippable, PriorityTurnUpdate, INoMoveAttack {
+public class Fortification extends Unit implements IBuilding, Unflippable, PriorityTurnUpdate, NoMoveAttack {
     private final Infantry unitInside;
 
     public Fortification(int x, int y, IGameController game, Infantry unit) {

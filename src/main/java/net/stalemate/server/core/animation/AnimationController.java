@@ -23,11 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AnimationController {
-    protected Animation current_animation = null;
+    private Animation current_animation = null;
 
-    protected final HashMap<String, Animation> animationMap = new HashMap<>();
+    private final HashMap<String, Animation> animationMap = new HashMap<>();
+    private final HashMap<Animation, String> animationMap2 = new HashMap<>();
 
-    protected final ArrayList<ArrayList<String>> shifts = new ArrayList<>();
+    protected final HashMap<String, String> shifts = new HashMap<>();
     int anim_tick = 0;
 
     public AnimationController(){
@@ -35,43 +36,24 @@ public class AnimationController {
     }
 
     public void addAnimation(String anim_name, Animation animation){
-        animation.stopLoop();
         animationMap.put(anim_name, animation);
+        animationMap2.put(animation, anim_name);
     }
 
+    /***
+     * Adds a shift from animation <code>a1</code> to animation <code>a2</code>
+     */
     public void addShift(String a1, String a2){
-        ArrayList<String> shift = new ArrayList<>();
-        shift.add(a1);
-        shift.add(a2);
-        shifts.add(shift);
+        shifts.put(a1, a2);
     }
 
     public void setCurrentAnimation(String a){
         current_animation = animationMap.get(a);
-        current_animation.current_frame = 0;
+        current_animation.setCurrentFrameIndex(0);
         anim_tick = 0;
     }
 
     public String getCurrentFrame(){
-        if (current_animation.hasEnded()) {
-            boolean hasShift = false;
-            for (ArrayList<String> shift : shifts) {
-                for (Map.Entry<String, Animation> entry : animationMap.entrySet()) {
-                    if (entry.getValue() == current_animation) {
-                        if (shift.get(0).equals(entry.getKey())) {
-                            current_animation = animationMap.get(shift.get(1));
-                            current_animation.current_frame = 0;
-                            anim_tick = 0;
-                            hasShift = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!hasShift){
-                current_animation.current_frame = 0;
-            }
-        }
         if (current_animation != null) {
             return current_animation.getFrame();
         }
@@ -89,28 +71,25 @@ public class AnimationController {
     public void tick(){
         if (current_animation != null){
             anim_tick++;
-            if (current_animation.hasEnded()) {
-                boolean hasShift = false;
-                for (ArrayList<String> shift : shifts) {
-                    for (Map.Entry<String, Animation> entry : animationMap.entrySet()) {
-                        if (entry.getValue() == current_animation) {
-                            if (shift.get(0).equals(entry.getKey())) {
-                                current_animation = animationMap.get(shift.get(1));
-                                anim_tick = 0;
-                                hasShift = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (!hasShift){
-                    current_animation.current_frame = 0;
-                }
-            }
 
             if (anim_tick == current_animation.getTickSleep()) {
                 anim_tick = 0;
                 current_animation.tick();
+            }
+
+            if (current_animation.hasEnded()) {
+                boolean hasShift = false;
+
+                if (shifts.containsKey(animationMap2.get(current_animation))){
+                    current_animation = animationMap.get(shifts.get(animationMap2.get(current_animation)));
+                    current_animation.setCurrentFrameIndex(0);
+                    anim_tick = 0;
+                    hasShift = true;
+                }
+
+                if (!hasShift){
+                    current_animation.setCurrentFrameIndex(0);
+                }
             }
         }
     }

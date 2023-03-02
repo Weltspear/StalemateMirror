@@ -32,7 +32,7 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.communication.chat.Chat;
 import net.stalemate.server.core.communication.chat.Message;
 import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.map_system.MapLoader;
+import net.stalemate.server.core.mapsystem.MapLoader;
 import net.stalemate.server.core.minimap.AttackTracker;
 import net.stalemate.server.core.units.util.IBase;
 

@@ -94,6 +94,8 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
         idle.addFrame("assets/units/fortification.png");
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
+
+        move_amount = -1;
     }
 
     @Override

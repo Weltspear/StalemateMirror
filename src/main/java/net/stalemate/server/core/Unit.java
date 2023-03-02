@@ -56,6 +56,31 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     protected boolean hasMoved = false;
 
     /***
+     * Amount of moves remaining for the unit this turn
+     * NOTE: Set this to -1 if you don't want your unit to have move amount
+     */
+    protected int move_amount = 0;
+    protected int turn_move_amount = 0;
+
+    /***
+     * Sets the amount of moves remaining for the unit this turn
+     */
+    public void setMoveAmount(int m){
+        this.move_amount = m;
+    }
+
+    /***
+     * The amount of moves available each turn
+     */
+    public int getTurnMoveAmount(){
+        return turn_move_amount;
+    }
+
+    public int getMoveAmount(){
+        return move_amount;
+    }
+
+    /***
      * Tells the game that this unit has recently moved
      */
     public void move(){
@@ -265,6 +290,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     public void turnUpdate() {
         hasTurnEnded = false;
         hasMoved = false;
+        if (move_amount != -1){
+            move_amount = turn_move_amount;
+        }
 
         has_not_moved += 1;
 
@@ -477,6 +505,15 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
+
+        if (move_amount != -1) {
+            if (hasTurnEnded) {
+                properties.put("move_amount", String.valueOf(0));
+            } else {
+                properties.put("move_amount", String.valueOf(move_amount));
+            }
+        }
+
         properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
         return properties;
     }

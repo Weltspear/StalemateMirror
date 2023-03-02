@@ -22,14 +22,11 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.MoveButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
-import java.util.ArrayList;
-
-public class MotorizedUnitOther extends Unit implements IUnitMoveAmount, IUnitName {
+public class MotorizedUnitOther extends Unit implements IUnitName {
     private final Unit contained_unit;
 
     @Override
@@ -89,6 +86,9 @@ public class MotorizedUnitOther extends Unit implements IUnitMoveAmount, IUnitNa
         anim.setCurrentAnimation("idle");
 
         fog_of_war_range = 3;
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
@@ -104,33 +104,9 @@ public class MotorizedUnitOther extends Unit implements IUnitMoveAmount, IUnitNa
         contained_unit.setHp(-1);
     }
 
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
-    }
-
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
         IUnitName.addNameProperty(getUnitName(), p);
         return p;
     }

@@ -23,17 +23,12 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MoveButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
-import java.util.ArrayList;
-
-public class LightTank extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
-
-    private int move_amount = 3;
+public class LightTank extends Unit implements IMechanized, IUnitName {
 
     public LightTank(int x, int y, IGameController game){
         super(x, y, game, new UnitStats(15, 15, 1, 2, 3, 2, 20, 20, 1, 0, 0), new AnimationController(), "Light Tank");
@@ -56,6 +51,9 @@ public class LightTank extends Unit implements IMechanized, IUnitMoveAmount, IUn
         anim.addShift("attack", "idle");
 
         anim.setCurrentAnimation("idle");
+
+        move_amount = 3;
+        turn_move_amount = 3;
     }
 
     @Override
@@ -68,30 +66,8 @@ public class LightTank extends Unit implements IMechanized, IUnitMoveAmount, IUn
     }
 
     @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
-    }
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 3;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

@@ -60,6 +60,7 @@ public class Fortification extends Unit implements IBuilding, Unflippable, Prior
         anim.addShift("attack", "idle");
 
         unitInside = unit;
+        move_amount = -1;
     }
 
     @Override

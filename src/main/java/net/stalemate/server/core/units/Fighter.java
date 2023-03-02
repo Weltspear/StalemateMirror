@@ -30,9 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Fighter extends AirUnit {
-    /***
-     * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
-     */
     public Fighter(int x, int y, IGameController game) {
         super(x, y, game, new UnitStats(10, 10, 1, 5, 4, 0, 20, 20, 0, 0, 0), new AnimationController(), "Fighter");
         Animation animation = new Animation(1);
@@ -46,6 +43,8 @@ public class Fighter extends AirUnit {
         anim.addShift("attack", "idle");
 
         fog_of_war_range = 5;
+        move_amount = 2;
+        turn_move_amount = 2;
 
     }
 

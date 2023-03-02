@@ -166,6 +166,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
     public AbstractFactoryBuilding(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
         super(x, y, game, unitStats, anim, name);
+        move_amount = -1;
     }
 
     public void addUnitToQueue(Unit unit, int production_time){

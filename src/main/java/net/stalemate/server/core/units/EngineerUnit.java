@@ -26,18 +26,16 @@ import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.RecoverButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
+import net.stalemate.server.core.units.buildings.*;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
-import net.stalemate.server.core.units.buildings.*;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
-public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
+public class EngineerUnit extends Unit implements IUnitName{
     public static class RepairButton implements ISelectorButtonUnit{
         @Override
         public String bind() {
@@ -239,6 +237,9 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
         anim.setCurrentAnimation("idle");
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
@@ -390,33 +391,9 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         return buttons;
     }
 
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
-    }
-
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

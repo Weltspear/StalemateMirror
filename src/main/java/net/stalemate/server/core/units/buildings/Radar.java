@@ -39,6 +39,8 @@ public class Radar extends Unit implements IConstructableBuilding, IBuilding, Pr
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
         fog_of_war_range = 5;
+
+        move_amount = -1;
     }
 
     @Override

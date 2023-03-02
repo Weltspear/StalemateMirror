@@ -26,14 +26,13 @@ import net.stalemate.server.core.buttons.HPSacrificeSU;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.RecoverButton;
 import net.stalemate.server.core.buttons.util.INoMoveAttack;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.util.IGameController;
 
 import java.util.ArrayList;
 
-public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttack, IUnitName {
+public class MachineGunner extends Unit implements INoMoveAttack, IUnitName {
 
     private volatile boolean mode = true;
 
@@ -110,6 +109,9 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
         attack.addFrame("assets/units/machine_gunner_fire_3.png");
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
@@ -151,33 +153,9 @@ public class MachineGunner extends Unit implements IUnitMoveAmount, INoMoveAttac
         return buttons;
     }
 
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
-    }
-
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

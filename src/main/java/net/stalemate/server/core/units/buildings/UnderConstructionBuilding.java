@@ -39,6 +39,7 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
         this.outBuilding = outBuilding;
         this.constructionTime = constructionTime;
         this.initialConstructionTime = constructionTime;
+        this.move_amount = -1;
     }
 
     @Override

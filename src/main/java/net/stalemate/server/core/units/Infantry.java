@@ -22,15 +22,12 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.*;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
-import java.util.ArrayList;
-
-public class Infantry extends Unit implements IUnitMoveAmount, IUnitName{
-    public Infantry(int x, int y, IGameController game) {
+public class Infantry extends Unit implements IUnitName{
+    public Infantry(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0, 1, 3), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/rifleman_idle_1.png");
@@ -48,70 +45,36 @@ public class Infantry extends Unit implements IUnitMoveAmount, IUnitName{
 
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
         if (supply > 5) {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            buttons.add(new MotorizeButton());
+            buttons[2] = new MotorizeButton();
         }
         else {
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MoveButton(movement_range));
-            for (int i = 0; i < 6; i++)
-                buttons.add(null);
-            buttons.add(new HPSacrificeSU());
+            buttons[8] = new HPSacrificeSU();
         }
 
         if (hp < max_hp && supply > 3){
-            if (buttons.size() < 9){
-                while (buttons.size() != 8){
-                    buttons.add(null);
-                }
-            }
-            buttons.set(7, new RecoverButton());
-
+            buttons[7] = new RecoverButton();
         }
 
-        if (buttons.size()==3){
-            buttons.add(null);
-        }
 
-        buttons.set(3, new ProtectUnitButton(Layer.GROUND));
+        buttons[3] = new ProtectUnitButton(Layer.GROUND);
 
         return buttons;
-    }
-
-    private int move_amount = 3;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 3;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
     }
 
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

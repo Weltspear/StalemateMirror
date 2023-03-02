@@ -25,13 +25,13 @@ import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
 
 import java.util.ArrayList;
 
 public class Radar extends Unit implements IConstructableBuilding, IBuilding, PriorityTurnUpdate {
-    public Radar(int x, int y, IGameController game) {
+    public Radar(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, -1, -1, 1, 0, 0), new AnimationController(), "Radar");
 
         Animation idle = new Animation(1);
@@ -39,12 +39,14 @@ public class Radar extends Unit implements IConstructableBuilding, IBuilding, Pr
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
         fog_of_war_range = 5;
+
+        move_amount = -1;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new Scrap();
         return buttons;
     }
 

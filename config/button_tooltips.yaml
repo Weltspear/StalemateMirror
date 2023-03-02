@@ -2,7 +2,7 @@ tooltips:
   # Basic buttons
   button_attack: "This button makes unit attack other unit
                   <br><p color=green>(0/2/0)</p>"
-  button_hpsacrificesu: "Sacrifices HP to add 2 SU\n(1/0/0)"
+  button_hpsacrificesu: "Sacrifices 2 HP to add 3 SU\n(2/0/0)"
   button_move: "Moves unit<br><p color=green>(0/1/0)</p>"
 
   # Building buttons

@@ -23,17 +23,14 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MoveButton;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Fighter extends AirUnit {
-    /***
-     * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
-     */
-    public Fighter(int x, int y, IGameController game) {
+    public Fighter(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 5, 4, 0, 20, 20, 0, 0, 0), new AnimationController(), "Fighter");
         Animation animation = new Animation(1);
         animation.addFrame("assets/units/placeholder_fighter.png");
@@ -46,11 +43,13 @@ public class Fighter extends AirUnit {
         anim.addShift("attack", "idle");
 
         fog_of_war_range = 5;
+        move_amount = 2;
+        turn_move_amount = 2;
 
     }
 
     @Override
-    public @Nullable ArrayList<IButton> getButtons() {
-        return new ArrayList<>(List.of(new IButton[]{new MoveButton(5, Layer.AIR), new AttackButton(1, Layer.AIR)}));
+    public IButton[] getButtons() {
+        return new IButton[]{new MoveButton(5, Layer.AIR), new AttackButton(1, Layer.AIR)};
     }
 }

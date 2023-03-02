@@ -19,9 +19,9 @@
 package net.stalemate.server.core.communication.chat;
 
 public class Message {
-    protected String author;
-    protected String message;
-    protected int timesRead = 0;
+    private final String author;
+    private final String message;
+    private int timesRead = 0;
 
     public Message(String author, String message){
         this.author = author;
@@ -38,5 +38,13 @@ public class Message {
 
     public int getTimesRead(){
         return timesRead;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

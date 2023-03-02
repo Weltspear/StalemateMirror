@@ -20,7 +20,7 @@ package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.units.util.IBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class Scrap implements Unit.IStandardButton {
     @Override
@@ -39,7 +39,7 @@ public class Scrap implements Unit.IStandardButton {
     }
 
     @Override
-    public void action(Unit unit, IGameController gameController) {
+    public void action(Unit unit, Game gameController) {
         if (unit instanceof IBuilding && !unit.hasTurnEnded()){
             unit.setHp(-1);
         }

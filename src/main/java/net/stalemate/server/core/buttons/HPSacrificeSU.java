@@ -19,7 +19,7 @@
 package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.Unit;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class HPSacrificeSU implements Unit.IStandardButton {
     @Override
@@ -38,11 +38,11 @@ public class HPSacrificeSU implements Unit.IStandardButton {
     }
 
     @Override
-    public void action(Unit unit, IGameController gameController) {
+    public void action(Unit unit, Game gameController) {
         if (!unit.hasTurnEnded()){
-            if (unit.unitStats().getHp() - 1 > 0){
-                unit.consumeSupply(-2);
-                unit.setHp(unit.getHp()-1);
+            if (unit.unitStats().getHp() - 2 > 0){
+                unit.consumeSupply(-3);
+                unit.setHp(unit.getHp()-2);
                 unit.endTurn();
             }
         }

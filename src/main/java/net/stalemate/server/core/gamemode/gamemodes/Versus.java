@@ -19,19 +19,19 @@
 package net.stalemate.server.core.gamemode.gamemodes;
 
 import net.stalemate.server.core.gamemode.IGamemode;
-import net.stalemate.server.core.util.IGameControllerGamemode;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
 public class Versus implements IGamemode {
     @Override
-    public void tick(IGameControllerGamemode g) {
+    public void tick(Game g) {
 
     }
 
     @Override
-    public boolean hasGameEnded(IGameControllerGamemode g) {
+    public boolean hasGameEnded(Game g) {
         ArrayList<Game.Team> teams_who_have_units = new ArrayList<>();
 
         for (Game.Team team: g.getTeams()){
@@ -44,7 +44,7 @@ public class Versus implements IGamemode {
     }
 
     @Override
-    public Game.Team getVictoriousTeam(IGameControllerGamemode g) {
+    public Game.Team getVictoriousTeam(Game g) {
 
         ArrayList<Game.Team> teams_who_have_units = new ArrayList<>();
 

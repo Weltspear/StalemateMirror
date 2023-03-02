@@ -26,18 +26,16 @@ import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.RecoverButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
+import net.stalemate.server.core.units.buildings.*;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
-import net.stalemate.server.core.units.buildings.*;
+import net.stalemate.server.core.controller.Game;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
-public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
+public class EngineerUnit extends Unit implements IUnitName{
     public static class RepairButton implements ISelectorButtonUnit{
         @Override
         public String bind() {
@@ -55,7 +53,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         }
 
         @Override
-        public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+        public void action(Unit selected_unit, Unit unit, Game gameController) {
             if (unit.unitStats().getSupply() >= 14 && !unit.hasTurnEnded() && selected_unit != unit){
                 if (selected_unit instanceof IMechanized && selected_unit.unitStats().getMaxHp() != selected_unit.unitStats().getHp()){
                     selected_unit.setHp(selected_unit.getHp() + 3);
@@ -113,7 +111,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (unit instanceof EngineerUnit eu){
                 eu.isInBuildingMode = true;
             }
@@ -143,7 +141,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (unit instanceof EngineerUnit eu){
                 eu.isInBuildingMode = false;
             }
@@ -169,7 +167,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         }
 
         @Override
-        public void action(int x, int y, Unit unit, IGameController gameController) {
+        public void action(int x, int y, Unit unit, Game gameController) {
             if (!unit.hasTurnEnded()) {
 
                 for (Entity entity : gameController.getEntities(x, y)) {
@@ -185,7 +183,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                 Unit building = null;
 
                 try {
-                    building = b.getConstructor(int.class, int.class, IGameController.class).newInstance(x, y, gameController);
+                    building = b.getConstructor(int.class, int.class, Game.class).newInstance(x, y, gameController);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -221,7 +219,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
 
     private boolean isInBuildingMode = false;
 
-    public EngineerUnit(int x, int y, IGameController game) {
+    public EngineerUnit(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 1, 0, 20, 20, 0, 0, 0), new AnimationController(), "Engineer");
 
         Animation idle = new Animation(20);
@@ -239,28 +237,28 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
         anim.setCurrentAnimation("idle");
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
         if (!isInBuildingMode) {
-            buttons.add(new MoveButton(movement_range));
-            buttons.add(new AttackButton(attack_range));
-            buttons.add(new MotorizeButton());
-            buttons.add(new RepairButton());
+            buttons[0] = new MoveButton(movement_range);
+            buttons[1] = new AttackButton(attack_range);
+            buttons[2] = new MotorizeButton();
+            buttons[3] = new RepairButton();
 
-            for (int i = 0; i < 4; i++){
-                buttons.add(null);
-            }
-            buttons.add(new BuildMenuButton());
+            buttons[8] = new BuildMenuButton();
 
             if (hp < max_hp && supply > 3){
-                buttons.set(7, new RecoverButton());
+                buttons[7] = new RecoverButton();
             }
         }
         else{
-            buttons.add(new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
+            buttons[0] = (new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -281,7 +279,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_military_tent";
                 }
             });
-            buttons.add(new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
+            buttons[1] = (new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -302,7 +300,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_tank_factory";
                 }
             });
-            buttons.add(new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
+            buttons[2] = (new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -323,7 +321,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_supply_station";
                 }
             });
-            buttons.add(new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
+            buttons[3] = (new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -344,7 +342,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_fortification";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Radar.class, 1, 2, false) {
+            buttons[4] = (new ConstructBuildingButton(Radar.class, 1, 2, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -365,7 +363,7 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                     return "button_engineer_unit_build_menu_build_radar";
                 }
             });
-            buttons.add(new ConstructBuildingButton(Factory.class, 2, 3, false) {
+            buttons[5] = (new ConstructBuildingButton(Factory.class, 2, 3, false) {
                 @Override
                 public String selector_texture() {
                     return "assets/ui/selectors/ui_repair.png";
@@ -387,42 +385,15 @@ public class EngineerUnit extends Unit implements IUnitMoveAmount, IUnitName{
                 }
             });
 
-            for (int i = 0; i < 2; i++){
-                buttons.add(null);
-            }
-            buttons.add(new ExitBuildMenuButton());
+            buttons[8] = new ExitBuildMenuButton();
         }
 
         return buttons;
     }
 
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
-    }
-
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

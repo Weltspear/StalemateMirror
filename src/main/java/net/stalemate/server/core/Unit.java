@@ -20,7 +20,7 @@ package net.stalemate.server.core;
 
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -55,6 +55,34 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      */
     protected boolean hasMoved = false;
 
+    /***
+     * Amount of moves remaining for the unit this turn
+     * NOTE: Set this to -1 if you don't want your unit to have move amount
+     */
+    protected int move_amount = 0;
+    protected int turn_move_amount = 0;
+
+    /***
+     * Sets the amount of moves remaining for the unit this turn
+     */
+    public void setMoveAmount(int m){
+        this.move_amount = m;
+    }
+
+    /***
+     * The amount of moves available each turn
+     */
+    public int getTurnMoveAmount(){
+        return turn_move_amount;
+    }
+
+    public int getMoveAmount(){
+        return move_amount;
+    }
+
+    /***
+     * Tells the game that this unit has recently moved
+     */
     public void move(){
         hasMoved = true;
     }
@@ -119,7 +147,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * Button which needs a selection of x and y coordinates to work
      */
     public interface ISelectorButton extends IButton{
-        void action(int x, int y, Unit unit, IGameController gameController);
+        void action(int x, int y, Unit unit, Game gameController);
         int selector_range();
         String selector_texture();
 
@@ -132,7 +160,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * Button which needs a selection another unit to work
      */
     public interface ISelectorButtonUnit extends IButton{
-        void action(Unit selected_unit, Unit unit, IGameController gameController);
+        void action(Unit selected_unit, Unit unit, Game gameController);
         int selector_range();
         String selector_texture();
 
@@ -152,7 +180,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * @see ISelectorButton
      */
     public interface IStandardButton extends IButton{
-        void action(Unit unit, IGameController gameController);
+        void action(Unit unit, Game gameController);
     }
 
     /***
@@ -233,7 +261,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
      */
-    public Unit(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
+    public Unit(int x, int y, Game game, UnitStats unitStats, AnimationController anim, String name) {
         super(x, y, game);
 
         this.anim = anim;
@@ -262,6 +290,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     public void turnUpdate() {
         hasTurnEnded = false;
         hasMoved = false;
+        if (move_amount != -1){
+            move_amount = turn_move_amount;
+        }
 
         has_not_moved += 1;
 
@@ -284,13 +315,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         buffs.removeAll(to_be_removed_b);
     }
 
-    private volatile boolean isAnimationUnsafe = false;
-
     @Override
     public void update() {
-        isAnimationUnsafe = true;
         anim.tick();
-        isAnimationUnsafe = false;
 
         if (hp <= 0){
             game.rmEntity(this);
@@ -312,6 +339,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
     }
 
+    /***
+     * This method is called after all teams did their turn
+     */
     public void allTeamTurnUpdate(){
         protector = null;
     }
@@ -322,25 +352,20 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     @Override
     public String getTextureFileName() {
-        while (isAnimationUnsafe){
-            Thread.onSpinWait();
-        }
         return anim.getCurrentFrame();
     }
 
-    public void resetTurn(){hasTurnEnded = false;}
-
     /***
-     * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. (It is one dimensional ArrayList)
+     * @return 3x3 grid with Button classes.
      */
     @Nullable
-    public abstract ArrayList<IButton> getButtons();
+    public abstract IButton[] getButtons();
 
     /***
-     * @return 3x3 grid with Button classes. If you want to leave a space empty place a null there. These buttons can be used by enemy team. Can be null. (It is one dimensional ArrayList)
+     * @return 3x3 grid with Button classes.
      */
     @Nullable
-    public ArrayList<IButton> getButtonsEnemy(){return null;}
+    public IButton[] getButtonsEnemy(){return null;}
 
     public UnitStats unitStats(){
         return new UnitStats(hp, max_hp, attack_range, movement_range, atk, df, supply, max_supply, armor, et_gain, et_max);
@@ -358,6 +383,9 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         return unitStats;
     }
 
+    /***
+     * Damages unit takes armor into account
+     */
     public void damage(int dmg){
         dmg -= armor;
         if (dmg <= 0){
@@ -441,6 +469,10 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      */
     private Unit protector = null;
 
+    /**
+     * Sets protector to <code>other</code>
+     * @param other new protector
+     */
     public void protectUnitWith(Unit other){
         protector = other;
     }
@@ -466,6 +498,15 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
+
+        if (move_amount != -1) {
+            if (hasTurnEnded) {
+                properties.put("move_amount", String.valueOf(0));
+            } else {
+                properties.put("move_amount", String.valueOf(move_amount));
+            }
+        }
+
         properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
         return properties;
     }

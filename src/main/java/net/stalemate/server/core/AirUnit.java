@@ -20,13 +20,13 @@ package net.stalemate.server.core;
 
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public abstract class AirUnit extends Unit {
     /***
      * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
      */
-    public AirUnit(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
+    public AirUnit(int x, int y, Game game, UnitStats unitStats, AnimationController anim, String name) {
         super(x, y, game, unitStats, anim, name);
     }
 

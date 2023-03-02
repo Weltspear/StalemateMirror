@@ -21,32 +21,35 @@ package net.stalemate.server.core.animation;
 import java.util.ArrayList;
 
 public class Animation {
-    protected final ArrayList<String> frames = new ArrayList<>();
-    protected  int current_frame = 0;
+    private final ArrayList<String> frames = new ArrayList<>();
+    private int current_frame = 0;
     /***
      * Number of ticks to sleep before going to a next frame
      */
     protected final int tick_sleep;
 
-    protected boolean isLooped = true;
-
     public Animation(int tick_sleep){
         this.tick_sleep = tick_sleep;
     }
 
-    public void stopLoop(){
-        isLooped = false;
-    }
-
     public void tick(){
         current_frame++;
-        if (current_frame == frames.size() && isLooped){
-            current_frame = 0;
-        }
     }
 
     public boolean hasEnded(){
-        return ((!isLooped)&&(current_frame == frames.size()));
+        return ((current_frame == frames.size()));
+    }
+
+    public int getCurrentFrameIndex() {
+        return current_frame;
+    }
+
+    public void setCurrentFrameIndex(int current_frame) {
+        this.current_frame = current_frame;
+    }
+
+    public int getAnimationSize(){
+        return frames.size();
     }
 
     public void addFrame(String frame){

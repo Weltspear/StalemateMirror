@@ -35,10 +35,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Game implements IGameControllerGamemode {
-    final ArrayList<Entity> entities = new ArrayList<>();
-    ArrayList<ArrayList<MapObject>> map;
-    ArrayList<Team> teams;
+public class Game {
+    private final ArrayList<Entity> entities = new ArrayList<>();
+    private final ArrayList<ArrayList<MapObject>> map;
+    private final ArrayList<Team> teams;
     final ArrayList<Team> already_assigned_teams = new ArrayList<>();
     private int team_doing_turn = 0;
     public ReentrantLock lock = new ReentrantLock();
@@ -70,8 +70,8 @@ public class Game implements IGameControllerGamemode {
         }
     }
 
-    final ArrayList<Entity> to_be_removed = new ArrayList<>();
-    final ArrayList<Entity> to_be_added = new ArrayList<>();
+    private final ArrayList<Entity> to_be_removed = new ArrayList<>();
+    private final ArrayList<Entity> to_be_added = new ArrayList<>();
 
     public static class Team implements IUnitTeam {
         protected final Color teamColor;
@@ -103,23 +103,23 @@ public class Game implements IGameControllerGamemode {
         }
 
         @Override
-        public synchronized ArrayList<Unit> getTeamUnits() {
+        public ArrayList<Unit> getTeamUnits() {
             return units;
         }
 
-        public synchronized boolean endedTurn(){return hasEndedItsTurn;}
+        public boolean endedTurn(){return hasEndedItsTurn;}
 
-        public synchronized void endTurn(){hasEndedItsTurn = true;}
+        public void endTurn(){hasEndedItsTurn = true;}
 
-        public synchronized void addUnit(Unit u){
+        public void addUnit(Unit u){
             to_be_added.add(u);
         }
 
-        public synchronized void rmUnit(Unit u){
+        public void rmUnit(Unit u){
             to_be_removed.add(u);
         }
 
-        public synchronized void update(){
+        public void update(){
             units.addAll(to_be_added);
             to_be_added.clear();
             units.removeAll(to_be_removed);
@@ -132,7 +132,7 @@ public class Game implements IGameControllerGamemode {
 
         protected int mp = 2;
 
-        public synchronized void setMilitaryPoints(int mp){
+        public void setMilitaryPoints(int mp){
             this.mp = mp;
         }
 
@@ -317,7 +317,6 @@ public class Game implements IGameControllerGamemode {
                 for (Team team : teams) {
                     team.hasEndedItsTurn = false;
                     for (Unit unit : team.getTeamUnits()) {
-                        unit.resetTurn();
                         unit.allTeamTurnUpdate();
                     }
                 }
@@ -339,7 +338,6 @@ public class Game implements IGameControllerGamemode {
         }
     }
 
-    @Override
     public synchronized void rmEntity(Entity entity) {
         to_be_removed.add(entity);
     }
@@ -377,7 +375,6 @@ public class Game implements IGameControllerGamemode {
         return attackTracker;
     }
 
-    @Override
     public synchronized ArrayList<Entity> getEntities(int x, int y) {
         ArrayList<Entity> ent_clone = this.getAllEntitiesCopy();
         ArrayList<Entity> ent = new ArrayList<>();
@@ -418,7 +415,6 @@ public class Game implements IGameControllerGamemode {
         return null;
     }
 
-    @Override
     public int getMapWidth() {
         if (getMapHeight() >= 1){
             return map.get(0).size();
@@ -426,7 +422,6 @@ public class Game implements IGameControllerGamemode {
         return 0;
     }
 
-    @Override
     public int getMapHeight() {
         return map.size();
     }
@@ -439,160 +434,5 @@ public class Game implements IGameControllerGamemode {
 
     public Team getVictoriousTeam(){
         return mode.getVictoriousTeam(this);
-    }
-
-    /***
-     * Thread safe Game class using lock
-     */
-    public class LockGame implements IGameController {
-
-        @Override
-        public void addEntity(Entity entity) {
-            try {
-                lock.lock();
-                Game.this.addEntity(entity);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public void rmEntity(Entity entity) {
-            try {
-                lock.lock();
-                Game.this.rmEntity(entity);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public ArrayList<Entity> getEntities(int x, int y) {
-            try {
-                lock.lock();
-                return Game.this.getEntities(x, y);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public MapObject getMapObject(int x, int y) {
-            return Game.this.getMapObject(x, y);
-        }
-
-        @Override
-        public ArrayList<Entity> getAllEntitiesCopy() {
-            try {
-                lock.lock();
-                return Game.this.getAllEntitiesCopy();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public ArrayList<Entity> getAllEntities() {
-            try{
-                lock.lock();
-                return Game.this.getAllEntities();
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public Team getUnitsTeam(Unit u) {
-            try{
-                lock.lock();
-                return Game.this.getUnitsTeam(u);
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public int getMapWidth() {
-            return Game.this.getMapHeight();
-        }
-
-        @Override
-        public int getMapHeight() {
-            return Game.this.getMapWidth();
-        }
-
-        @Override
-        public EventListenerRegistry getEvReg() {
-            try{
-                lock.lock();
-                return Game.this.getEvReg();
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public StandardNeutralTeam getNeutralTeam() {
-            try{
-                lock.lock();
-                return Game.this.getNeutralTeam();
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public UnitNameGen getUnitNameGen() {
-            try{
-                lock.lock();
-                return Game.this.getUnitNameGen();
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-
-        public ArrayList<ArrayList<MapObject>> getMap() {
-            return Game.this.map;
-        }
-
-        public ArrayList<Team> getTeams() {
-            try{
-                lock.lock();
-                return Game.this.getTeams();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        public Team getTeamDoingTurn() {
-            try {
-                lock.lock();
-                return Game.this.getTeamDoingTurn();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        public AttackTracker getAttackTracker(){
-            try{
-                lock.lock();
-                return Game.this.getAttackTracker();
-            }
-            finally {
-                lock.unlock();
-            }
-        }
-    }
-
-    /***
-     * Gets thread safe game
-     */
-    public LockGame getLockedGame(){
-        return new LockGame();
     }
 }

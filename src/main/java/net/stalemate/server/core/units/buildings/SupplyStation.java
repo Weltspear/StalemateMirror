@@ -26,13 +26,13 @@ import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
 
 public class SupplyStation extends Unit implements IBuilding, IConstructableBuilding {
-    public SupplyStation(int x, int y, IGameController game) {
+    public SupplyStation(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0, 0, 0), new AnimationController(), "Supply Station");
 
         Animation a = new Animation(5);
@@ -42,9 +42,9 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new Scrap());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new Scrap();
         return buttons;
     }
 

@@ -32,7 +32,7 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.communication.chat.Chat;
 import net.stalemate.server.core.communication.chat.Message;
 import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.map_system.MapLoader;
+import net.stalemate.server.core.mapsystem.MapLoader;
 import net.stalemate.server.core.minimap.AttackTracker;
 import net.stalemate.server.core.units.util.IBase;
 
@@ -387,8 +387,6 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 Map<String, Object> data_map = (objectMapper).readValue(json, Map.class);
                 ArrayList<Map<String, Object>> actions = (ArrayList<Map<String, Object>>) data_map.get("actions");
 
-                Game.LockGame lgame = game.getLockedGame();
-
                 int sel_x_tmp = (int) data_map.get("sel_x");
                 int sel_y_tmp = (int) data_map.get("sel_y");
 
@@ -434,7 +432,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         iselectorbuttonid = null;
                         selected_unit = null;
 
-                        ArrayList<Entity> entities = lgame.getEntities(selector_x, selector_y);
+                        ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
 
                         for (Entity entity : entities) {
                             if (entity instanceof Unit) {
@@ -453,7 +451,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                             if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                 for (Unit.IButton ibutton : selected_unit.getButtons()) {
                                     if (ibutton != null)
-                                    if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                    if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                         doActionIStandardButtonIfCorrect(params, ibutton);
                                     }
                                 }
@@ -461,7 +459,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                 if (selected_unit.getButtonsEnemy() != null) {
                                     for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
                                         if (ibutton != null)
-                                        if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                        if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                             doActionIStandardButtonIfCorrect(params, ibutton);
                                         }
                                     }
@@ -478,7 +476,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                             if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                 for (Unit.IButton ibutton : selected_unit.getButtons()) {
                                     if (ibutton != null)
-                                        if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                        if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                             prepareISelectorButton(params, ibutton);
                                         }
                                 }
@@ -486,7 +484,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                 if (selected_unit.getButtonsEnemy() != null) {
                                     for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
                                         if (ibutton != null)
-                                            if (lgame.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
+                                            if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
                                                 prepareISelectorButton(params, ibutton);
                                             }
                                     }
@@ -502,11 +500,11 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                         && team.getTeamUnits().contains(selected_unit));
                                 for (Unit.IButton button : isSelectedUnitEnemyTeam && selected_unit.getButtonsEnemy() != null ?
                                         selected_unit.getButtonsEnemy() : isSelectedUnitEnemyTeam
-                                        ? new ArrayList<Unit.IButton>() : selected_unit.getButtons() != null
-                                        ? selected_unit.getButtons() : new ArrayList<Unit.IButton>()) {
+                                        ? new Unit.IButton[9] : selected_unit.getButtons() != null
+                                        ? selected_unit.getButtons() : new Unit.IButton[9]) {
                                     if (button != null)
                                         if (button.identifier().equals(iselectorbuttonid)) {
-                                            if (lgame.getTeamDoingTurn() == team || button.canBeUsedWhenOtherTeamsTurn()) {
+                                            if (game.getTeamDoingTurn() == team || button.canBeUsedWhenOtherTeamsTurn()) {
                                                 if (button instanceof Unit.ISelectorButton) {
                                                     if (viewMode == getButtonViewMode(button))
                                                         if (selector_x >= 0 && selector_y >= 0) {
@@ -562,7 +560,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     }
 
                     else if (action.get("action").equals("EndTurn")) {
-                        if (lgame.getTeamDoingTurn() == team) {
+                        if (game.getTeamDoingTurn() == team) {
                             if (!team.endedTurn()) {
                                 team.endTurn();
                                 iselectorbuttonid = null;
@@ -668,14 +666,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             game.lock.lock();
             try {
                 if (game != null && team != null) {
-                    Game.LockGame lgame = game.getLockedGame();
 
                     // Create entity render
 
                     // Get entities in range of 40 tiles
                     ArrayList<Entity> entities_in_range = new ArrayList<>();
 
-                    for (Entity entity: lgame.getAllEntities()){
+                    for (Entity entity: game.getAllEntities()){
                         if (entity.getX() < cam_x + 40 && entity.getY() < cam_y + 40 &&
                             entity.getX() > cam_x - 40 && entity.getY() > cam_y - 40){
                             entities_in_range.add(entity);
@@ -686,7 +683,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     for (Entity entity: entities_in_range){
                         if (entity instanceof Unit u){
-                            if (lgame.getUnitsTeam(u) != team){
+                            if (game.getUnitsTeam(u) != team){
                                 enemy_units.add(u);
                             }
                         }
@@ -722,7 +719,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                             unit_data.put("type", "unit");
 
-                            Game.Team t = lgame.getUnitsTeam(unit);
+                            Game.Team t = game.getUnitsTeam(unit);
                             unit_data.put("rgb", t.getTeamColor().getRGB());
 
                             ArrayList<Integer> stats = new ArrayList<>();
@@ -810,7 +807,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         HashMap<String, Object> selected_unit_data = new HashMap<>();
                         selected_unit_data.put("properties", selected_unit.getProperties().serialize());
                         selected_unit_data.put("texture", selected_unit.getTextureFileName());
-                        selected_unit_data.put("rgb", lgame.getUnitsTeam(selected_unit).getTeamColor().getRGB());
+                        selected_unit_data.put("rgb", game.getUnitsTeam(selected_unit).getTeamColor().getRGB());
 
                         selected_unit_data.put("x", selected_unit.getX());
                         selected_unit_data.put("y", selected_unit.getY());
@@ -905,7 +902,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                     // AttackTracker
 
-                    AttackTracker attackTracker = lgame.getAttackTracker();
+                    AttackTracker attackTracker = game.getAttackTracker();
                     long hash = attackTracker.getCombatCoordsHash();
                     if (attackTracker.getCombatCoordsHash() != lastAttackTrackerHash){
                         lastAttackTrackerHash = hash;

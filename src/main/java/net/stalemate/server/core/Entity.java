@@ -18,7 +18,7 @@
 
 package net.stalemate.server.core;
 
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 /***
  * An object on the grid which can move
@@ -64,7 +64,7 @@ public abstract class Entity {
 
     protected int x;
     protected int y;
-    protected final IGameController game;
+    protected final Game game;
     protected boolean isInvisible = false;
 
     public boolean isInvisible() {
@@ -78,7 +78,7 @@ public abstract class Entity {
      */
     public abstract String getTextureFileName();
 
-    public Entity(int x, int y, IGameController game){
+    public Entity(int x, int y, Game game){
         this.x = x;
         this.y = y;
         this.game = game;

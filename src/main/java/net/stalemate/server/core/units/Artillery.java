@@ -25,16 +25,15 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
+public class Artillery extends Unit implements IMechanized, IUnitName {
     @SuppressWarnings("all")
     public static class ShellingButton implements ISelectorButton{
         private final int attack_range;
@@ -59,7 +58,7 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUn
         }
 
         @Override
-        public void action(int x, int y, Unit unit, IGameController gameController) {
+        public void action(int x, int y, Unit unit, Game gameController) {
             if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 5 > 0 && x != unit.getX() && y != unit.getY()) {
                 ArrayList<int[]> coords_to_hit = new ArrayList<>();
 
@@ -104,7 +103,7 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUn
         }
     }
 
-    public Artillery(int x, int y, IGameController game) {
+    public Artillery(int x, int y, Game game) {
         super(x, y, game, new UnitStats(5, 5, 4, 1, 3, 0, 15, 15, 0, 1, 2), new AnimationController(), "Artillery");
 
         Animation idle = new Animation(15);
@@ -123,45 +122,23 @@ public class Artillery extends Unit implements IMechanized, IUnitMoveAmount, IUn
         anim.setCurrentAnimation("idle");
 
         fog_of_war_range = 3;
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new AttackButton(attack_range));
-        buttons.add(new MoveButton(movement_range));
-        buttons.add(new MotorizeButton());
-        // buttons.add(new ShellingButton(attack_range));
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new AttackButton(attack_range);
+        buttons[1] = new MoveButton(movement_range);
+        buttons[2] = new MotorizeButton();
         return buttons;
-    }
-
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
     }
 
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

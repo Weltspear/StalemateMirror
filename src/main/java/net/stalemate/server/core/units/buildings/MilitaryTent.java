@@ -24,13 +24,13 @@ import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.units.*;
 import net.stalemate.server.core.units.util.IBase;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
 public class MilitaryTent extends AbstractFactoryBuilding implements IConstructableBuilding, IBase {
 
-    public MilitaryTent(int x, int y, IGameController game) {
+    public MilitaryTent(int x, int y, Game game) {
         super(x, y, game, new UnitStats(13, 13, 0, 0, 0, 0, -1, -1, 0, 0, 0), new AnimationController(), "Base");
 
         Animation idle = new Animation(1);
@@ -40,16 +40,12 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
+    public IButton[] getButtons() {
         boolean isProductionBlocked = checkForBlockage();
-        ArrayList<IButton> buttons = new ArrayList<>();
-
-        for (int i = 0; i < 9; i++){
-            buttons.add(null);
-        }
+        IButton[] buttons = new IButton[9];
 
         if (!isProductionBlocked){
-            buttons.set(0, new TrainButton(Infantry.class, 1, 1) {
+            buttons[0] = new TrainButton(Infantry.class, 1, 1) {
                 @Override
                 public String bind() {
                     return "I";
@@ -64,8 +60,8 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_infantry";
                 }
-            });
-            buttons.set(1, new TrainButton(Artillery.class, 1, 2) {
+            };
+            buttons[1] = new TrainButton(Artillery.class, 1, 2) {
                 @Override
                 public String bind() {
                     return "A";
@@ -80,8 +76,8 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_artillery";
                 }
-            });
-            buttons.set(2, new TrainButton(AntiTank.class, 2, 3) {
+            };
+            buttons[2] = new TrainButton(AntiTank.class, 2, 3) {
                 @Override
                 public String bind() {
                     return "T";
@@ -96,8 +92,8 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_anti_tank";
                 }
-            });
-            buttons.set(3, new TrainButton(EngineerUnit.class, 1, 1) {
+            };
+            buttons[3] = new TrainButton(EngineerUnit.class, 1, 1) {
                 @Override
                 public String bind() {
                     return "E";
@@ -112,8 +108,8 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_engineer_unit";
                 }
-            });
-            buttons.set(4, new TrainButton(MotorizedUnit.class, 1, 2) {
+            };
+            buttons[4] = new TrainButton(MotorizedUnit.class, 1, 2) {
                 @Override
                 public String bind() {
                     return "M";
@@ -128,8 +124,8 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_motorized_unit_unit";
                 }
-            });
-            buttons.set(5, new TrainButton(MachineGunner.class, 1, 3) {
+            };
+            buttons[5] = new TrainButton(MachineGunner.class, 1, 3) {
                 @Override
                 public String bind() {
                     return "G";
@@ -144,12 +140,12 @@ public class MilitaryTent extends AbstractFactoryBuilding implements IConstructa
                 public String identifier() {
                     return "button_train_machine_gunner";
                 }
-            });
+            };
         }
 
-        buttons.set(6, new DefaultCancelButton());
-        buttons.set(7, new DefaultChangeDeploymentPointButton());
-        buttons.set(8, new Scrap());
+        buttons[6] = new DefaultCancelButton();
+        buttons[7] = new DefaultChangeDeploymentPointButton();
+        buttons[8] = new Scrap();
 
         return buttons;
     }

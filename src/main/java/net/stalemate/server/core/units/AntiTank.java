@@ -24,16 +24,13 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
-import java.util.ArrayList;
-
-public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
-    public AntiTank(int x, int y, IGameController game) {
+public class AntiTank extends Unit implements IMechanized, IUnitName {
+    public AntiTank(int x, int y, Game game) {
         super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 18, 18, 0, 1, 2), new AnimationController(), "Anti-Tank");
 
         Animation idle = new Animation(2);
@@ -49,15 +46,18 @@ public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount, IUni
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
         anim.setCurrentAnimation("idle");
+
+        move_amount = 2;
+        turn_move_amount = 2;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<Unit.IButton> buttons = new ArrayList<>();
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
 
-        buttons.add((new AttackButton(attack_range)).enableAT());
-        buttons.add(new MoveButton(movement_range));
-        buttons.add(new MotorizeButton());
+        buttons[0] = (new AttackButton(attack_range)).enableAT();
+        buttons[1] = new MoveButton(movement_range);
+        buttons[2] = new MotorizeButton();
         return buttons;
     }
 
@@ -74,7 +74,6 @@ public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount, IUni
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, properties);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);
@@ -82,23 +81,6 @@ public class AntiTank extends Unit implements IMechanized, IUnitMoveAmount, IUni
 
         IUnitName.addNameProperty(uname, properties);
         return properties;
-    }
-
-    private int move_amount = 2;
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
     }
 
     @Override

@@ -19,7 +19,7 @@
 package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.Unit;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class ResupplyButton implements Unit.ISelectorButtonUnit {
     @Override
@@ -38,7 +38,7 @@ public class ResupplyButton implements Unit.ISelectorButtonUnit {
     }
 
     @Override
-    public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+    public void action(Unit selected_unit, Unit unit, Game gameController) {
         if (!unit.hasTurnEnded() && unit != selected_unit){
             int needed_supply = selected_unit.unitStats().getMaxSupply() - selected_unit.unitStats().getSupply();
             if (unit.getSupply() - needed_supply > 1){

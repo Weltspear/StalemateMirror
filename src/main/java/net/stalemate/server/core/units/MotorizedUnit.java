@@ -23,19 +23,14 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.ResupplyButton;
-import net.stalemate.server.core.buttons.util.IUnitMoveAmount;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
-import java.util.ArrayList;
+public class MotorizedUnit extends Unit implements IMechanized, IUnitName {
 
-public class MotorizedUnit extends Unit implements IMechanized, IUnitMoveAmount, IUnitName {
-
-    private int move_amount = 2;
-
-    public MotorizedUnit(int x, int y, IGameController game) {
+    public MotorizedUnit(int x, int y, Game game) {
         super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 40, 40, 0, 0, 0), new AnimationController(), "Supply Truck");
 
         Animation idle = new Animation(1);
@@ -45,41 +40,22 @@ public class MotorizedUnit extends Unit implements IMechanized, IUnitMoveAmount,
         anim.setCurrentAnimation("idle");
 
         fog_of_war_range = 3;
+
+        turn_move_amount = 2;
+        move_amount = 2;
     }
 
     @Override
-    public ArrayList<IButton> getButtons() {
-        ArrayList<IButton> buttons = new ArrayList<>();
-        buttons.add(new MoveButton(movement_range));
-        buttons.add(new ResupplyButton());
+    public IButton[] getButtons() {
+        IButton[] buttons = new IButton[9];
+        buttons[0] = new MoveButton(movement_range);
+        buttons[1] = new ResupplyButton();
         return buttons;
-    }
-
-    @Override
-    public void setMoveAmount(int m) {
-        move_amount = m;
-    }
-
-    @Override
-    public int getTurnMoveAmount() {
-        return 2;
-    }
-
-    @Override
-    public int getMoveAmount() {
-        return move_amount;
-    }
-
-    @Override
-    public void turnUpdate() {
-        super.turnUpdate();
-        setMoveAmount(getTurnMoveAmount());
     }
 
     @Override
     public Properties getProperties() {
         Properties p = super.getProperties();
-        IUnitMoveAmount.addMoveAmountProperty(move_amount, hasTurnEnded, p);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

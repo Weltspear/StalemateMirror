@@ -19,12 +19,19 @@
 package net.stalemate.server.core;
 
 public class MapObject {
-    public final String texture_file;
-    public final boolean isPassable;
+    private final String texture_file;
+    private final boolean isPassable;
 
-    public MapObject(String
-                     texture_file, boolean isPassable){
+    public MapObject(String texture_file, boolean isPassable){
         this.texture_file = texture_file;
         this.isPassable = isPassable;
+    }
+
+    public String getTexture() {
+        return texture_file;
+    }
+
+    public boolean isPassable() {
+        return isPassable;
     }
 }

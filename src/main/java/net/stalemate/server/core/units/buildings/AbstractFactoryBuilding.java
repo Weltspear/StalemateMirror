@@ -195,7 +195,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
                 if (!(y+deployment_y < game.getMapHeight()) || y+deployment_y < 0){
                     isBlocked = true;
                 }
-                if (!game.getMapObject(x+deployment_x, y+deployment_y).isPassable){
+                if (!game.getMapObject(x+deployment_x, y+deployment_y).isPassable()){
                     isBlocked = true;
                 }
 

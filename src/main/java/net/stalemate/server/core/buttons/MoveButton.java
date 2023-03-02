@@ -57,7 +57,7 @@ public class MoveButton implements Unit.ISelectorButton {
     public void action(int x, int y, Unit unit, Game gameController) {
         if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 1 > 0 && unit.getMoveAmount() > 0)
         if ((x != unit.getX()) || (y != unit.getY())) {
-            if (gameController.getMapObject(x, y).isPassable) {
+            if (gameController.getMapObject(x, y).isPassable()) {
                 boolean isPassable = true;
                 for (Entity entity : gameController.getEntities(x, y)) {
                     if (!entity.isPassable()

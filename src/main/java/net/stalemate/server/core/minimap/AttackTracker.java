@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * Used for minimap blinking.
  */
 public class AttackTracker implements EventListener {
-    ArrayList<int[]> combat_coords = new ArrayList<>();
+    private ArrayList<int[]> combat_coords = new ArrayList<>();
 
     @OnEvent(type = OnEvent.EventType.ON_UNIT_ATTACK)
     public void onAttack(Unit attacker, Unit attacked_unit){

@@ -36,9 +36,9 @@ import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Game {
-    final ArrayList<Entity> entities = new ArrayList<>();
-    ArrayList<ArrayList<MapObject>> map;
-    ArrayList<Team> teams;
+    private final ArrayList<Entity> entities = new ArrayList<>();
+    private final ArrayList<ArrayList<MapObject>> map;
+    private final ArrayList<Team> teams;
     final ArrayList<Team> already_assigned_teams = new ArrayList<>();
     private int team_doing_turn = 0;
     public ReentrantLock lock = new ReentrantLock();
@@ -70,8 +70,8 @@ public class Game {
         }
     }
 
-    final ArrayList<Entity> to_be_removed = new ArrayList<>();
-    final ArrayList<Entity> to_be_added = new ArrayList<>();
+    private final ArrayList<Entity> to_be_removed = new ArrayList<>();
+    private final ArrayList<Entity> to_be_added = new ArrayList<>();
 
     public static class Team implements IUnitTeam {
         protected final Color teamColor;
@@ -103,23 +103,23 @@ public class Game {
         }
 
         @Override
-        public synchronized ArrayList<Unit> getTeamUnits() {
+        public ArrayList<Unit> getTeamUnits() {
             return units;
         }
 
-        public synchronized boolean endedTurn(){return hasEndedItsTurn;}
+        public boolean endedTurn(){return hasEndedItsTurn;}
 
-        public synchronized void endTurn(){hasEndedItsTurn = true;}
+        public void endTurn(){hasEndedItsTurn = true;}
 
-        public synchronized void addUnit(Unit u){
+        public void addUnit(Unit u){
             to_be_added.add(u);
         }
 
-        public synchronized void rmUnit(Unit u){
+        public void rmUnit(Unit u){
             to_be_removed.add(u);
         }
 
-        public synchronized void update(){
+        public void update(){
             units.addAll(to_be_added);
             to_be_added.clear();
             units.removeAll(to_be_removed);
@@ -132,7 +132,7 @@ public class Game {
 
         protected int mp = 2;
 
-        public synchronized void setMilitaryPoints(int mp){
+        public void setMilitaryPoints(int mp){
             this.mp = mp;
         }
 

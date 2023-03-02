@@ -20,7 +20,7 @@ package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.units.MotorizedUnitOther;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class MotorizeButton implements Unit.IStandardButton {
     @Override
@@ -39,7 +39,7 @@ public class MotorizeButton implements Unit.IStandardButton {
     }
 
     @Override
-    public void action(Unit unit, IGameController gameController) {
+    public void action(Unit unit, Game gameController) {
         if (!unit.hasTurnEnded() && unit.getSupply()-3>0){
             unit.setSupply(unit.getSupply()-3);
             unit.setEntrenchment(0);

@@ -24,7 +24,7 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class MotorizedUnitOther extends Unit implements IUnitName {
     private final Unit contained_unit;
@@ -59,7 +59,7 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (!hasTurnEnded){
                 gameController.rmEntity(MotorizedUnitOther.this);
                 contained_unit.setHp(hp);
@@ -73,7 +73,7 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
         }
     }
 
-    public MotorizedUnitOther(int x, int y, IGameController game, Unit other) {
+    public MotorizedUnitOther(int x, int y, Game game, Unit other) {
         super(x, y, game, new UnitStats(other.getHp(), other.getMaxHp(), 0, 3,0,0,
                         other.getSupply(), other.getMaxSupply(),0, 0, 0), new AnimationController(), other.getName());
 

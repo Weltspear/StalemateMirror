@@ -24,7 +24,7 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
 
 import java.lang.reflect.InvocationTargetException;
@@ -70,11 +70,11 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (gameController.getUnitsTeam(AbstractFactoryBuilding.this).getMilitaryPoints() - cost >= 0) {
                 gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
                 try {
-                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, IGameController.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime);
+                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, Game.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -84,7 +84,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
     public abstract class CancelTrain implements IStandardButton{
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (AbstractFactoryBuilding.this.production_queue.size() > 0){
                 production_queue.removeLast();
             }
@@ -121,7 +121,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         }
 
         @Override
-        public void action(int x, int y, Unit unit, IGameController gameController) {
+        public void action(int x, int y, Unit unit, Game gameController) {
             if (x == AbstractFactoryBuilding.this.x && y == AbstractFactoryBuilding.this.y){
                 return;
             }
@@ -164,7 +164,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         }
     }
 
-    public AbstractFactoryBuilding(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
+    public AbstractFactoryBuilding(int x, int y, Game game, UnitStats unitStats, AnimationController anim, String name) {
         super(x, y, game, unitStats, anim, name);
         move_amount = -1;
     }

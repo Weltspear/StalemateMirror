@@ -26,8 +26,8 @@ import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.LightTank;
-import net.stalemate.server.core.util.IGameController;
-import net.stalemate.server.core.util.IGameControllerGamemode;
+import net.stalemate.server.core.controller.Game;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import java.util.HashMap;
 public class CaptureTheCity implements IGamemode {
     public static class RebelUnit extends Infantry {
 
-        public RebelUnit(int x, int y, IGameController game) {
+        public RebelUnit(int x, int y, Game game) {
             super(x, y, game);
             name = "Rebel";
         }
@@ -49,7 +49,7 @@ public class CaptureTheCity implements IGamemode {
         int capture_progress = 0;
         int turns_held_full_capture = 0;
 
-        public FlagEntity(int x, int y, IGameController game) {
+        public FlagEntity(int x, int y, Game game) {
             super(x, y, game);
             isInvisible = true;
         }
@@ -138,7 +138,7 @@ public class CaptureTheCity implements IGamemode {
     final ArrayList<RebelDeploymentPoint> dep_points = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
-    private void init(IGameControllerGamemode g){
+    private void init(Game g){
         isInited = true;
 
         HashMap<String, Object> params = g.getAparams();
@@ -158,7 +158,7 @@ public class CaptureTheCity implements IGamemode {
     }
 
     @Override
-    public void tick(IGameControllerGamemode g) {
+    public void tick(Game g) {
         if (!isInited){
             init(g);
         }
@@ -182,12 +182,12 @@ public class CaptureTheCity implements IGamemode {
     }
 
     @Override
-    public boolean hasGameEnded(IGameControllerGamemode g) {
+    public boolean hasGameEnded(Game g) {
         return false;
     }
 
     @Override
-    public Game.Team getVictoriousTeam(IGameControllerGamemode g) {
+    public Game.Team getVictoriousTeam(Game g) {
         return null;
     }
 

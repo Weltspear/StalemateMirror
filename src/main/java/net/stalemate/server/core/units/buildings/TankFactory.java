@@ -25,12 +25,12 @@ import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.LightTank;
 import net.stalemate.server.core.units.Tankette;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
 public class TankFactory extends AbstractFactoryBuilding implements IConstructableBuilding {
-    public TankFactory(int x, int y, IGameController game) {
+    public TankFactory(int x, int y, Game game) {
         super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, -1, -1, 1, 0, 0), new AnimationController(), "Tank Factory");
 
         Animation idle = new Animation(1);

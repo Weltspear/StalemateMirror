@@ -26,10 +26,10 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class HeavyTank extends Unit implements IMechanized, IUnitName {
-    public HeavyTank(int x, int y, IGameController game){
+    public HeavyTank(int x, int y, Game game){
         super(x, y, game, new Unit.UnitStats(20, 20, 1, 1, 3, 3, 21, 21, 1, 0, 0), new AnimationController(), "Heavy Tank");
 
         Animation idle = new Animation(2);

@@ -23,7 +23,7 @@ import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.buttons.util.Invulnerable;
 import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.util.IBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create more attack buttons for bombardment etc.
     protected final int attack_range;
@@ -72,7 +72,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
     }
 
     @Override
-    public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+    public void action(Unit selected_unit, Unit unit, Game gameController) {
         if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 2 > 0 && !(selected_unit instanceof Invulnerable)){
             if (selected_unit.unitStats().getHp() > 0){
                 unit.getAnimationController().setCurrentAnimation("attack");

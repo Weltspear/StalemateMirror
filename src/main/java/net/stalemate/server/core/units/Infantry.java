@@ -24,10 +24,10 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.*;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class Infantry extends Unit implements IUnitName{
-    public Infantry(int x, int y, IGameController game) {
+    public Infantry(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0, 1, 3), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/rifleman_idle_1.png");

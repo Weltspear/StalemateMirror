@@ -20,12 +20,12 @@ package net.stalemate.server.core.gamemode;
 
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.util.IGameControllerGamemode;
+import net.stalemate.server.core.controller.Game;
 
 public interface IGamemode {
-    void tick(IGameControllerGamemode g);
-    boolean hasGameEnded(IGameControllerGamemode g);
-    Game.Team getVictoriousTeam(IGameControllerGamemode g);
+    void tick(Game g);
+    boolean hasGameEnded(Game g);
+    Game.Team getVictoriousTeam(Game g);
     default Properties getProperties(){
         return new Properties();
     }

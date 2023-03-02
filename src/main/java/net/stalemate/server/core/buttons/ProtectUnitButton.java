@@ -20,7 +20,7 @@ package net.stalemate.server.core.buttons;
 
 import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Unit;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class ProtectUnitButton implements Unit.ISelectorButtonUnit{
     private final Unit.Layer l;
@@ -45,7 +45,7 @@ public class ProtectUnitButton implements Unit.ISelectorButtonUnit{
     }
 
     @Override
-    public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+    public void action(Unit selected_unit, Unit unit, Game gameController) {
         if (!unit.hasTurnEnded()){
             if (gameController.getUnitsTeam(selected_unit) == gameController.getUnitsTeam(unit)){
                 if (selected_unit.getProtector() == null){

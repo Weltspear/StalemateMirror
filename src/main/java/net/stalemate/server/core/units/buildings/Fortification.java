@@ -27,13 +27,13 @@ import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.util.IBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.util.PriorityTurnUpdate;
 
 public class Fortification extends Unit implements IBuilding, Unflippable, PriorityTurnUpdate, NoMoveAttack {
     private final Infantry unitInside;
 
-    public Fortification(int x, int y, IGameController game, Infantry unit) {
+    public Fortification(int x, int y, Game game, Infantry unit) {
         super(x, y, game, new UnitStats(15, 15, 2, 0, 2, 1, 30, 30, 2, 0, 0), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);

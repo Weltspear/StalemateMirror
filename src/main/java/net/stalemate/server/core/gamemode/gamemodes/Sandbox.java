@@ -19,22 +19,22 @@
 package net.stalemate.server.core.gamemode.gamemodes;
 
 import net.stalemate.server.core.gamemode.IGamemode;
-import net.stalemate.server.core.util.IGameControllerGamemode;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.controller.Game;
 
 public class Sandbox implements IGamemode {
     @Override
-    public void tick(IGameControllerGamemode g) {
+    public void tick(Game g) {
 
     }
 
     @Override
-    public boolean hasGameEnded(IGameControllerGamemode g) {
+    public boolean hasGameEnded(Game g) {
         return false;
     }
 
     @Override
-    public Game.Team getVictoriousTeam(IGameControllerGamemode g) {
+    public Game.Team getVictoriousTeam(Game g) {
         return null;
     }
 

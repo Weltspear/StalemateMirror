@@ -20,7 +20,7 @@ package net.stalemate.server.core;
 
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -147,7 +147,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * Button which needs a selection of x and y coordinates to work
      */
     public interface ISelectorButton extends IButton{
-        void action(int x, int y, Unit unit, IGameController gameController);
+        void action(int x, int y, Unit unit, Game gameController);
         int selector_range();
         String selector_texture();
 
@@ -160,7 +160,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * Button which needs a selection another unit to work
      */
     public interface ISelectorButtonUnit extends IButton{
-        void action(Unit selected_unit, Unit unit, IGameController gameController);
+        void action(Unit selected_unit, Unit unit, Game gameController);
         int selector_range();
         String selector_texture();
 
@@ -180,7 +180,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
      * @see ISelectorButton
      */
     public interface IStandardButton extends IButton{
-        void action(Unit unit, IGameController gameController);
+        void action(Unit unit, Game gameController);
     }
 
     /***
@@ -261,7 +261,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     /***
      * NOTE: If you don't want unit to have supply set <code>UnitStats.supply</code> to -1
      */
-    public Unit(int x, int y, IGameController game, UnitStats unitStats, AnimationController anim, String name) {
+    public Unit(int x, int y, Game game, UnitStats unitStats, AnimationController anim, String name) {
         super(x, y, game);
 
         this.anim = anim;

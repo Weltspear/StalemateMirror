@@ -28,7 +28,7 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -58,7 +58,7 @@ public class Artillery extends Unit implements IMechanized, IUnitName {
         }
 
         @Override
-        public void action(int x, int y, Unit unit, IGameController gameController) {
+        public void action(int x, int y, Unit unit, Game gameController) {
             if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 5 > 0 && x != unit.getX() && y != unit.getY()) {
                 ArrayList<int[]> coords_to_hit = new ArrayList<>();
 
@@ -103,7 +103,7 @@ public class Artillery extends Unit implements IMechanized, IUnitName {
         }
     }
 
-    public Artillery(int x, int y, IGameController game) {
+    public Artillery(int x, int y, Game game) {
         super(x, y, game, new UnitStats(5, 5, 4, 1, 3, 0, 15, 15, 0, 1, 2), new AnimationController(), "Artillery");
 
         Animation idle = new Animation(15);

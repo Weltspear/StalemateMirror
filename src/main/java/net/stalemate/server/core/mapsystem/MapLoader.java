@@ -34,7 +34,7 @@ import net.stalemate.server.core.units.*;
 import net.stalemate.server.core.units.buildings.Fortification;
 import net.stalemate.server.core.units.buildings.MilitaryTent;
 import net.stalemate.server.core.units.buildings.TankFactory;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.awt.*;
 import java.io.File;
@@ -52,15 +52,15 @@ public class MapLoader {
         private static final HashMap<String, Class<? extends Entity>> entity_registry = new HashMap<>();
 
         /***
-         * Add an Entity to registry with (int x, int y, IGameController g) constructor
+         * Add an Entity to registry with (int x, int y, Game g) constructor
          */
         public static void addEntity(String id, Class<? extends Entity> entity){
             entity_registry.put(id, entity);
         }
 
-        public static Entity constructEntity(String id, int x, int y, IGameController gameController){
+        public static Entity constructEntity(String id, int x, int y, Game gameController){
             try {
-                return entity_registry.get(id).getConstructor(new Class[] { int.class, int.class, IGameController.class}).newInstance(x, y, gameController);
+                return entity_registry.get(id).getConstructor(new Class[] { int.class, int.class, Game.class}).newInstance(x, y, gameController);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 e.printStackTrace();
                 return null;

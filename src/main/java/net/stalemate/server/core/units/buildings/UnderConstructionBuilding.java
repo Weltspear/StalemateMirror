@@ -22,7 +22,7 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
@@ -34,7 +34,7 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
     /***
      * @param outBuilding Building to be deployed. It has to have the same coordinates as this entity
      */
-    public UnderConstructionBuilding(int x, int y, IGameController g, Unit outBuilding, int constructionTime, AnimationController a) {
+    public UnderConstructionBuilding(int x, int y, Game g, Unit outBuilding, int constructionTime, AnimationController a) {
         super(x, y, g, new UnitStats(1, outBuilding.unitStats().getMaxHp(), 0, 0, 0, 0, 0, -1, 0, 0, 0), a, outBuilding.getName());
         this.outBuilding = outBuilding;
         this.constructionTime = constructionTime;

@@ -27,10 +27,10 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class AntiTank extends Unit implements IMechanized, IUnitName {
-    public AntiTank(int x, int y, IGameController game) {
+    public AntiTank(int x, int y, Game game) {
         super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 18, 18, 0, 1, 2), new AnimationController(), "Anti-Tank");
 
         Animation idle = new Animation(2);

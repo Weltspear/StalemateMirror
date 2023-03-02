@@ -24,13 +24,13 @@ import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.units.*;
 import net.stalemate.server.core.units.util.IBase;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.util.ArrayList;
 
 public class MilitaryTent extends AbstractFactoryBuilding implements IConstructableBuilding, IBase {
 
-    public MilitaryTent(int x, int y, IGameController game) {
+    public MilitaryTent(int x, int y, Game game) {
         super(x, y, game, new UnitStats(13, 13, 0, 0, 0, 0, -1, -1, 0, 0, 0), new AnimationController(), "Base");
 
         Animation idle = new Animation(1);

@@ -31,7 +31,7 @@ import net.stalemate.server.core.units.buildings.*;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -53,7 +53,7 @@ public class EngineerUnit extends Unit implements IUnitName{
         }
 
         @Override
-        public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+        public void action(Unit selected_unit, Unit unit, Game gameController) {
             if (unit.unitStats().getSupply() >= 14 && !unit.hasTurnEnded() && selected_unit != unit){
                 if (selected_unit instanceof IMechanized && selected_unit.unitStats().getMaxHp() != selected_unit.unitStats().getHp()){
                     selected_unit.setHp(selected_unit.getHp() + 3);
@@ -111,7 +111,7 @@ public class EngineerUnit extends Unit implements IUnitName{
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (unit instanceof EngineerUnit eu){
                 eu.isInBuildingMode = true;
             }
@@ -141,7 +141,7 @@ public class EngineerUnit extends Unit implements IUnitName{
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (unit instanceof EngineerUnit eu){
                 eu.isInBuildingMode = false;
             }
@@ -167,7 +167,7 @@ public class EngineerUnit extends Unit implements IUnitName{
         }
 
         @Override
-        public void action(int x, int y, Unit unit, IGameController gameController) {
+        public void action(int x, int y, Unit unit, Game gameController) {
             if (!unit.hasTurnEnded()) {
 
                 for (Entity entity : gameController.getEntities(x, y)) {
@@ -183,7 +183,7 @@ public class EngineerUnit extends Unit implements IUnitName{
                 Unit building = null;
 
                 try {
-                    building = b.getConstructor(int.class, int.class, IGameController.class).newInstance(x, y, gameController);
+                    building = b.getConstructor(int.class, int.class, Game.class).newInstance(x, y, gameController);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -219,7 +219,7 @@ public class EngineerUnit extends Unit implements IUnitName{
 
     private boolean isInBuildingMode = false;
 
-    public EngineerUnit(int x, int y, IGameController game) {
+    public EngineerUnit(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 1, 0, 20, 20, 0, 0, 0), new AnimationController(), "Engineer");
 
         Animation idle = new Animation(20);

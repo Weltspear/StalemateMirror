@@ -26,11 +26,11 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class Tankette extends Unit implements IMechanized, IUnitName {
 
-    public Tankette(int x, int y, IGameController game) {
+    public Tankette(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 2, 2, 1, 20, 20, 1, 0, 0), new AnimationController(), "Tankette");
         Animation idle = new Animation(20);
         idle.addFrame("assets/units/tankette_idle.png");

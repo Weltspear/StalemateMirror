@@ -28,7 +28,7 @@ import net.stalemate.server.core.buttons.RecoverButton;
 import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class MachineGunner extends Unit implements NoMoveAttack, IUnitName {
 
@@ -51,7 +51,7 @@ public class MachineGunner extends Unit implements NoMoveAttack, IUnitName {
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (!hasTurnEnded){
                 mode = true;
                 attack_range--;
@@ -77,7 +77,7 @@ public class MachineGunner extends Unit implements NoMoveAttack, IUnitName {
         }
 
         @Override
-        public void action(Unit unit, IGameController gameController) {
+        public void action(Unit unit, Game gameController) {
             if (!hasTurnEnded){
                 mode = false;
                 attack_range++;
@@ -86,7 +86,7 @@ public class MachineGunner extends Unit implements NoMoveAttack, IUnitName {
         }
     }
 
-    public MachineGunner(int x, int y, IGameController game) {
+    public MachineGunner(int x, int y, Game game) {
         super(x, y, game, new UnitStats(12, 12, 1, 1, 3, 0, 20, 20, 0, 1, 2), new AnimationController(), "Heavy Infantry");
 
         Animation idle = new Animation(20);

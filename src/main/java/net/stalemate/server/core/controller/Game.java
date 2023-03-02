@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Game implements IGameControllerGamemode {
+public class Game {
     final ArrayList<Entity> entities = new ArrayList<>();
     ArrayList<ArrayList<MapObject>> map;
     ArrayList<Team> teams;
@@ -338,7 +338,6 @@ public class Game implements IGameControllerGamemode {
         }
     }
 
-    @Override
     public synchronized void rmEntity(Entity entity) {
         to_be_removed.add(entity);
     }
@@ -376,7 +375,6 @@ public class Game implements IGameControllerGamemode {
         return attackTracker;
     }
 
-    @Override
     public synchronized ArrayList<Entity> getEntities(int x, int y) {
         ArrayList<Entity> ent_clone = this.getAllEntitiesCopy();
         ArrayList<Entity> ent = new ArrayList<>();
@@ -417,7 +415,6 @@ public class Game implements IGameControllerGamemode {
         return null;
     }
 
-    @Override
     public int getMapWidth() {
         if (getMapHeight() >= 1){
             return map.get(0).size();
@@ -425,7 +422,6 @@ public class Game implements IGameControllerGamemode {
         return 0;
     }
 
-    @Override
     public int getMapHeight() {
         return map.size();
     }

@@ -25,7 +25,7 @@ import net.stalemate.server.core.buttons.util.Unflippable;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
         }
 
         @Override
-        public void action(Unit selected_unit, Unit unit, IGameController gameController) {
+        public void action(Unit selected_unit, Unit unit, Game gameController) {
             if (!selected_unit.hasTurnEnded() && selected_unit instanceof Infantry selected_unit_i){
                 gameController.rmEntity(unit);
                 gameController.rmEntity(selected_unit);
@@ -87,7 +87,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
         }
     }
 
-    public FortificationEmpty(int x, int y, IGameController game) {
+    public FortificationEmpty(int x, int y, Game game) {
         super(x, y, game, new UnitStats(15, 15, 0, 0, 0, 0, 0, -1, 2, 0, 0), new AnimationController(), "Fortification");
 
         Animation idle = new Animation(1);

@@ -22,7 +22,7 @@ import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.buttons.util.Unflippable;
-import net.stalemate.server.core.util.IGameController;
+import net.stalemate.server.core.controller.Game;
 
 public class MoveButton implements Unit.ISelectorButton {
     private final int move_range;
@@ -54,7 +54,7 @@ public class MoveButton implements Unit.ISelectorButton {
     }
 
     @Override
-    public void action(int x, int y, Unit unit, IGameController gameController) {
+    public void action(int x, int y, Unit unit, Game gameController) {
         if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 1 > 0 && unit.getMoveAmount() > 0)
         if ((x != unit.getX()) || (y != unit.getY())) {
             if (gameController.getMapObject(x, y).isPassable) {

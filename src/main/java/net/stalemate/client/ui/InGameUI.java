@@ -232,7 +232,7 @@ public class InGameUI extends JPanel {
                         }
                     }
                 } else {
-                    if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?".contains(String.valueOf(e.getKeyChar()))) {
+                    if (" qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM<>=-()[]{}\"';:.,1234567890@#$%^&*/\\?_".contains(String.valueOf(e.getKeyChar()))) {
                         currentMSG += String.valueOf(e.getKeyChar());
                     } else if (e.getKeyCode() == KeyboardBindMapper.escape) {
                         currentMSG = "";
@@ -1396,7 +1396,11 @@ public class InGameUI extends JPanel {
                             g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
                         }
                         String m = "[Chat]: " + in_client.getCurrentMSG();
+
+                        int offset_rect = g.getFontMetrics().stringWidth(m);
                         g.drawString(m, 500, 383 - 40);
+
+                        g.fillRect(500+offset_rect, 343-g.getFontMetrics().getHeight()+2, g.getFontMetrics().stringWidth(" "), g.getFontMetrics().getHeight());
                     }
 
                 // Render chat

@@ -78,6 +78,7 @@ public class Game {
         protected final ArrayList<Unit> units = new ArrayList<>();
         protected final ArrayList<Unit> to_be_added = new ArrayList<>();
         protected final ArrayList<Unit> to_be_removed = new ArrayList<>();
+        protected String teamName;
         protected final boolean isTeamUncontrolled;
         protected boolean hasEndedItsTurn = false;
         protected EntryTable additional_params = new EntryTable();
@@ -159,6 +160,14 @@ public class Game {
             }
             return uc;
         }
+
+        public String getTeamName() {
+            return teamName;
+        }
+
+        public void setTeamName(String teamName) {
+            this.teamName = teamName;
+        }
     }
 
     /***
@@ -168,6 +177,7 @@ public class Game {
         public NeutralTeam(Color c) {
             super(c);
             AUTO_SKIP_TURN = true;
+            teamName = "neutral";
         }
     }
 

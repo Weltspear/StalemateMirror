@@ -18,6 +18,7 @@
 
 package net.stalemate.server;
 
+import net.stalemate.server.lobby_management.Lobby;
 import net.stalemate.server.lobby_management.LobbyHandler;
 
 import java.net.ServerSocket;
@@ -41,6 +42,12 @@ public class Server {
     @SuppressWarnings("all")
     public void start_server(){
         LOGGER.log(Level.INFO, "Stalemate Lobby Server");
+
+        if (Lobby.DEBUG){
+            LOGGER.log(Level.WARNING, "Stalemate server running in debug mode");
+            LOGGER.log(Level.WARNING, "Players can see each other's units despite fog of war");
+            LOGGER.log(Level.WARNING, "Chat commands enabled");
+        }
 
         boolean result = ServerDescription.loadDesc();
         if (!result)

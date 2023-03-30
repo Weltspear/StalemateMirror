@@ -27,7 +27,7 @@ import static net.stalemate.log.MakeLog.makeLog;
 
 public class Chat {
     private final ArrayList<Message> chat = new ArrayList<>();
-    private final ReentrantLock lock = new ReentrantLock();
+    protected final ReentrantLock lock = new ReentrantLock();
     private static final Logger LOGGER = makeLog(Logger.getLogger(Chat.class.getSimpleName()));
 
     public Chat(){
@@ -58,6 +58,10 @@ public class Chat {
                         if (i == 0 && chat.size() == 0) {
                             break;
                         }
+                    }
+                    if (!(i < chat.size()))
+                    {
+                        continue;
                     }
                     c1.add(chat.get(i).read());
                 }

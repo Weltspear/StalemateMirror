@@ -30,6 +30,7 @@ import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.communication.chat.Chat;
+import net.stalemate.server.core.communication.chat.DebugChat;
 import net.stalemate.server.core.communication.chat.Message;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.mapsystem.MapLoader;
@@ -53,6 +54,8 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
     final ArrayList<String> next_maps;
     int current_next_map = 0;
+
+    public static boolean DEBUG = false;
 
     public int getMaxPlayerCount() {
         try {
@@ -83,6 +86,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         lobby_lock.lock();
 
         chat = new Chat();
+        if (DEBUG){
+            chat = new DebugChat(this);
+        }
         game = MapLoader.load(map_path);
         max_player_count = MapLoader.getMapPlayerCount(map_path);
         players = new ArrayList<>();
@@ -118,6 +124,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         for (Player player: players){
             Game.Team t = game.getUnassignedTeam();
             player.setTeam(t);
+            t.setTeamName(player.nickname);
 
             for (Unit u: t.getTeamUnits()){
                 if (u instanceof IBase){
@@ -679,36 +686,38 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         }
                     }
 
-                    ArrayList<Unit> enemy_units = new ArrayList<>();
+                    if (!DEBUG) {
+                        ArrayList<Unit> enemy_units = new ArrayList<>();
 
-                    for (Entity entity: entities_in_range){
-                        if (entity instanceof Unit u){
-                            if (game.getUnitsTeam(u) != team){
-                                enemy_units.add(u);
-                            }
-                        }
-                    }
-
-                    // Remove enemy units outside that range
-                    entities_in_range.removeAll(enemy_units);
-
-                    ArrayList<Entity> schedule_add = new ArrayList<>();
-
-                    for (Unit enemy: enemy_units){
-                        for (Entity entity: entities_in_range){
-                            if (entity instanceof Unit unit){
-                                 if (unit.getX() - unit.getFogOfWarRange() <= enemy.getX() &&
-                                    unit.getX() + unit.getFogOfWarRange() >= enemy.getX() &&
-                                        unit.getY() - unit.getFogOfWarRange() <= enemy.getY() &&
-                                        unit.getY() + unit.getFogOfWarRange() >= enemy.getY()){
-                                    schedule_add.add(enemy);
-                                    break;
+                        for (Entity entity : entities_in_range) {
+                            if (entity instanceof Unit u) {
+                                if (game.getUnitsTeam(u) != team) {
+                                    enemy_units.add(u);
                                 }
                             }
                         }
-                    }
 
-                    entities_in_range.addAll(schedule_add);
+                        // Remove enemy units outside that range
+                        entities_in_range.removeAll(enemy_units);
+
+                        ArrayList<Entity> schedule_add = new ArrayList<>();
+
+                        for (Unit enemy : enemy_units) {
+                            for (Entity entity : entities_in_range) {
+                                if (entity instanceof Unit unit) {
+                                    if (unit.getX() - unit.getFogOfWarRange() <= enemy.getX() &&
+                                            unit.getX() + unit.getFogOfWarRange() >= enemy.getX() &&
+                                            unit.getY() - unit.getFogOfWarRange() <= enemy.getY() &&
+                                            unit.getY() + unit.getFogOfWarRange() >= enemy.getY()) {
+                                        schedule_add.add(enemy);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        entities_in_range.addAll(schedule_add);
+                    }
 
                     // Put data into HashMap
                     ArrayList<HashMap<String, Object>> entity_data = new ArrayList<>();
@@ -1082,4 +1091,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
     }
 
+    public Game getGame() {
+        return game;
+    }
 }

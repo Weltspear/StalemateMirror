@@ -18,10 +18,11 @@
 
 package net.stalemate;
 
+import net.stalemate.client.AssetLoader;
 import net.stalemate.client.SpecialTeamReprReg;
 import net.stalemate.client.ui.MainMenu;
-import net.stalemate.client.AssetLoader;
 import net.stalemate.server.Server;
+import net.stalemate.server.lobby_management.Lobby;
 
 import java.awt.*;
 import java.io.File;
@@ -35,6 +36,11 @@ public class Main {
 
         if (args.length > 0){
             if (args[0].equals("--serv")){
+                if (args.length > 1){
+                    if (args[1].equals("--dbg")){
+                        Lobby.DEBUG = true;
+                    }
+                }
                 Server server = new Server();
                 server.start_server();
             }

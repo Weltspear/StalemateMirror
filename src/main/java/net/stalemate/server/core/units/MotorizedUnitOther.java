@@ -66,7 +66,6 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
                 contained_unit.setSupply(supply);
                 contained_unit.setX(x);
                 contained_unit.setY(y);
-                contained_unit.endTurn();
                 gameController.addEntity(contained_unit);
                 MotorizedUnitOther.this.setHp(-1);
             }

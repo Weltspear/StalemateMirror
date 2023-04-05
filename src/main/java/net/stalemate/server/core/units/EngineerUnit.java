@@ -28,6 +28,7 @@ import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.buttons.RecoverButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.buildings.*;
+import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.units.util.IMechanized;
 import net.stalemate.server.core.units.util.IUnitName;
@@ -55,10 +56,10 @@ public class EngineerUnit extends Unit implements IUnitName{
         @Override
         public void action(Unit selected_unit, Unit unit, Game gameController) {
             if (unit.unitStats().getSupply() >= 14 && !unit.hasTurnEnded() && selected_unit != unit){
-                if (selected_unit instanceof IMechanized && selected_unit.unitStats().getMaxHp() != selected_unit.unitStats().getHp()){
+                if ((selected_unit instanceof IMechanized || selected_unit instanceof IBuilding) && selected_unit.unitStats().getMaxHp() != selected_unit.unitStats().getHp()){
                     selected_unit.setHp(selected_unit.getHp() + 3);
                     if (selected_unit.unitStats().getHp() > selected_unit.unitStats().getMaxHp()){
-                        selected_unit.setHp(selected_unit.unitStats().getHp() - selected_unit.unitStats().getMaxHp());
+                        selected_unit.setHp(selected_unit.unitStats().getMaxHp());
                     }
                     unit.endTurn();
                     unit.consumeSupply(4);

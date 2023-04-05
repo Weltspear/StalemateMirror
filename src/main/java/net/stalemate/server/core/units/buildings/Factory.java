@@ -36,6 +36,7 @@ public class Factory extends Unit implements IBuilding, IConstructableBuilding {
         idle.addFrame("assets/units/factory.png");
         anim.addAnimation("idle", idle);
         anim.setCurrentAnimation("idle");
+        this.move_amount = -1;
     }
 
     @Override

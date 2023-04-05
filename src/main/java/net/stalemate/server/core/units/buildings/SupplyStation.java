@@ -39,6 +39,7 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
         a.addFrame("assets/units/supply_station.png");
         anim.addAnimation("idle", a);
         anim.setCurrentAnimation("idle");
+        this.move_amount = -1;
     }
 
     @Override

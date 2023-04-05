@@ -74,6 +74,11 @@ public class AntiTank extends Unit implements IMechanized, IUnitName {
 
         properties.put("atk_range", "" + this.unitStats().getAttackRange());
         properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        properties.put("move_amount", String.valueOf(move_amount));
+
+        properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
+        if (this.entrenchment > 0)
+            properties.put("et", "" + this.entrenchment);
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);

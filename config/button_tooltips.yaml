@@ -40,6 +40,7 @@ tooltips:
   button_train_light_tank: 'Trains Light Tank<br>Production time: 2<br><p color=green>(0/0/3)</p>'
   button_train_tankette: 'Trains Tankette<br>Production time: 2<br><p color=green>(0/0/2)</p>'
   button_train_heavy_tank: 'Trains Heavy Tank<br>Production time: 2<br><p color=green>(0/0/3)</p>'
+  button_train_sp_artillery: 'Trains SP Artillery<br>Production time: 2<br><p color=green>(0/0/3)</p>'
 
   # For old server
   button_produce_light_tank: 'Trains Light Tank<br>Production time: 4<br><p color=green>(0/0/6)</p>'

@@ -23,6 +23,7 @@ import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.Scrap;
 import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.LightTank;
+import net.stalemate.server.core.units.SelfPropelledArtillery;
 import net.stalemate.server.core.units.Tankette;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import net.stalemate.server.core.controller.Game;
@@ -91,6 +92,22 @@ public class TankFactory extends AbstractFactoryBuilding implements IConstructab
                 @Override
                 public String identifier() {
                     return "button_train_heavy_tank";
+                }
+            };
+            buttons[3] = new TrainButton(SelfPropelledArtillery.class, 2, 3) {
+                @Override
+                public String bind() {
+                    return "A";
+                }
+
+                @Override
+                public String texture() {
+                    return "assets/ui/buttons/train_sp_artillery.png";
+                }
+
+                @Override
+                public String identifier() {
+                    return "button_train_sp_artillery";
                 }
             };
         }

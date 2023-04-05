@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 public class SupplyStation extends Unit implements IBuilding, IConstructableBuilding {
     public SupplyStation(int x, int y, Game game) {
-        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 30, 0, 0, 0), new AnimationController(), "Supply Station");
+        super(x, y, game, new UnitStats(10, 10, 0, 0, 0, 0, 0, 40, 0, 0, 0), new AnimationController(), "Supply Station");
 
         Animation a = new Animation(5);
         a.addFrame("assets/units/supply_station.png");
@@ -62,7 +62,7 @@ public class SupplyStation extends Unit implements IBuilding, IConstructableBuil
     public void turnUpdate() {
         super.turnUpdate();
 
-        supply+=7;
+        supply+=8;
         if (supply > max_supply){
             supply = max_supply;
         }

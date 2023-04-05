@@ -31,7 +31,7 @@ import net.stalemate.server.core.controller.Game;
 public class MotorizedUnit extends Unit implements IMechanized, IUnitName {
 
     public MotorizedUnit(int x, int y, Game game) {
-        super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 40, 40, 0, 0, 0), new AnimationController(), "Supply Truck");
+        super(x, y, game, new UnitStats(5, 5, 0, 3, 0, 0, 25, 30, 0, 0, 0), new AnimationController(), "Supply Truck");
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");

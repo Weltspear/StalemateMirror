@@ -34,19 +34,21 @@ import java.util.ArrayDeque;
  * This building produces other units
  */
 public abstract class AbstractFactoryBuilding extends Unit implements IBuilding, PriorityTurnUpdate {
-    public static class UnitProductionTime{
+    public static class UnitProduction {
         public final Unit unit;
         public int time_in_production;
+        public final int cost;
 
-        public UnitProductionTime(Unit unit, int time_in_production){
+        public UnitProduction(Unit unit, int time_in_production, int cost){
             this.unit = unit;
             this.time_in_production = time_in_production;
+            this.cost = cost;
         }
 
     }
 
-    final ArrayDeque<UnitProductionTime> production_queue = new ArrayDeque<>();
-    UnitProductionTime currently_processed_unit = null;
+    final ArrayDeque<UnitProduction> production_queue = new ArrayDeque<>();
+    UnitProduction currently_processed_unit = null;
 
     protected int deployment_x = 1;
     protected int deployment_y = 0;
@@ -71,10 +73,11 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
         @Override
         public void action(Unit unit, Game gameController) {
+            if (production_queue.size() != 8)
             if (gameController.getUnitsTeam(AbstractFactoryBuilding.this).getMilitaryPoints() - cost >= 0) {
                 gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
                 try {
-                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, Game.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime);
+                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, Game.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime, cost);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -86,9 +89,12 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         @Override
         public void action(Unit unit, Game gameController) {
             if (AbstractFactoryBuilding.this.production_queue.size() > 0){
-                production_queue.removeLast();
+                UnitProduction uproduction = production_queue.removeLast();
+                gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() + uproduction.cost);
             }
             else if (AbstractFactoryBuilding.this.currently_processed_unit != null){
+                UnitProduction uproduction = AbstractFactoryBuilding.this.currently_processed_unit;
+                gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() + uproduction.cost);
                 AbstractFactoryBuilding.this.currently_processed_unit = null;
             }
         }
@@ -169,9 +175,9 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         move_amount = -1;
     }
 
-    public void addUnitToQueue(Unit unit, int production_time){
+    public void addUnitToQueue(Unit unit, int production_time, int cost){
         if (production_queue.size() != 8) {
-            production_queue.add(new UnitProductionTime(unit, production_time));
+            production_queue.add(new UnitProduction(unit, production_time, cost));
         }
     }
 
@@ -250,7 +256,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         if (currently_processed_unit != null){
             queue.addQueueMember(new UnitQueue.QueueMember(currently_processed_unit.unit.getTextureFileName(), currently_processed_unit.time_in_production));
         }
-        for (UnitProductionTime upt: production_queue) {
+        for (UnitProduction upt: production_queue) {
             queue.addQueueMember(new UnitQueue.QueueMember(upt.unit.getTextureFileName(), upt.time_in_production));
         }
 

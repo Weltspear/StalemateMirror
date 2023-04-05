@@ -16,26 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.server.core.gamemode;
+package net.stalemate.singleplayer;
 
-import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.controller.Game;
-
-public interface IGamemode {
-    void tick(Game g);
-    boolean hasGameEnded(Game g);
-    Game.Team getVictoriousTeam(Game g);
-    default Properties getProperties(){
-        return new Properties();
-    }
-    String gmName();
-
-    default void onTurnEnd(){
-
-    }
-
-    default boolean isSingleplayerExclusive(){
-        return false;
-    }
+public interface AITurn {
+    void doTurn();
 }

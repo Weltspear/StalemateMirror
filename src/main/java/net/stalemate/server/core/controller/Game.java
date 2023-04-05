@@ -331,6 +331,7 @@ public class Game {
                     }
                 }
                 team_doing_turn = 0;
+                mode.onTurnEnd();
             }
             try {
                 Thread.sleep(3);

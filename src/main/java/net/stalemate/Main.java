@@ -23,6 +23,7 @@ import net.stalemate.client.SpecialTeamReprReg;
 import net.stalemate.client.ui.MainMenu;
 import net.stalemate.server.Server;
 import net.stalemate.server.lobby_management.Lobby;
+import net.stalemate.singleplayer.SingleplayerGame;
 
 import java.awt.*;
 import java.io.File;
@@ -43,6 +44,18 @@ public class Main {
                 }
                 Server server = new Server();
                 server.start_server();
+            }
+            if (args[0].equals("--singleplayer")){
+                Lobby.DEBUG = true;
+                AssetLoader.loadAll();
+                SpecialTeamReprReg.makeAll();
+
+                GraphicsEnvironment ge =
+                        GraphicsEnvironment.getLocalGraphicsEnvironment();
+                ge.registerFont(AssetLoader.getMonogram());
+
+                SingleplayerGame game = new SingleplayerGame("maps/fort_default_21x21.json");
+                game.startGame();
             }
         }
         else {

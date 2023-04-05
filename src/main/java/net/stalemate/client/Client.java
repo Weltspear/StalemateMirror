@@ -301,6 +301,14 @@ public class Client {
             return null;
         }
 
+        public int getSelX() {
+            return sel_x;
+        }
+
+        public int getSelY() {
+            return sel_y;
+        }
+
     }
 
     public Expect<Integer, ?> start_client(){

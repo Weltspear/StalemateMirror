@@ -28,13 +28,13 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.gamemodes.CaptureTheCity;
+import net.stalemate.server.core.gamemode.gamemodes.Fortress;
 import net.stalemate.server.core.gamemode.gamemodes.Sandbox;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
 import net.stalemate.server.core.units.*;
 import net.stalemate.server.core.units.buildings.Fortification;
 import net.stalemate.server.core.units.buildings.MilitaryTent;
 import net.stalemate.server.core.units.buildings.TankFactory;
-import net.stalemate.server.core.controller.Game;
 
 import java.awt.*;
 import java.io.File;
@@ -104,6 +104,7 @@ public class MapLoader {
         GamemodeRegistry.addGamemode("versus", Versus.class);
         GamemodeRegistry.addGamemode("dev", Sandbox.class);
         GamemodeRegistry.addGamemode("ctc", CaptureTheCity.class);
+        GamemodeRegistry.addGamemode("fortress", Fortress.class);
     }
 
     @SuppressWarnings("unchecked")

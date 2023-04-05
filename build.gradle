@@ -114,6 +114,14 @@ task runServer(type: JavaExec) {
     args("--serv")
 }
 
+task runSingleplayer(type: JavaExec) {
+    dependsOn(build)
+    group("run-stalemate")
+    classpath sourceSets.main.runtimeClasspath
+    main = "net.stalemate.Main"
+    args("--singleplayer")
+}
+
 task runServerDbg(type: JavaExec) {
     dependsOn(build)
     group("run-stalemate")

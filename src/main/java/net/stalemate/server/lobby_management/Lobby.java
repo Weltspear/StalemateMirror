@@ -46,14 +46,14 @@ import java.util.logging.Logger;
 import static net.stalemate.log.MakeLog.makeLog;
 
 public class Lobby implements Runnable{ // todo add more locks if necessary
-    Game game;
-    ArrayList<Player> players = new ArrayList<>();
-    private int max_player_count = 2;
-    Chat chat;
-    private final Semaphore playerWaitSemaphore = new Semaphore(0);
+    protected Game game;
+    protected ArrayList<Player> players = new ArrayList<>();
+    protected int max_player_count = 2;
+    protected Chat chat;
+    protected final Semaphore playerWaitSemaphore = new Semaphore(0);
 
-    final ArrayList<String> next_maps;
-    int current_next_map = 0;
+    protected ArrayList<String> next_maps;
+    protected int current_next_map = 0;
 
     public static boolean DEBUG = false;
 
@@ -74,13 +74,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
     }
 
-    String map_path;
-    String map_name = "default";
-    String game_mode = "Versus";
+    protected String map_path;
+    protected String map_name = "default";
+    protected String game_mode = "Versus";
 
     private static final Logger LOGGER = makeLog(Logger.getLogger(Lobby.class.getSimpleName()));
 
-    private final ReentrantLock lobby_lock = new ReentrantLock();
+    protected final ReentrantLock lobby_lock = new ReentrantLock();
 
     public void resetLobby(){
         lobby_lock.lock();
@@ -109,6 +109,14 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
     public void lbstart(){
         LOGGER.log(Level.INFO,"Lobby started!");
         printStatus();
+
+        game.lock.lock();
+
+        if (game.getMode().isSingleplayerExclusive()){
+            throw new RuntimeException("Cannot launch a multiplayer game on a map which uses singleplayer exclusive gamemode");
+        }
+
+        game.lock.unlock();
 
         // Waiting for players
         try {
@@ -248,6 +256,10 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         private Chat chat;
 
         private long lastAttackTrackerHash = -1;
+
+        public String getNickname() {
+            return nickname;
+        }
 
         String nickname;
 

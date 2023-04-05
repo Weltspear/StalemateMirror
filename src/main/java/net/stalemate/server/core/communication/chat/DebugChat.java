@@ -19,6 +19,7 @@
 package net.stalemate.server.core.communication.chat;
 
 import net.stalemate.server.core.controller.Game;
+import net.stalemate.server.core.gamemode.gamemodes.Fortress;
 import net.stalemate.server.lobby_management.Lobby;
 
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public class DebugChat extends Chat{
                     }
                     g.lock.unlock();
                 }
-                if (command[0].equals("me")) {
+                else if (command[0].equals("me")) {
                     Game g = lobby.getGame();
                     g.lock.lock();
                     for (Game.Team t : g.getTeams()) {
@@ -68,13 +69,22 @@ public class DebugChat extends Chat{
                     }
                     g.lock.unlock();
                 }
-                if (command[0].equals("help")) {
+                else if (command[0].equals("fortressinfo")) {
+                    Game g = lobby.getGame();
+                    g.lock.lock();
+                    if (g.getMode() instanceof Fortress fortress){
+                        consoleMsg(fortress.fortressInfo());
+                    }
+                    g.lock.unlock();
+                }
+                else if (command[0].equals("help")) {
                     consoleMsg("/help - shows this message");
                     consoleMsg("/set_team <x> - sets player's console current team");
                     consoleMsg("/me - sets player's console current team to his own");
                     consoleMsg("/list_teams - sets player's console current team");
                     consoleMsg("/mp <x> - sets mp of player's console current team t");
                     consoleMsg("o x");
+                    consoleMsg("/fortressinfo - shows info about current fortress game");
                 }
             }
 
@@ -100,7 +110,7 @@ public class DebugChat extends Chat{
                     }
                     g.lock.unlock();
                 }
-                if (command[0].equals("mp")) {
+                else if (command[0].equals("mp")) {
                     Game g = lobby.getGame();
                     g.lock.lock();
 

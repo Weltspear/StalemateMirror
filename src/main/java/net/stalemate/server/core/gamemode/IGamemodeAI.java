@@ -19,23 +19,13 @@
 package net.stalemate.server.core.gamemode;
 
 import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.properties.Properties;
-import net.stalemate.server.core.controller.Game;
+import net.stalemate.singleplayer.AITurn;
 
-public interface IGamemode {
-    void tick(Game g);
-    boolean hasGameEnded(Game g);
-    Game.Team getVictoriousTeam(Game g);
-    default Properties getProperties(){
-        return new Properties();
-    }
-    String gmName();
+/***
+ * If a Gamemode implements this interface it should implement a Gamemode specific AI.
+ */
+public interface IGamemodeAI {
 
-    default void onTurnEnd(){
+    AITurn getAI(Game g, Game.Team t);
 
-    }
-
-    default boolean isSingleplayerExclusive(){
-        return false;
-    }
 }

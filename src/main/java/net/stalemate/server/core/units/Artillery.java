@@ -121,7 +121,7 @@ public class Artillery extends Unit implements IMechanized, IUnitName {
 
         anim.setCurrentAnimation("idle");
 
-        fog_of_war_range = 3;
+        fog_of_war_range = 4;
 
         move_amount = 2;
         turn_move_amount = 2;

@@ -50,7 +50,7 @@ public class InGameUIRunnable implements Runnable {
 		        g.inGameUIUpdate();
 
                 g.unsafeLock.lock();
-                Object[] ef = cgame.buildView(g.cam_x, g.cam_y);
+                Object[] ef = cgame.buildView(g.cam_x, g.cam_y, g.scale);
 
                 Image minimap = cgame.drawMinimap(g.cam_x, g.cam_y);
 

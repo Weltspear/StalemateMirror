@@ -30,10 +30,7 @@ import net.stalemate.client.property.ClientSideProperty;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -55,6 +52,8 @@ public class InGameUI extends JPanel {
     private final Image empty;
 
     private Image minimap = null;
+
+    public float scale = 1f;
 
     private final JFrame frame;
     private boolean do_offset = false;
@@ -270,7 +269,9 @@ public class InGameUI extends JPanel {
         private final HashMap<BufferedImage, Image> big_unit_texture_cache = new HashMap<>();
         private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
 
+        // true selector x
         private int tsel_x;
+        // true selector y
         private int tsel_y;
 
         static class CachedBufferedImage{
@@ -440,7 +441,8 @@ public class InGameUI extends JPanel {
 
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                boolean[][] fog_of_war, boolean[][] selr, ClientGame.ClientSelectedUnit selectedUnit, int mp,
-                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor, String teamDoingTurnNick) {
+                               boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor,
+                               String teamDoingTurnNick) {
             if (!clMapLoader.isMapLoaded()){
                 return;
             }
@@ -455,7 +457,7 @@ public class InGameUI extends JPanel {
                     mapLoader.loadFromOther(clMapLoader);
                 }
 
-                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y);
+                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y, this.interface_.scale);
 
                 ArrayList<Image> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
@@ -733,8 +735,7 @@ public class InGameUI extends JPanel {
                 }
 
                 // if no new sel_x and sel_y have been received in a long time fall back to previous
-                this.interface_.sel_x_frame = (tsel_x - (this.interface_.cam_x+6))*64 + 6*64;
-                this.interface_.sel_y_frame = (tsel_y - (this.interface_.cam_y+2))*64 + 2*64;
+                setSelectorData(tsel_x, tsel_y);
 
                 this.interface_.unsafeLock.lock();
                 this.interface_.map_to_render = map;
@@ -777,8 +778,8 @@ public class InGameUI extends JPanel {
             interface_.unsafeLock.lock();
             tsel_x = sel_x;
             tsel_y = sel_y;
-            int sel_x_frame = (sel_x - (this.interface_.cam_x+6))*64 + 6*64;
-            int sel_y_frame = (sel_y - (this.interface_.cam_y+2))*64 + 2*64;
+            int sel_x_frame = (int)Math.floor(((sel_x - (this.interface_.cam_x+6))*64 + 6*64)/interface_.scale);
+            int sel_y_frame = (int)Math.floor(((sel_y - (this.interface_.cam_y+2))*64 + 2*64)/interface_.scale);
 
             this.interface_.sel_x_frame = sel_x_frame;
             this.interface_.sel_y_frame = sel_y_frame;
@@ -788,6 +789,22 @@ public class InGameUI extends JPanel {
     }
 
     class MListener extends MouseAdapter{
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            super.mouseWheelMoved(e);
+            unsafeLock.lock();
+
+            if (e.getWheelRotation() == 1){
+                scale = 1f;
+            } else{
+                scale = 2f;
+            }
+
+            // trick to fix prev selector when changing scale
+            mouseMoved(e);
+            unsafeLock.unlock();
+        }
+
         @Override
         public void mouseClicked(MouseEvent e) {
             unsafeLock.lock();
@@ -818,11 +835,12 @@ public class InGameUI extends JPanel {
                     if (offset_direction == OffsetDirection.None) {
                         if ((e.getX() >= 0 && e.getX() <= 832) &&
                                 (e.getY() >= 64 && e.getY() <= 384)) {
-                            int x_diff = (sel_x_frame - offset_x) - e.getX();
-                            int y_diff = (sel_y_frame + 64 - offset_y) - e.getY();
 
-                            int right_mv = (int) Math.ceil((float) x_diff / 64);
-                            int down_mv = (int) Math.ceil((float) y_diff / 64);
+                            int x_diff = (int)Math.floor((sel_x_frame - offset_x/scale) - e.getX());
+                            int y_diff = (int)Math.floor((sel_y_frame + 64 - offset_y/scale) - e.getY());
+
+                            int right_mv = (int) Math.ceil((float) x_diff / (64/ scale));
+                            int down_mv = (int) Math.ceil((float) y_diff / (64 / scale));
 
                             for (int m1 = 0; m1 < Math.abs(right_mv); m1++) {
                                 if (right_mv > 0) {
@@ -846,7 +864,8 @@ public class InGameUI extends JPanel {
                 }
                 else if (e.getButton() == MouseEvent.BUTTON2) {
                     in_client.keysInQueue.add("ESCAPE");
-                } else {
+                }
+                else {
                     in_client.keysInQueue.add("ENTER");
                 }
             }
@@ -896,15 +915,11 @@ public class InGameUI extends JPanel {
                 if (offset_direction == OffsetDirection.None)
                     if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
                         if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
+                            int x_c = (int)(Math.floor(Math.ceil((e.getX()+Math.floor(offset_x/scale))/(64f/scale))))-1;
+                            int y_c = (int)(Math.floor(Math.ceil((e.getY()-64+Math.floor(offset_y/scale))/(64f/scale))))-1;
 
-                            int x_selector = 448;
-                            int y_selector = 256;
-
-                            int x_diff = e.getX() - (x_selector - offset_x);
-                            int y_diff = e.getY() - (y_selector - offset_y);
-
-                            InGameUI.this.x_prev = x_selector + (int)(Math.floor((float)x_diff/64))*64 - offset_x;
-                            InGameUI.this.y_prev = y_selector + (int)(Math.floor((float)y_diff/64))*64 - offset_y;
+                            InGameUI.this.x_prev = (int)(Math.floor(x_c*Math.floor(64f/scale))-Math.floor(offset_x/scale));
+                            InGameUI.this.y_prev = (int)(Math.floor(y_c*Math.floor(64f/scale))-Math.floor((offset_y)/scale));
 
                             InGameUI.this.do_render_prev = true;
                             InGameUI.this.do_offset = true;
@@ -942,6 +957,7 @@ public class InGameUI extends JPanel {
 
         this.addMouseMotionListener(m);
         this.addMouseListener(m);
+        this.addMouseWheelListener(m);
 
         in_client = new KeyboardInput();
         this.addKeyListener(in_client);
@@ -994,6 +1010,7 @@ public class InGameUI extends JPanel {
         this.removeKeyListener(in_client);
         this.removeMouseListener(m);
         this.removeMouseMotionListener(m);
+        this.removeMouseWheelListener(m);
         frame.remove(this);
         unsafeLock.unlock();
     }
@@ -1029,6 +1046,7 @@ public class InGameUI extends JPanel {
         this.addKeyListener(in_client);
         this.addMouseListener(m);
         this.addMouseMotionListener(m);
+        this.addMouseWheelListener(m);
         this.requestFocus();
     }
 
@@ -1036,6 +1054,7 @@ public class InGameUI extends JPanel {
         this.removeKeyListener(in_client);
         this.removeMouseListener(m);
         this.removeMouseMotionListener(m);
+        this.removeMouseWheelListener(m);
         offset_direction = OffsetDirection.None;
         focus_desktop_pane = true;
     }
@@ -1171,29 +1190,22 @@ public class InGameUI extends JPanel {
                 BufferedImage bufferedImage = new BufferedImage(13 * 64, 5 * 64, BufferedImage.TYPE_INT_ARGB_PRE);
                 Graphics2D g2 = bufferedImage.createGraphics();
 
-                int y = 0;
-                for (ArrayList<Image> row_x : map_to_render) {
-                    int x_count = 0;
-                    for (Image x : row_x) {
-                        g2.drawImage(x != null ? x : empty, 64 * (x_count - 1) - offset_x, 64 * (y - 1) - offset_y, null);
-                        x_count++;
-                    }
-                    y++;
-                }
+                int y;
 
-                renderImages2(entity_render, offset_x, offset_y, g2);
-                renderImages(fog_of_war, offset_x, offset_y, g2);
-                renderImages(unit_data_ar, offset_x, offset_y, g2);
-                renderImages(_selr, offset_x, offset_y, g2);
+                renderImagesScale(map_to_render, offset_x, offset_y, 1/scale, g2);
+                renderImagesScale(entity_render, offset_x, offset_y, 1/scale, g2);
+                renderImagesScale(fog_of_war, offset_x, offset_y, 1/scale, g2);
+                renderImagesScale(unit_data_ar, offset_x, offset_y, 1/scale, g2);
+                renderImagesScale(_selr, offset_x, offset_y, 1/scale, g2);
 
                 // Preview selector
                 if (selector != null && do_render_prev && do_offset) {
-                    g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), x_prev, y_prev - 64, null);
+                    g2.drawImage(selector.getScaledInstance((int)Math.floor(64/scale), (int)Math.floor(64/scale), Image.SCALE_FAST), x_prev, y_prev, null);
                 }
 
                 // Normal Selector
                 if (selector != null)
-                    g2.drawImage(selector.getScaledInstance(64, 64, Image.SCALE_FAST), sel_x_frame - offset_x, sel_y_frame - offset_y, null);
+                    g2.drawImage(selector.getScaledInstance((int)Math.floor(64/scale), (int)Math.floor(64/scale), Image.SCALE_FAST), sel_x_frame - (int)Math.floor(offset_x/scale), sel_y_frame - (int)Math.floor(offset_y/scale), null);
 
                 g2.dispose();
                 g.drawImage(bufferedImage, 0, 64, null);
@@ -1456,6 +1468,20 @@ public class InGameUI extends JPanel {
             for (BufferedImage x : row_x){
                 if (x != null)
                     g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
+                x_count++;
+            }
+            y++;
+        }
+    }
+
+    private<T extends Image> void renderImagesScale(ArrayList<ArrayList<T>> buffered_images, int offset_x, int offset_y, float scale, Graphics2D g2) {
+        int y;
+        y = 0;
+        for (ArrayList<T> row_x: buffered_images){
+            int x_count = 0;
+            for (T x : row_x){
+                if (x != null)
+                    g2.drawImage( scale != 1f? x.getScaledInstance((int) Math.ceil(64*scale), (int) Math.ceil(64*scale), Image.SCALE_FAST): x, (int) (Math.floor(scale*64*(x_count-1))-offset_x*scale), (int) (Math.floor(scale*64*(y-1))-offset_y*scale), null);
                 x_count++;
             }
             y++;

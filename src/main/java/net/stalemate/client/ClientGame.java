@@ -475,17 +475,23 @@ public class ClientGame {
         return new Expect<>("");
     }
 
-    public Object[] buildView(int x, int y){
+    public Object[] buildView(int x, int y, float scale){
         try {
             lock.lock();
             Object[] fog_of_war_and_entities = new Object[3];
-            boolean[][] fog_of_war_s = new boolean[7][15];
-            ClientEntity[][] entities_s = new ClientEntity[7][15];
-            boolean[][] sel_range = new boolean[7][15];
+            boolean[][] fog_of_war_s = new boolean[(int)Math.ceil(3*scale)*2+1][(int)Math.ceil(7*scale)*2+1];
+            ClientEntity[][] entities_s = new ClientEntity[(int)Math.ceil(3*scale)*2+1][(int)Math.ceil(7*scale)*2+1];
+            boolean[][] sel_range = new boolean[(int)Math.ceil(3*scale)*2+1][(int)Math.ceil(7*scale)*2+1];
+
+            // y + 3
+            // x + 7
+
+            int y_center = y + (int)Math.ceil(3*scale);
+            int x_center = x + (int)Math.ceil(7*scale);
 
             for (ClientEntity entity : entities) {
-                if (entity.getY() >= y - 1 && entity.getY() < y + 6) {
-                    if (entity.getX() >= x - 1 && entity.getX() < x + 14) {
+                if (entity.getY() >= y_center - (int)Math.ceil(3*scale) - 1 && entity.getY() < y_center + (int)Math.ceil(3*scale)) {
+                    if (entity.getX() >= x_center - (int)Math.ceil(7*scale) - 1 && entity.getX() < x_center + (int)Math.ceil(7*scale)) {
                         if (entity instanceof ClientUnit u) {
                             if (!u.isTransparent())
                                 entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
@@ -495,16 +501,16 @@ public class ClientGame {
             }
 
             for (ClientEntity entity : entities) {
-                if (entity.getY() >= y - 1 && entity.getY() < y + 6) {
-                    if (entity.getX() >= x - 1 && entity.getX() < x + 14) {
+                if (entity.getY() >= y_center - (int)Math.ceil(3*scale) - 1 && entity.getY() < y_center + (int)Math.ceil(3*scale)) {
+                    if (entity.getX() >= x_center - (int)Math.ceil(7*scale) - 1 && entity.getX() < x_center + (int)Math.ceil(7*scale)) {
                         if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] == null)
                             entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
                     }
                 }
             }
 
-            for (int _y = y - 1; _y < y + 6; _y++) {
-                for (int _x = x - 1; _x < x + 14; _x++) {
+            for (int _y = y_center - (int)Math.ceil(3*scale) - 1; _y <  y_center + (int)Math.ceil(3*scale); _y++) {
+                for (int _x = x_center - (int)Math.ceil(7*scale) - 1 ; _x < x_center + (int)Math.ceil(7*scale); _x++) {
                     if (_x >= 0 && _y >= 0 && _y < mapLoader.getHeight() && _x < mapLoader.getWidth()) {
                         boolean s = fog_of_war[_y][_x];
                         fog_of_war_s[_y - y + 1][_x - x + 1] = s;
@@ -514,8 +520,8 @@ public class ClientGame {
 
             if (selectedUnit != null){
                 if (selectedUnit.getSelR() > 0){
-                    for (int _y = y - 1; _y < y + 6; _y++) {
-                        for (int _x = x - 1; _x < x + 14; _x++) {
+                    for (int _y = y_center - (int)Math.ceil(3*scale) - 1; _y <  y_center + (int)Math.ceil(3*scale); _y++) {
+                        for (int _x = x_center - (int)Math.ceil(7*scale) - 1 ; _x < x_center + (int)Math.ceil(7*scale); _x++) {
                             if (_x >= 0 && _y >= 0 && _y < mapLoader.getHeight() && _x < mapLoader.getWidth()) {
                                 if (_x > selectedUnit.getX() || _y > selectedUnit.getY() ||
                                         _x < selectedUnit.getX() || _y < selectedUnit.getY()){

@@ -18,11 +18,12 @@
 
 package net.stalemate.server.core.gamemode.gamemodes;
 
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
-import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.controller.Game;
+import net.stalemate.server.core.gamemode.IGamemodeAI;
+import net.stalemate.singleplayer.AITurn;
 
-public class Sandbox implements IGamemode {
+public class Sandbox implements IGamemode, IGamemodeAI {
     @Override
     public void tick(Game g) {
 
@@ -41,5 +42,12 @@ public class Sandbox implements IGamemode {
     @Override
     public String gmName() {
         return "Dev";
+    }
+
+    @Override
+    public AITurn getAI(Game g, Game.Team t) {
+        return () -> {
+
+        };
     }
 }

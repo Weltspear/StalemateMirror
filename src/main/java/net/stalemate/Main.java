@@ -54,7 +54,7 @@ public class Main {
                         GraphicsEnvironment.getLocalGraphicsEnvironment();
                 ge.registerFont(AssetLoader.getMonogram());
 
-                SingleplayerGame game = new SingleplayerGame("maps/fort_default_21x21.json");
+                SingleplayerGame game = new SingleplayerGame("maps/dev_default_21x21.json");
                 game.startGame();
             }
         }

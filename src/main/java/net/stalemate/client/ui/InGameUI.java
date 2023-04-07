@@ -32,8 +32,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
+import java.awt.image.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -797,8 +796,8 @@ public class InGameUI extends JPanel {
 
             if (e.getWheelRotation() == 1){
                 scale -= 0.1f;
-                if (scale < 1){
-                    scale = 1;
+                if (scale < 0.5){
+                    scale = 0.5f;
                 }
             } else{
                 scale += 0.1f;
@@ -1504,12 +1503,15 @@ public class InGameUI extends JPanel {
     }
 
     // due to weird issues encountered with java scaling this has to be here
-    private Image correctScaledImage(Image img){
-        BufferedImage corrected = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = corrected.createGraphics();
-        g.drawImage(img, 0, 0, null);
-        g.dispose();
-        return corrected;
+    private Image scaleImage(Image img, int width, int height){
+        BufferedImage n = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        n.getGraphics().drawImage(img, 0, 0, null);
+
+        // this essentially replicates functionality of getScaledInstance but takes BufferedImage's getSource
+        // and that fixes weird scaling issues
+        AreaAveragingScaleFilter areaAveragingScaleFilter = new AreaAveragingScaleFilter(width, height);
+        ImageProducer prod = new FilteredImageSource(n.getSource(), areaAveragingScaleFilter);
+        return Toolkit.getDefaultToolkit().createImage(prod);
     }
 
     private Image getScaledImage(Image img, float scale){
@@ -1522,7 +1524,7 @@ public class InGameUI extends JPanel {
         }
 
         if (!scale_map_cache.get(scale).containsKey(img)){
-            scale_map_cache.get(scale).put(img, correctScaledImage(img.getScaledInstance((int) Math.ceil(64*scale), (int) Math.ceil(64*scale), Image.SCALE_SMOOTH)));
+            scale_map_cache.get(scale).put(img, scaleImage(img ,(int) Math.ceil(64*scale), (int) Math.ceil(64*scale)));
         }
 
         return scale_map_cache.get(scale).get(img);

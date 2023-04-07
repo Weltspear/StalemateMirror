@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class InGameUI extends JPanel {
+    private final HashMap<Float, HashMap<Image, Image>> scale_map_cache = new HashMap<>();
     private final ClientDataManager clDataManager;
     private final KeyboardInput in_client;
     private final JDesktopPane p;
@@ -264,10 +265,10 @@ public class InGameUI extends JPanel {
         private final BufferedImage shovel;
 
         private final HashMap<String, Image> entity_scaled_cache = new HashMap<>();
+        private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
         private final HashMap<String, Image> button_scaled_cache = new HashMap<>();
         private final HashMap<BufferedImage, Image> queue_scaled_cache = new HashMap<>();
         private final HashMap<BufferedImage, Image> big_unit_texture_cache = new HashMap<>();
-        private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
 
         // true selector x
         private int tsel_x;
@@ -795,9 +796,15 @@ public class InGameUI extends JPanel {
             unsafeLock.lock();
 
             if (e.getWheelRotation() == 1){
-                scale = 1f;
+                scale -= 0.1f;
+                if (scale < 1){
+                    scale = 1;
+                }
             } else{
-                scale = 2f;
+                scale += 0.1f;
+                if (scale > 2){
+                    scale = 2;
+                }
             }
 
             // trick to fix prev selector when changing scale
@@ -1192,20 +1199,20 @@ public class InGameUI extends JPanel {
 
                 int y;
 
-                renderImagesScale(map_to_render, offset_x, offset_y, 1/scale, g2);
-                renderImagesScale(entity_render, offset_x, offset_y, 1/scale, g2);
-                renderImagesScale(fog_of_war, offset_x, offset_y, 1/scale, g2);
-                renderImagesScale(unit_data_ar, offset_x, offset_y, 1/scale, g2);
-                renderImagesScale(_selr, offset_x, offset_y, 1/scale, g2);
+                renderImagesScale(map_to_render, offset_x, offset_y, scale, g2);
+                renderImagesScale(entity_render, offset_x, offset_y, scale, g2);
+                renderImagesScale(fog_of_war, offset_x, offset_y, scale, g2);
+                renderImagesScale(unit_data_ar, offset_x, offset_y, scale, g2);
+                renderImagesScale(_selr, offset_x, offset_y, scale, g2);
 
                 // Preview selector
                 if (selector != null && do_render_prev && do_offset) {
-                    g2.drawImage(selector.getScaledInstance((int)Math.floor(64/scale), (int)Math.floor(64/scale), Image.SCALE_FAST), x_prev, y_prev, null);
+                    g2.drawImage(selector.getScaledInstance((int)Math.ceil(64/scale), (int)Math.ceil(64/scale), Image.SCALE_SMOOTH), correctCoordX(x_prev), correctCoordY(y_prev), null);
                 }
 
                 // Normal Selector
                 if (selector != null)
-                    g2.drawImage(selector.getScaledInstance((int)Math.floor(64/scale), (int)Math.floor(64/scale), Image.SCALE_FAST), sel_x_frame - (int)Math.floor(offset_x/scale), sel_y_frame - (int)Math.floor(offset_y/scale), null);
+                    g2.drawImage(selector.getScaledInstance((int)Math.ceil(64/scale), (int)Math.ceil(64/scale), Image.SCALE_SMOOTH), correctCoordX(sel_x_frame - (int)Math.ceil(offset_x/scale)), correctCoordY(sel_y_frame - (int)Math.ceil(offset_y/scale)), null);
 
                 g2.dispose();
                 g.drawImage(bufferedImage, 0, 64, null);
@@ -1446,59 +1453,78 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
-    private void renderImagesScaled(ArrayList<ArrayList<BufferedImage>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
-        int y;
-        y = 0;
-        for (ArrayList<BufferedImage> row_x: buffered_images){
-            int x_count = 0;
-            for (BufferedImage x : row_x){
-                if (x != null)
-                    g2.drawImage(x.getScaledInstance(64, 64, Image.SCALE_FAST), 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
-                x_count++;
-            }
-            y++;
-        }
-    }
-
-    private void renderImages(ArrayList<ArrayList<BufferedImage>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
-        int y;
-        y = 0;
-        for (ArrayList<BufferedImage> row_x: buffered_images){
-            int x_count = 0;
-            for (BufferedImage x : row_x){
-                if (x != null)
-                    g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
-                x_count++;
-            }
-            y++;
-        }
-    }
-
     private<T extends Image> void renderImagesScale(ArrayList<ArrayList<T>> buffered_images, int offset_x, int offset_y, float scale, Graphics2D g2) {
         int y;
         y = 0;
         for (ArrayList<T> row_x: buffered_images){
             int x_count = 0;
+
             for (T x : row_x){
                 if (x != null)
-                    g2.drawImage( scale != 1f? x.getScaledInstance((int) Math.ceil(64*scale), (int) Math.ceil(64*scale), Image.SCALE_FAST): x, (int) (Math.floor(scale*64*(x_count-1))-offset_x*scale), (int) (Math.floor(scale*64*(y-1))-offset_y*scale), null);
+                    g2.drawImage(getScaledImage(x, 1/scale), (x_count-1)*(int)Math.ceil(64/scale)+(int)Math.ceil(-offset_x/scale), (y-1)*(int)Math.ceil(64/scale)+(int)Math.ceil(-offset_y/scale), null);
                 x_count++;
             }
             y++;
         }
     }
 
-    private void renderImages2(ArrayList<ArrayList<Image>> buffered_images, int offset_x, int offset_y, Graphics2D g2) {
-        int y;
-        y = 0;
-        for (ArrayList<Image> row_x: buffered_images){
-            int x_count = 0;
-            for (Image x : row_x){
-                if (x != null)
-                    g2.drawImage(x, 64*(x_count-1)-offset_x, 64*(y-1)-offset_y, null);
-                x_count++;
-            }
-            y++;
+    private int correctCoordY(int y){
+        if (y < 0){
+            return y;
         }
+
+        int y_size = (int)Math.ceil(3*scale)*2;
+        return correctCoord(y, y_size, offset_y);
+    }
+
+    private int correctCoordX(int x){
+
+        if (x < 0){
+            return x;
+        }
+
+        int x_size = (int)Math.ceil(7*scale)*2;
+        return correctCoord(x, x_size, offset_x);
+    }
+
+    // this corrects selector coord due to selector coord being not correctly aligned
+    // , but it is close to value which is okay, corrects the coord by going through
+    // all coords that may be generated by renderImagesScale and getting the closest
+    // coordinate to the original coord
+    private int correctCoord(int c, int c_size, int offset_c) {
+        int c_coord = (int)Math.ceil(-offset_c/scale)-(int)Math.ceil(64/scale);
+        ArrayList<Integer> c_estimate = new ArrayList<>();
+        for (int i = 0; i < c_size; i++){
+            c_coord += (int)Math.ceil(64/scale);
+            c_estimate.add(Math.abs(c_coord- c));
+        }
+
+        int idx = c_estimate.indexOf(Collections.min(c_estimate));
+        return (idx)*(int)Math.ceil(64/scale)+(int)Math.ceil(-offset_c /scale);
+    }
+
+    // due to weird issues encountered with java scaling this has to be here
+    private Image correctScaledImage(Image img){
+        BufferedImage corrected = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = corrected.createGraphics();
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
+        return corrected;
+    }
+
+    private Image getScaledImage(Image img, float scale){
+        if (scale == 1){
+            return img;
+        }
+
+        if (!scale_map_cache.containsKey(scale)){
+            scale_map_cache.put(scale, new HashMap<>());
+        }
+
+        if (!scale_map_cache.get(scale).containsKey(img)){
+            scale_map_cache.get(scale).put(img, correctScaledImage(img.getScaledInstance((int) Math.ceil(64*scale), (int) Math.ceil(64*scale), Image.SCALE_SMOOTH)));
+        }
+
+        return scale_map_cache.get(scale).get(img);
     }
 }

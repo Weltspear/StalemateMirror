@@ -531,7 +531,7 @@ public class ClientGame {
                                                 _y >= selectedUnit.getY() - selectedUnit.getSelR()){
                                             int arny = _y - y + 1;
                                             int arnx = _x - x + 1;
-                                            if (arnx >= 0 && arnx < 15 && arny >= 0 && arny < 7){
+                                            if (arnx >= 0 && arnx < sel_range[0].length && arny >= 0 && arny < sel_range[1].length){
                                                 sel_range[arny][arnx] = true;
                                             }
                                         }

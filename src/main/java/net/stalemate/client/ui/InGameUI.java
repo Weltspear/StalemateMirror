@@ -842,11 +842,11 @@ public class InGameUI extends JPanel {
                         if ((e.getX() >= 0 && e.getX() <= 832) &&
                                 (e.getY() >= 64 && e.getY() <= 384)) {
 
-                            int x_diff = (int)Math.floor((sel_x_frame - offset_x/scale) - e.getX());
-                            int y_diff = (int)Math.floor((sel_y_frame + 64 - offset_y/scale) - e.getY());
+                            int x_c = calculateXOnCamera(e.getX());
+                            int y_c = calculateYOnCamera(e.getY());
 
-                            int right_mv = (int) Math.ceil((float) x_diff / (64/ scale));
-                            int down_mv = (int) Math.ceil((float) y_diff / (64 / scale));
+                            int right_mv = clDataManager.tsel_x-(cam_x+x_c);
+                            int down_mv = clDataManager.tsel_y-(cam_y+y_c);
 
                             for (int m1 = 0; m1 < Math.abs(right_mv); m1++) {
                                 if (right_mv > 0) {
@@ -876,6 +876,14 @@ public class InGameUI extends JPanel {
                 }
             }
             unsafeLock.unlock();
+        }
+
+        public int calculateXOnCamera(int x_m){
+            return (int)(Math.ceil(Math.ceil((x_m+Math.ceil(offset_x/scale))/Math.ceil(64/scale))))-1;
+        }
+
+        public int calculateYOnCamera(int y_m){
+            return (int)(Math.ceil(Math.ceil((y_m-64+Math.ceil(offset_y/scale))/Math.ceil(64/scale))))-1;
         }
 
         @Override
@@ -921,11 +929,11 @@ public class InGameUI extends JPanel {
                 if (offset_direction == OffsetDirection.None)
                     if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
                         if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
-                            int x_c = (int)(Math.floor(Math.ceil((e.getX()+Math.floor(offset_x/scale))/(64f/scale))))-1;
-                            int y_c = (int)(Math.floor(Math.ceil((e.getY()-64+Math.floor(offset_y/scale))/(64f/scale))))-1;
+                            int x_c = calculateXOnCamera(e.getX());
+                            int y_c = calculateYOnCamera(e.getY());
 
-                            InGameUI.this.x_prev = (int)(Math.floor(x_c*Math.floor(64f/scale))-Math.floor(offset_x/scale));
-                            InGameUI.this.y_prev = (int)(Math.floor(y_c*Math.floor(64f/scale))-Math.floor((offset_y)/scale));
+                            InGameUI.this.x_prev = (int)Math.ceil(x_c*(int)Math.ceil(64/scale))+(int)Math.ceil(-offset_x/scale);
+                            InGameUI.this.y_prev = (int)Math.ceil(y_c*(int)Math.ceil(64/scale))+(int)Math.ceil(-(offset_y)/scale);
 
                             InGameUI.this.do_render_prev = true;
                             InGameUI.this.do_offset = true;

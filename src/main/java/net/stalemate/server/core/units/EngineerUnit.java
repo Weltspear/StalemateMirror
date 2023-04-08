@@ -243,6 +243,137 @@ public class EngineerUnit extends Unit implements IUnitName{
         turn_move_amount = 2;
     }
 
+    public void makeBuildingMode(IButton[] buttons){
+        buttons[0] = (new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "M";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_base.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_military_tent";
+            }
+        });
+        buttons[1] = (new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "T";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_factory.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_tank_factory";
+            }
+        });
+        buttons[2] = (new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "S";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_supply_station.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_supply_station";
+            }
+        });
+        buttons[3] = (new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "F";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_fortification.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_fortification";
+            }
+        });
+        buttons[4] = (new ConstructBuildingButton(Radar.class, 1, 2, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "A";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_radar.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_radar";
+            }
+        });
+        buttons[5] = (new ConstructBuildingButton(Factory.class, 2, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "E";
+            }
+
+            @Override
+            public String texture() {
+                return "assets/ui/buttons/build_factory2.png";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_factory";
+            }
+        });
+
+        buttons[8] = new ExitBuildMenuButton();
+    }
+
     @Override
     public IButton[] getButtons() {
         IButton[] buttons = new IButton[9];
@@ -259,134 +390,7 @@ public class EngineerUnit extends Unit implements IUnitName{
             }
         }
         else{
-            buttons[0] = (new ConstructBuildingButton(MilitaryTent.class, 1, 3, false) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "M";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_base.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_military_tent";
-                }
-            });
-            buttons[1] = (new ConstructBuildingButton(TankFactory.class, 2, 3, false) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "T";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_factory.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_tank_factory";
-                }
-            });
-            buttons[2] = (new ConstructBuildingButton(SupplyStation.class, 2, 3, false) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "S";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_supply_station.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_supply_station";
-                }
-            });
-            buttons[3] = (new ConstructBuildingButton(FortificationEmpty.class, 2, 3, true) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "F";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_fortification.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_fortification";
-                }
-            });
-            buttons[4] = (new ConstructBuildingButton(Radar.class, 1, 2, false) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "A";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_radar.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_radar";
-                }
-            });
-            buttons[5] = (new ConstructBuildingButton(Factory.class, 2, 3, false) {
-                @Override
-                public String selector_texture() {
-                    return "assets/ui/selectors/ui_repair.png";
-                }
-
-                @Override
-                public String bind() {
-                    return "E";
-                }
-
-                @Override
-                public String texture() {
-                    return "assets/ui/buttons/build_factory2.png";
-                }
-
-                @Override
-                public String identifier() {
-                    return "button_engineer_unit_build_menu_build_factory";
-                }
-            });
-
-            buttons[8] = new ExitBuildMenuButton();
+            makeBuildingMode(buttons);
         }
 
         return buttons;

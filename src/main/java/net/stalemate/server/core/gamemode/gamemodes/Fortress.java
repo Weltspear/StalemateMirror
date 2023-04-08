@@ -27,6 +27,7 @@ import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.IGamemodeAI;
 import net.stalemate.server.core.pathfinding.Pathfinding;
 import net.stalemate.server.core.units.Artillery;
+import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.LightTank;
 import net.stalemate.server.core.units.buildings.MilitaryTent;
@@ -73,7 +74,7 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
     @Override
     public Game.Team getVictoriousTeam(Game g) {
-        if (turns_passed >= 60) {
+        if (turns_passed >= 40) {
             for (Game.Team team : g.getTeams()) {
                 if (!Objects.equals(team.getTeamName(), null) && !Objects.equals(team.getTeamName(), "neutral")
                     && !Objects.equals(team.getTeamName(), "fortressAI")) {
@@ -179,11 +180,15 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
         }
 
         private int artilleryAmount(){
-            return (int) Math.ceil(((double) (waveSize-4))*1.5f);
+            return (int) Math.ceil(((double) (waveSize-3))*1.5f);
         }
 
         private int tankAmount(){
-            return (int) Math.ceil(((double) (waveSize-6))*2f);
+            return (int) Math.ceil(((double) (waveSize-4))*2f);
+        }
+
+        private int heavyTankAmount(){
+            return (int) Math.ceil(waveSize-4);
         }
 
         private void switchToAttackMode(Unit actor, UnitAction uaction){
@@ -224,7 +229,8 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
                 AlreadySpawnedCoord sp = new AlreadySpawnedCoord(rect.x + RND.nextInt(rect.x2 - rect.x),
                         rect.y + RND.nextInt(rect.y2 - rect.y));
 
-                Unit unit =  type == 1 ? new Infantry(sp.x, sp.y, g): type == 2 ? new Artillery(sp.x, sp.y, g) : new LightTank(sp.x, sp.y, g);
+                Unit unit =  type == 1 ? new Infantry(sp.x, sp.y, g): type == 2 ? new Artillery(sp.x, sp.y, g)
+                        : type == 3 ? new LightTank(sp.x, sp.y, g) : new HeavyTank(sp.x, sp.y, g);
 
                 unit.setSupply(unit.getSupply()+20);
 
@@ -234,6 +240,20 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
                 alreadySpawnedCoords.add(sp);
                 g.addEntity(unit);
+            }
+        }
+
+        private void attackIfCan(Unit actor){
+            for (Entity entity: g.getAllEntities()){
+                if (entity instanceof Unit u){
+                    if (!t.getTeamUnits().contains(u)){
+                        if (Math.abs(u.getX()-actor.getX()) <= actor.unitStats().attack_range() && Math.abs(u.getY()-actor.getY()) <= actor.unitStats().attack_range()){
+                            AttackButton attackButton = new AttackButton(3);
+
+                            attackButton.action(u, actor, g);
+                        }
+                    }
+                }
             }
         }
 
@@ -256,6 +276,7 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
                 spawnUnits(rect, infantryAmount2(), alreadySpawnedCoords, 1);
                 spawnUnits(rect, artilleryAmount(), alreadySpawnedCoords, 2);
                 spawnUnits(rect, tankAmount(), alreadySpawnedCoords, 3);
+                spawnUnits(rect, heavyTankAmount(), alreadySpawnedCoords, 4);
 
                 waveSize++;
             }
@@ -272,17 +293,7 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
                 UnitAction uaction = entry.getValue();
 
-                for (Entity entity: g.getAllEntities()){
-                    if (entity instanceof Unit u){
-                        if (!t.getTeamUnits().contains(u)){
-                            if (Math.abs(u.getX()-actor.getX()) <= actor.unitStats().attack_range() && Math.abs(u.getY()-actor.getY()) <= actor.unitStats().attack_range()){
-                                AttackButton attackButton = new AttackButton(3);
-
-                                attackButton.action(u, actor, g);
-                            }
-                        }
-                    }
-                }
+                attackIfCan(actor);
 
                 if (uaction.target != null){
                     if (uaction.target.getHp() <= 0){
@@ -313,6 +324,8 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
                 else {
                     fixPath(actor, uaction);
                 }
+
+                attackIfCan(actor);
             }
 
             for (Unit unit : stageForRemoval){

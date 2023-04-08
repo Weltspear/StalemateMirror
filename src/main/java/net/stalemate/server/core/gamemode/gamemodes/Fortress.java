@@ -304,17 +304,37 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
                 if (uaction.path != null) {
                     if (uaction.path.size() > 0) {
 
-                        Pathfinding.Node next = uaction.path.get(0);
+                        int nidx = actor.unitStats().getMovementRange()-1;
 
-                        uaction.path.remove(0);
+                        while (!actor.hasTurnEnded()) {
+                            if (nidx >= uaction.path.size()){
+                                nidx = uaction.path.size()-1;
+                            }
 
-                        if (Pathfinding.isCoordPassable(next.x, next.y, g)) {
-                            MoveButton moveButton = new MoveButton(1);
+                            Pathfinding.Node next = uaction.path.get(nidx);
 
-                            moveButton.action(next.x, next.y, entry.getKey(), g);
-                        }
-                        else{
-                            fixPath(actor, uaction);
+                            if (Pathfinding.isCoordPassable(next.x, next.y, g)) {
+                                int cur_move_amount = actor.getMoveAmount();
+
+                                MoveButton moveButton = new MoveButton(1);
+
+                                moveButton.action(next.x, next.y, entry.getKey(), g);
+
+                                if (cur_move_amount > actor.getMoveAmount() || actor.hasTurnEnded()){
+                                    uaction.path = new ArrayList<>(uaction.path.subList(nidx+1,uaction.path.size()));
+
+                                    if (!actor.hasTurnEnded()){
+                                        nidx = actor.unitStats().getMovementRange();
+                                    }
+                                }
+
+                                attackIfCan(actor);
+                            } else {
+                                fixPath(actor, uaction);
+                                break;
+                            }
+
+                            nidx--;
                         }
                     }
                     else {
@@ -324,8 +344,6 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
                 else {
                     fixPath(actor, uaction);
                 }
-
-                attackIfCan(actor);
             }
 
             for (Unit unit : stageForRemoval){

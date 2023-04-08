@@ -32,9 +32,7 @@ import net.stalemate.server.core.gamemode.gamemodes.Fortress;
 import net.stalemate.server.core.gamemode.gamemodes.Sandbox;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
 import net.stalemate.server.core.units.*;
-import net.stalemate.server.core.units.buildings.Fortification;
-import net.stalemate.server.core.units.buildings.MilitaryTent;
-import net.stalemate.server.core.units.buildings.TankFactory;
+import net.stalemate.server.core.units.buildings.*;
 
 import java.awt.*;
 import java.io.File;
@@ -67,6 +65,10 @@ public class MapLoader {
             }
         }
 
+        public static boolean containsEntity(String id){
+            return entity_registry.containsKey(id);
+        }
+
     }
 
     public static class GamemodeRegistry{
@@ -88,8 +90,8 @@ public class MapLoader {
 
     static {
         EntityRegistry.addEntity("base", MilitaryTent.class);
-        EntityRegistry.addEntity("fortification", Fortification.class);
-        // addEntity("supply_station", SupplyStation.class);
+        EntityRegistry.addEntity("fortification", FortificationEmpty.class);
+        EntityRegistry.addEntity("supply_station", SupplyStation.class);
         EntityRegistry.addEntity("tank_factory", TankFactory.class);
 
         EntityRegistry.addEntity("infantry", Infantry.class);

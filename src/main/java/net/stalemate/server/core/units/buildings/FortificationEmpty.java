@@ -100,7 +100,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
 
     @Override
     public IButton[] getButtons() {
-        return new IButton[9];
+        return getButtonsEnemy();
     }
 
     @Override

@@ -18,8 +18,11 @@
 
 package net.stalemate.server.core.communication.chat;
 
+import net.stalemate.server.core.Entity;
+import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.gamemodes.Fortress;
+import net.stalemate.server.core.mapsystem.MapLoader;
 import net.stalemate.server.lobby_management.Lobby;
 
 import java.util.HashMap;
@@ -78,13 +81,15 @@ public class DebugChat extends Chat{
                     g.lock.unlock();
                 }
                 else if (command[0].equals("help")) {
-                    consoleMsg("/help - shows this message");
                     consoleMsg("/set_team <x> - sets player's console current team");
                     consoleMsg("/me - sets player's console current team to his own");
                     consoleMsg("/list_teams - sets player's console current team");
                     consoleMsg("/mp <x> - sets mp of player's console current team t");
                     consoleMsg("o x");
-                    consoleMsg("/fortressinfo - shows info about current fortress game");
+                    consoleMsg("/fortressinfo - shows info about current fortress ga");
+                    consoleMsg("me");
+                    consoleMsg("/spawn <entity> <x> <y> - spawns entity at specifie");
+                    consoleMsg("d x and y coordinates");
                 }
             }
 
@@ -123,13 +128,54 @@ public class DebugChat extends Chat{
                             t.setMilitaryPoints(mp);
                             consoleMsg("MP set successfully");
                         } catch (NumberFormatException e){
-                            consoleMsg("Command argument is not a number");
+                            consoleMsg("Command argument is not a 32-bit integer");
                         }
 
                     } else{
-                        consoleMsg("You haven't set your current team use /set_team to do so");
+                        consoleMsg("You haven't set your current team use /set_team to d");
+                        consoleMsg("o so");
                     }
 
+                    g.lock.unlock();
+                }
+            }
+
+            if (command.length == 4){
+                if (command[0].equals("spawn")) {
+                    Game g = lobby.getGame();
+                    g.lock.lock();
+                    try {
+                        if (curTeam.containsKey(msg.getAuthor())) {
+                            String entity_id = command[1];
+                            int x = Integer.parseInt(command[2]);
+                            int y = Integer.parseInt(command[3]);
+
+                            if (x < 0 || y < 0){
+                                throw new NumberFormatException();
+                            }
+
+                            if (!MapLoader.EntityRegistry.containsEntity(entity_id)) {
+                                consoleMsg(entity_id + " not found in entity registry");
+                            }
+                            else {
+                                Entity entity = MapLoader.EntityRegistry.constructEntity(entity_id, x, y, g);
+
+                                if (entity instanceof Unit u){
+                                    curTeam.get(msg.getAuthor()).addUnit(u);
+                                }
+
+                                g.addEntity(entity);
+                            }
+                        } else{
+                            consoleMsg("You haven't set your current team use /set_team to d");
+                            consoleMsg("o so");
+                        }
+
+
+                    } catch (NumberFormatException e){
+                        consoleMsg("Command argument/arguments is not a 32-bit integer ");
+                        consoleMsg("or is/are negative");
+                    }
                     g.lock.unlock();
                 }
             }

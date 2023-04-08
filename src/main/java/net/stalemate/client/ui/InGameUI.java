@@ -30,9 +30,12 @@ import net.stalemate.client.property.ClientSideProperty;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -244,6 +247,12 @@ public class InGameUI extends JPanel {
                     } else if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
                         if (currentMSG.length() - 1 >= 0)
                             currentMSG = currentMSG.substring(0, currentMSG.length() - 1);
+                    } else if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_V){
+                        try {
+                            currentMSG += Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+                        } catch (UnsupportedFlavorException | IOException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                 }
             }

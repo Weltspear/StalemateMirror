@@ -20,12 +20,10 @@ package net.stalemate.server.core.gamemode.gamemodes;
 
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
-import net.stalemate.server.core.buttons.AttackButton;
-import net.stalemate.server.core.buttons.MoveButton;
+import net.stalemate.server.core.ai.BattleGroup;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.IGamemodeAI;
-import net.stalemate.server.core.pathfinding.Pathfinding;
 import net.stalemate.server.core.units.Artillery;
 import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.Infantry;
@@ -109,51 +107,15 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
         private static final Random RND = new Random();
 
+        ArrayList<BattleGroup> battleGroups = new ArrayList<>();
+
         public record AlreadySpawnedCoord(int x, int y){}
-
-        public static class UnitAction {
-            public enum Action{
-                MOVE,
-                ATTACK,
-            }
-
-            private ArrayList<Pathfinding.Node> path;
-            private Action action;
-            private Unit target;
-
-            public UnitAction(Unit target, ArrayList<Pathfinding.Node> path){
-                this.target = target;
-                this.path = path;
-                action = Action.ATTACK;
-            }
-
-
-            public UnitAction(ArrayList<Pathfinding.Node> path){
-                this.target = null;
-                this.path = path;
-                action = Action.MOVE;
-            }
-
-            public void attack(Unit target, ArrayList<Pathfinding.Node> path){
-                this.target = target;
-                this.path = path;
-                action = Action.ATTACK;
-            }
-
-            public void move(ArrayList<Pathfinding.Node> path){
-                this.target = null;
-                this.path = path;
-                action = Action.MOVE;
-            }
-        }
 
         private int turnsDone = 5;
 
         private int waveSize = 1;
 
         private Unit targetBase = null;
-
-        private final HashMap<Unit, UnitAction> actions = new HashMap<>();
 
         public FortressAI(Game g, Game.Team t, ArrayList<SpawnRect> rects){
             this.g = g;
@@ -180,7 +142,8 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
         }
 
         private int artilleryAmount(){
-            return (int) Math.ceil(((double) (waveSize-3))*1.5f);
+            //return (int) Math.ceil(((double) (waveSize-3))*1.5f);
+            return (int) Math.ceil(((double) (waveSize))*1.5f);
         }
 
         private int tankAmount(){
@@ -191,39 +154,9 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
             return (int) Math.ceil(waveSize-4);
         }
 
-        private void switchToAttackMode(Unit actor, UnitAction uaction){
+        private ArrayList<Unit> spawnUnits(SpawnRect rect, int uamount, ArrayList<AlreadySpawnedCoord> alreadySpawnedCoords, int type){
+            ArrayList<Unit> units = new ArrayList<>();
 
-            boolean found = false;
-
-            for (Entity entity: g.getAllEntities()){
-                if (entity instanceof Unit u){
-                    if (!t.getTeamUnits().contains(u)){
-                        if (Math.abs(u.getX()-actor.getX()) < 10 && Math.abs(u.getY()-actor.getY()) < 10){
-                            uaction.attack(u, Pathfinding.a_star(u.getX(), u.getY(), actor.getX(), actor.getY(), g, true));
-                            found = true;
-                            if (uaction.path != null)
-                                if (uaction.path.size() > 0)
-                                    break;
-                        }
-                    }
-                }
-            }
-
-            if (!found){
-                for (Entity entity: g.getAllEntities()){
-                    if (entity instanceof Unit u){
-                        if (!t.getTeamUnits().contains(u)){
-                            uaction.attack(u, Pathfinding.a_star(u.getX(), u.getY(), actor.getX(), actor.getY(), g, true));
-                            if (uaction.path != null)
-                                if (uaction.path.size() > 0)
-                                    break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void spawnUnits(SpawnRect rect, int uamount, ArrayList<AlreadySpawnedCoord> alreadySpawnedCoords, int type){
             if (t.getTeamUnits().size()+infantryAmount2()+artilleryAmount()+tankAmount() < 100)
             for (int i = 0; i < uamount; i++){
                 AlreadySpawnedCoord sp = new AlreadySpawnedCoord(rect.x + RND.nextInt(rect.x2 - rect.x),
@@ -234,27 +167,15 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
                 unit.setSupply(unit.getSupply()+20);
 
-                actions.put(unit, new UnitAction(Pathfinding.a_star(targetBase.getX(), targetBase.getY(), unit.getX(), unit.getY(), g, true)));
-
                 t.addUnit(unit);
 
                 alreadySpawnedCoords.add(sp);
                 g.addEntity(unit);
-            }
-        }
 
-        private void attackIfCan(Unit actor){
-            for (Entity entity: g.getAllEntities()){
-                if (entity instanceof Unit u){
-                    if (!t.getTeamUnits().contains(u)){
-                        if (Math.abs(u.getX()-actor.getX()) <= actor.unitStats().attack_range() && Math.abs(u.getY()-actor.getY()) <= actor.unitStats().attack_range()){
-                            AttackButton attackButton = new AttackButton(3);
-
-                            attackButton.action(u, actor, g);
-                        }
-                    }
-                }
+                units.add(unit);
             }
+
+            return units;
         }
 
         @Override
@@ -273,97 +194,46 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
                 ArrayList<AlreadySpawnedCoord> alreadySpawnedCoords = new ArrayList<>();
 
-                spawnUnits(rect, infantryAmount2(), alreadySpawnedCoords, 1);
-                spawnUnits(rect, artilleryAmount(), alreadySpawnedCoords, 2);
-                spawnUnits(rect, tankAmount(), alreadySpawnedCoords, 3);
-                spawnUnits(rect, heavyTankAmount(), alreadySpawnedCoords, 4);
+                ArrayList<Unit> spawnedUnits = new ArrayList<>();
+
+                spawnedUnits.addAll(spawnUnits(rect, infantryAmount2(), alreadySpawnedCoords, 1));
+                spawnedUnits.addAll(spawnUnits(rect, artilleryAmount(), alreadySpawnedCoords, 2));
+                spawnedUnits.addAll(spawnUnits(rect, tankAmount(), alreadySpawnedCoords, 3));
+                spawnedUnits.addAll(spawnUnits(rect, heavyTankAmount(), alreadySpawnedCoords, 4));
+
+                Collections.shuffle(spawnedUnits);
+
+                while (spawnedUnits.size() > 0){
+                    BattleGroup battleGroup = new BattleGroup(g, t);
+                    for (int i = 0; i < 10 && spawnedUnits.size() > 0; i++){
+                        Unit u = spawnedUnits.get(0);
+                        spawnedUnits.remove(0);
+
+                        battleGroup.addUnit(u);
+                    }
+                    battleGroup.attack(targetBase.getX(), targetBase.getY());
+
+                    battleGroups.add(battleGroup);
+                }
 
                 waveSize++;
             }
 
-            ArrayList<Unit> stageForRemoval = new ArrayList<>();
+            ArrayList<BattleGroup> to_be_removed = new ArrayList<>();
 
-            for (Map.Entry<Unit, UnitAction> entry: actions.entrySet()){
-                Unit actor = entry.getKey();
-
-                if (actor.getHp() <= 0){
-                    stageForRemoval.add(entry.getKey());
-                    continue;
-                }
-
-                UnitAction uaction = entry.getValue();
-
-                attackIfCan(actor);
-
-                if (uaction.target != null){
-                    if (uaction.target.getHp() <= 0){
-                        switchToAttackMode(actor, uaction);
-                    }
-                }
-
-                if (uaction.path != null) {
-                    if (uaction.path.size() > 0) {
-
-                        int nidx = actor.unitStats().getMovementRange()-1;
-
-                        while (!actor.hasTurnEnded()) {
-                            if (nidx >= uaction.path.size()){
-                                nidx = uaction.path.size()-1;
-                            }
-
-                            Pathfinding.Node next = uaction.path.get(nidx);
-
-                            if (Pathfinding.isCoordPassable(next.x, next.y, g)) {
-                                int cur_move_amount = actor.getMoveAmount();
-
-                                MoveButton moveButton = new MoveButton(1);
-
-                                moveButton.action(next.x, next.y, entry.getKey(), g);
-
-                                if (cur_move_amount > actor.getMoveAmount() || actor.hasTurnEnded()){
-                                    uaction.path = new ArrayList<>(uaction.path.subList(nidx+1,uaction.path.size()));
-
-                                    if (!actor.hasTurnEnded()){
-                                        nidx = actor.unitStats().getMovementRange();
-                                    }
-                                }
-
-                                attackIfCan(actor);
-                            } else {
-                                fixPath(actor, uaction);
-                                break;
-                            }
-
-                            nidx--;
-                        }
-                    }
-                    else {
-                        switchToAttackMode(actor, uaction);
-                    }
-                }
-                else {
-                    fixPath(actor, uaction);
+            for (BattleGroup battleGroup: battleGroups){
+                if (battleGroup.getUnitAmount() == 0){
+                    to_be_removed.add(battleGroup);
                 }
             }
 
-            for (Unit unit : stageForRemoval){
-                actions.remove(unit);
+            battleGroups.removeAll(to_be_removed);
+
+            for (BattleGroup battleGroup: battleGroups){
+                battleGroup.doTurn();
             }
 
             turnsDone++;
-        }
-
-        private void fixPath(Unit actor, UnitAction uaction) {
-            if (uaction.action == UnitAction.Action.MOVE) {
-
-                uaction.path = Pathfinding.a_star(targetBase.getX(), targetBase.getY(),
-                        actor.getX(), actor.getY(), g, true);
-            }
-            else{
-                uaction.path = Pathfinding.a_star(uaction.target.getX(), uaction.target.getY(),
-                        actor.getX(), actor.getY(), g, true);
-
-            }
         }
     }
 

@@ -313,13 +313,13 @@ public class BattleGroup {
 
         if (!found && isAutonomous){
             for (Entity entity: g.getAllEntities()){
-                if (entity instanceof Unit u){
-                    if (!t.getTeamUnits().contains(u)){
-                        if (isAutonomous){
-                            global_order = BattleGroupOrder.ATTACK;
-                            global_order_x = u.getX();
-                            global_order_y = u.getY();
-                        }
+                if (entity instanceof Unit u) {
+                    if (!t.getTeamUnits().contains(u)) {
+
+                        global_order = BattleGroupOrder.ATTACK;
+                        global_order_x = u.getX();
+                        global_order_y = u.getY();
+
 
                         AttackOrder attackOrder = new AttackOrder(u, Pathfinding.a_star(u.getX(), u.getY(), actor.getX(), actor.getY(), g, true));
                         if (attackOrder.path != null)

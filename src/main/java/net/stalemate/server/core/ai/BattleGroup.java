@@ -30,8 +30,11 @@ import net.stalemate.server.core.units.SelfPropelledArtillery;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class BattleGroup {
+    private static final Random RND = new Random();
+
     ArrayList<Unit> attack_force = new ArrayList<>();
     ArrayList<Unit> artillery = new ArrayList<>();
 
@@ -112,6 +115,29 @@ public class BattleGroup {
         }
     }
 
+
+    public static class FollowOrder implements UnitOrderWithPath{
+        public int gt_x;
+        public int gt_y;
+        public ArrayList<Pathfinding.Node> path;
+        public Unit target;
+
+        public void setPath(ArrayList<Pathfinding.Node> path) {
+            this.path = path;
+        }
+
+        public ArrayList<Pathfinding.Node> getPath() {
+            return path;
+        }
+
+        public FollowOrder(int gt_x, int gt_y, ArrayList<Pathfinding.Node> path, Unit target){
+            this.gt_x = gt_x;
+            this.gt_y = gt_y;
+            this.path = path;
+            this.target = target;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public void doTurn(){
         removeDeadUnits(attack_force);
@@ -136,21 +162,15 @@ public class BattleGroup {
                 }
             }
 
-            int atk_force_idx = 0;
-
             for (Unit unit : artillery){
                 if (!orders.containsKey(unit)) {
-                    if (atk_force_idx >= attack_force.size()) {
-                        atk_force_idx = 0;
-                    }
+                    int atk_force_idx = RND.nextInt(attack_force.size());
 
                     Unit attack_force_unit = attack_force.get(atk_force_idx);
 
-                    orders.put(unit, new MoveOrder(attack_force_unit.getX(), attack_force_unit.getY(),
+                    orders.put(unit, new FollowOrder(attack_force_unit.getX(), attack_force_unit.getY(),
                             Pathfinding.a_star(attack_force_unit.getX(), attack_force_unit.getY(), unit.getX(), unit.getY(), g,
-                                    true)));
-
-                    atk_force_idx++;
+                                    true), attack_force_unit));
                 }
             }
         }
@@ -161,6 +181,18 @@ public class BattleGroup {
             UnitOrder uorder = entry.getValue();
 
             attackIfCan(actor);
+
+            if (uorder == null){
+                orders.put(actor, new MoveOrder(global_order_x, global_order_y,
+                        Pathfinding.a_star(global_order_x, global_order_y, actor.getX(), actor.getY(), g,
+                                true)));
+            }
+
+            if (uorder instanceof FollowOrder followOrder){
+                if (followOrder.target.getHp() <= 0){
+                    makeFollowOrder(actor);
+                }
+            }
 
             if (uorder instanceof AttackOrder attackOrder){
                 if (attackOrder.target.getHp() <= 0){
@@ -183,6 +215,24 @@ public class BattleGroup {
             }
             else {
                 fixPath(actor, uorder_path);
+            }
+        }
+    }
+
+    public void makeFollowOrder(Unit actor){
+        if (attack_force.size() != 0 && artillery.contains(actor)) {
+            int atk_force_idx = RND.nextInt(attack_force.size());
+
+            Unit attack_force_unit = attack_force.get(atk_force_idx);
+
+            orders.put(actor, new FollowOrder(attack_force_unit.getX(), attack_force_unit.getY(),
+                    Pathfinding.a_star(attack_force_unit.getX(), attack_force_unit.getY(), actor.getX(), actor.getY(), g,
+                            true), attack_force_unit));
+        } else{
+            if (global_order == BattleGroupOrder.ATTACK){
+                orders.put(actor, new MoveOrder(global_order_x, global_order_y,
+                        Pathfinding.a_star(global_order_x, global_order_y, actor.getX(), actor.getY(), g,
+                                true)));
             }
         }
     }
@@ -222,7 +272,9 @@ public class BattleGroup {
         else if (uorder instanceof AttackOrder attackOrder){
             attackOrder.path = Pathfinding.a_star(attackOrder.target.getX(), attackOrder.target.getY(),
                     actor.getX(), actor.getY(), g, true);
-
+        }
+        else if (uorder instanceof FollowOrder followOrder){
+            fixFollowOrder(actor, followOrder);
         }
     }
 
@@ -269,8 +321,21 @@ public class BattleGroup {
         }
     }
 
+    public void fixFollowOrder(Unit actor, FollowOrder followOrder){
+        if (followOrder.target.getX() != followOrder.gt_x ||
+            followOrder.target.getY() != followOrder.gt_y){
+            followOrder.path = Pathfinding.a_star(followOrder.target.getX(), followOrder.target.getY(),
+                    actor.getX(), actor.getY(), g, true);
+        }
+    }
+
     private void moveThroughPath(Unit actor, UnitOrderWithPath uorder){
         int nidx = actor.unitStats().getMovementRange()-1;
+
+        // it is possible that target will be away from (gt_x, gt_y)
+        if (uorder instanceof FollowOrder followOrder){
+            fixPath(actor, followOrder);
+        }
 
         while (!actor.hasTurnEnded()) {
             if (uorder.getPath().size() == 0){
@@ -289,6 +354,9 @@ public class BattleGroup {
                 nidx = uorder.getPath().size()-1;
             }
 
+            if (nidx < 0){
+                break;
+            }
 
             Pathfinding.Node next = uorder.getPath().get(nidx);
 

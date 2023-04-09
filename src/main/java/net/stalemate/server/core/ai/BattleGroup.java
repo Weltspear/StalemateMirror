@@ -40,6 +40,8 @@ public class BattleGroup {
 
     private HashMap<Unit, UnitOrder> orders = new HashMap<>();
 
+    private boolean isAutonomous = false;
+
     private final Game g;
     private final Game.Team t;
 
@@ -138,6 +140,10 @@ public class BattleGroup {
         }
     }
 
+    private boolean isCloseToOrder(int x, int y){
+        return (global_order_x-x) * (global_order_x - x) + (global_order_y - y) * (global_order_y - y) <= 10*10;
+    }
+
     @SuppressWarnings("unchecked")
     public void doTurn(){
         removeDeadUnits(attack_force);
@@ -156,9 +162,14 @@ public class BattleGroup {
         if (global_order == BattleGroupOrder.ATTACK) {
             for (Unit unit : attack_force) {
                 if (!orders.containsKey(unit)) {
-                    orders.put(unit, new MoveOrder(global_order_x, global_order_y,
-                            Pathfinding.a_star(global_order_x, global_order_y, unit.getX(), unit.getY(), g,
-                                    true)));
+                    if (isCloseToOrder(unit.getX(), unit.getY())){
+                        orders.put(unit, switchToAttackMode(unit));
+                    }
+                    else{
+                        orders.put(unit, new MoveOrder(global_order_x, global_order_y,
+                                Pathfinding.a_star(global_order_x, global_order_y, unit.getX(), unit.getY(), g,
+                                        true)));
+                    }
                 }
             }
 
@@ -183,9 +194,14 @@ public class BattleGroup {
             attackIfCan(actor);
 
             if (uorder == null){
-                orders.put(actor, new MoveOrder(global_order_x, global_order_y,
-                        Pathfinding.a_star(global_order_x, global_order_y, actor.getX(), actor.getY(), g,
-                                true)));
+                if (isCloseToOrder(actor.getX(), actor.getY()) && !artillery.contains(actor)){
+                    orders.put(actor, switchToAttackMode(actor));
+                }
+                else{
+                    orders.put(actor, new MoveOrder(global_order_x, global_order_y,
+                            Pathfinding.a_star(global_order_x, global_order_y, actor.getX(), actor.getY(), g,
+                                    true)));
+                }
             }
 
             if (uorder instanceof FollowOrder followOrder){
@@ -265,7 +281,6 @@ public class BattleGroup {
 
     private void fixPath(Unit actor, UnitOrder uorder) {
         if (uorder instanceof MoveOrder moveOrder) {
-
             moveOrder.path = Pathfinding.a_star(moveOrder.gt_x, moveOrder.gt_y,
                     actor.getX(), actor.getY(), g, true);
         }
@@ -296,14 +311,21 @@ public class BattleGroup {
             }
         }
 
-        if (!found){
+        if (!found && isAutonomous){
             for (Entity entity: g.getAllEntities()){
                 if (entity instanceof Unit u){
                     if (!t.getTeamUnits().contains(u)){
+                        if (isAutonomous){
+                            global_order = BattleGroupOrder.ATTACK;
+                            global_order_x = u.getX();
+                            global_order_y = u.getY();
+                        }
+
                         AttackOrder attackOrder = new AttackOrder(u, Pathfinding.a_star(u.getX(), u.getY(), actor.getX(), actor.getY(), g, true));
                         if (attackOrder.path != null)
-                            if (attackOrder.path.size() > 0)
+                            if (attackOrder.path.size() > 0) {
                                 return attackOrder;
+                            }
                     }
                 }
             }
@@ -392,5 +414,12 @@ public class BattleGroup {
     public void mergeWithOther(BattleGroup other){
         artillery.addAll(other.artillery);
         attack_force.addAll(other.attack_force);
+    }
+
+    /***
+     * Enables BattleGroup's autonomous decision-making
+     */
+    public void makeAutonomous(){
+        isAutonomous = true;
     }
 }

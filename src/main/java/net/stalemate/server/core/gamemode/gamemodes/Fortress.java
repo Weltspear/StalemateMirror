@@ -221,13 +221,49 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
             ArrayList<BattleGroup> to_be_removed = new ArrayList<>();
 
+            ArrayList<BattleGroup> to_be_merged = new ArrayList<>();
+
             for (BattleGroup battleGroup: battleGroups){
                 if (battleGroup.getUnitAmount() == 0){
+                    to_be_removed.add(battleGroup);
+                }
+                if (battleGroup.getUnitAmount() < 10){
+                    to_be_merged.add(battleGroup);
                     to_be_removed.add(battleGroup);
                 }
             }
 
             battleGroups.removeAll(to_be_removed);
+
+            if (battleGroups.size() == 0){
+                battleGroups.addAll(to_be_merged);
+                to_be_merged.clear();
+            }
+
+            if (to_be_merged.size() > 0)
+            for (BattleGroup battleGroup: battleGroups){
+                if (to_be_merged.size() == 0){
+                    break;
+                }
+
+                if (battleGroup.getUnitAmount() < 20){
+                    BattleGroup m = to_be_merged.get(0);
+                    to_be_merged.remove(m);
+                    battleGroup.mergeWithOther(m);
+                }
+            }
+
+            // if there are any left try to merge with any battlegroup
+            if (to_be_merged.size() > 0)
+                for (BattleGroup battleGroup: battleGroups){
+                    if (to_be_merged.size() == 0){
+                        break;
+                    }
+
+                    BattleGroup m = to_be_merged.get(0);
+                    to_be_merged.remove(m);
+                    battleGroup.mergeWithOther(m);
+                }
 
             for (BattleGroup battleGroup: battleGroups){
                 battleGroup.doTurn();

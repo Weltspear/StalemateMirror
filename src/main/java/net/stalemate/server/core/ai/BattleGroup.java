@@ -388,4 +388,9 @@ public class BattleGroup {
     public int getUnitAmount(){
         return artillery.size()+attack_force.size();
     }
+
+    public void mergeWithOther(BattleGroup other){
+        artillery.addAll(other.artillery);
+        attack_force.addAll(other.attack_force);
+    }
 }

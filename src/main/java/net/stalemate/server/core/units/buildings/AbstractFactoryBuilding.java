@@ -18,6 +18,7 @@
 
 package net.stalemate.server.core.units.buildings;
 
+import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.AnimationController;
@@ -46,6 +47,8 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
         }
 
     }
+
+    private Layer layer = Layer.GROUND;
 
     final ArrayDeque<UnitProduction> production_queue = new ArrayDeque<>();
     UnitProduction currently_processed_unit = null;
@@ -190,14 +193,14 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
             if (currently_processed_unit.time_in_production <= 0){
                 boolean isBlocked = false;
                 for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
-                    if (!entity.isPassable()){
+                    if (!entity.isPassable() && !(entity instanceof AirUnit ? layer == Layer.GROUND : layer == Layer.AIR)){
                         isBlocked = true;
                         break;
                     }
                 }
 
                 for (Entity entity: game.getEntitiesToBeAdded()){
-                    if (entity.getX() == x+deployment_x && entity.getY() == y+deployment_y){
+                    if (entity.getX() == x+deployment_x && entity.getY() == y+deployment_y && !(entity instanceof AirUnit ? layer == Layer.GROUND : layer == Layer.AIR)){
                         if (!entity.isPassable()){
                             isBlocked = true;
                             break;
@@ -252,7 +255,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
     public boolean checkForBlockage(){
         boolean isProductionBlocked = false;
         for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
-            if (entity instanceof Unit){
+            if (entity instanceof Unit && !(entity instanceof AirUnit ? layer == Layer.GROUND : layer == Layer.AIR)){
                 isProductionBlocked = true;
                 break;
             }

@@ -950,6 +950,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         toBeJsoned.put("atk_tracker", coords);
                     }
 
+                    // Send viewmode
+                    toBeJsoned.put("mode", viewMode == ViewMode.GROUND ? 0 : 1);
+
                     // Chat
                     ArrayList<String> chat = this.chat.read();
                     toBeJsoned.put("chat", chat);

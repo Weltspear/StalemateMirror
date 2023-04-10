@@ -271,6 +271,8 @@ public class InGameUI extends JPanel {
         private final ClientMapLoader mapLoader = new ClientMapLoader();
         private final BufferedImage skull;
         private final BufferedImage shovel;
+        private final BufferedImage motorized;
+        private final BufferedImage plane;
 
         private final HashMap<String, Image> entity_scaled_cache = new HashMap<>();
         private final HashMap<String, Image> map_scaled_cache = new HashMap<>();
@@ -367,6 +369,8 @@ public class InGameUI extends JPanel {
 
             shovel = AssetLoader.load("assets/shovel.png");
             skull = AssetLoader.load("assets/skull.png");
+            motorized = AssetLoader.load("assets/motorized.png");
+            plane = AssetLoader.load("assets/plane.png");
         }
 
         public Image unit2image(ClientGame.ClientUnit e){
@@ -640,7 +644,7 @@ public class InGameUI extends JPanel {
                             Object[] hash_ar = new Object[]{rgb_team,
                                     ((float) ucentity.getHp()) / ((float) ucentity.getMaxHp()),
                                     (has_unit_su_enabled) ? ((float) ucentity.getSu()) / ((float) ucentity.getMaxSu()) : -1,
-                                    0};
+                                    0, ucentity.getOther(), ucentity.getOtherTeamRGB()};
 
                             // takes indicators into account
                             if (ucentity.getSu() < ucentity.getMaxSu() * 0.4 && has_unit_su_enabled) {
@@ -729,6 +733,25 @@ public class InGameUI extends JPanel {
 
                                 if (et > 0 && !(su < max_su * 0.4 && has_unit_su_enabled))
                                     graphics.drawImage(shovel_col, 0, 0, null);
+
+                                // Draw "other"
+                                if (ucentity.getOther() != -1){
+                                    BufferedImage other = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB_PRE);
+                                    Graphics2D other_graphics = other.createGraphics();
+                                    other_graphics.setBackground(new Color(0x00FFFFFF, true));
+                                    other_graphics.drawImage(ucentity.getOther() == 1 ? plane : motorized, 0, 0, null);
+
+                                    for (int y_ = 0; y_ < 16; y_++) {
+                                        for (int x_ = 0; x_ < 16; x_++) {
+                                            if (other.getRGB(x_, y_) == Color.BLACK.getRGB()) {
+                                                other.setRGB(x_, y_, ucentity.getOtherTeamRGB().getRGB());
+                                            }
+                                        }
+                                    }
+
+                                    graphics.drawImage(other,46, 1, null);
+                                }
+
                                 graphics.dispose();
 
                                 unit_data_ar.get(y).add(clone);

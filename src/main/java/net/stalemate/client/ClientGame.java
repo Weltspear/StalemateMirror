@@ -46,6 +46,10 @@ public class ClientGame {
     private Color teamDoingTurnColor = Color.WHITE;
     private String teamDoingTurnNick = "";
 
+    // 0 ground
+    // 1 air
+    private int mode = 0;
+
     public String getMapPath() {
         return map_path;
     }
@@ -228,6 +232,12 @@ public class ClientGame {
         private final int fog_of_war_range;
         private final boolean is_our;
 
+        // if an air unit is above shows an icon / if a ground unit is below shows an icon
+        // 0 motorized
+        // 1 plane
+        private int other = -1;
+        private Color rgb_team_other = null;
+
         public ClientUnit(int x, int y, boolean flip, BufferedImage texture, String texture_n, int rgb,
                           ArrayList<Integer> stats, boolean transparent,
                           int fog_of_war_range, boolean is_our) {
@@ -284,6 +294,19 @@ public class ClientGame {
 
         public String getTextureLoc() {
             return texture_n;
+        }
+
+        public int getOther(){
+            return other;
+        }
+
+        public Color getOtherTeamRGB(){
+            return rgb_team_other;
+        }
+
+        public void setOther(int other, Color rgb){
+            this.other = other;
+            this.rgb_team_other = rgb;
         }
     }
 
@@ -462,6 +485,8 @@ public class ClientGame {
 
             teamDoingTurnColor = new Color((int)data_map.get("team_doing_turn_color"));
             teamDoingTurnNick = ((String)data_map.get("team_doing_turn_nick"));
+
+            mode = (int)data_map.get("mode");
         } catch (JsonProcessingException e){
             lock.unlock();
             return new Expect<>(() -> "Failed to parse JSON");
@@ -505,6 +530,17 @@ public class ClientGame {
                     if (entity.getX() >= x_center - (int)Math.ceil(7*scale) - 1 && entity.getX() < x_center + (int)Math.ceil(7*scale)) {
                         if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] == null)
                             entities_s[entity.getY() - y + 1][entity.getX() - x + 1] = entity;
+                        else{
+                            if (entities_s[entity.getY() - y + 1][entity.getX() - x + 1] instanceof ClientUnit unit && entity instanceof ClientUnit otherunit
+                                    && entities_s[entity.getY() - y + 1][entity.getX() - x + 1] != entity) {
+                                if (mode == 0) {
+                                    unit.setOther(1, otherunit.getTeamColor());
+                                }
+                                else{
+                                    unit.setOther(0, otherunit.getTeamColor());
+                                }
+                            }
+                        }
                     }
                 }
             }

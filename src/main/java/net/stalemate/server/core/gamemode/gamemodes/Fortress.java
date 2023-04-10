@@ -111,7 +111,7 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
         public record AlreadySpawnedCoord(int x, int y){}
 
-        private int turnsDone = 5;
+        private int turnsDone = 0;
 
         private int waveSize = 1;
 
@@ -133,25 +133,20 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
             t.setTeamName("fortressAI");
         }
 
-        private int infantryAmount(){
-            return (int) Math.ceil(((double) (waveSize))*1.5f);
-        }
-
         private int infantryAmount2(){
             return (int) Math.ceil(-(waveSize/3f - 4)*(waveSize/3f - 4) + 15);
         }
 
         private int artilleryAmount(){
-            //return (int) Math.ceil(((double) (waveSize-3))*1.5f);
-            return (int) Math.ceil(((double) (waveSize))*1.5f);
+            return (int) Math.ceil(((double) (waveSize-3))*1.5f);
         }
 
         private int tankAmount(){
-            return (int) Math.ceil(((double) (waveSize-4))*2f);
+            return (int) Math.ceil(((double) (waveSize-5))*2f);
         }
 
         private int heavyTankAmount(){
-            return (int) Math.ceil(waveSize-4);
+            return (int) Math.ceil(waveSize-5);
         }
 
         private ArrayList<Unit> spawnUnits(SpawnRect rect, int uamount, ArrayList<AlreadySpawnedCoord> alreadySpawnedCoords, int type){

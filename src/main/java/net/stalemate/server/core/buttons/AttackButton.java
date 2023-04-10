@@ -18,6 +18,7 @@
 
 package net.stalemate.server.core.buttons;
 
+import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.buttons.util.Invulnerable;
@@ -76,7 +77,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
         if (!unit.hasTurnEnded() && unit.unitStats().getSupply() - 2 > 0 && !(selected_unit instanceof Invulnerable)){
             if (selected_unit.unitStats().getHp() > 0){
                 unit.getAnimationController().setCurrentAnimation("attack");
-                if (anti_tank_mode && selected_unit.getProtector() == null){
+                if (anti_tank_mode && (selected_unit.getProtector() == null || unit instanceof AirUnit)){
                     if (selected_unit.unitStats().getArmor() == 1){
                         selected_unit.damage(unit.getAtk() + 1);
                     } else if (selected_unit.unitStats().getArmor() == 2){
@@ -93,7 +94,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
                         selected_unit.getProtector().damage(unit.getAtk()-3);
                     }
                 }
-                else if (selected_unit.getProtector() == null) {
+                else if ((selected_unit.getProtector() == null || unit instanceof AirUnit)) {
                     selected_unit.damage(unit.getAtk());
                 }
                 else {
@@ -110,7 +111,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
                             unit.damage(selected_unit.getDf());
                             selected_unit.getAnimationController().setCurrentAnimation("attack");
 
-                            if (selected_unit.getProtector() != null){
+                            if (selected_unit.getProtector() != null && !(unit instanceof AirUnit)){
                                 unit.damage(selected_unit.getProtector().getDf());
                                 selected_unit.getProtector().getAnimationController().setCurrentAnimation("attack");
                             }
@@ -139,7 +140,7 @@ public class AttackButton implements Unit.ISelectorButtonUnit { // todo: create 
                 if (!(selected_unit instanceof IBuilding))
                 selected_unit.consumeSupply(2);
 
-                if (selected_unit.getProtector() != null && !(selected_unit instanceof IBuilding)){
+                if (selected_unit.getProtector() != null && !(selected_unit instanceof IBuilding) && !(unit instanceof AirUnit)){
                     selected_unit.getProtector().consumeSupply(2);
                 }
 

@@ -32,6 +32,7 @@ import net.stalemate.server.core.gamemode.gamemodes.Fortress;
 import net.stalemate.server.core.gamemode.gamemodes.Sandbox;
 import net.stalemate.server.core.gamemode.gamemodes.Versus;
 import net.stalemate.server.core.units.*;
+import net.stalemate.server.core.units.air.*;
 import net.stalemate.server.core.units.buildings.*;
 
 import java.awt.*;
@@ -101,7 +102,15 @@ public class MapLoader {
         EntityRegistry.addEntity("light_tank", LightTank.class);
         EntityRegistry.addEntity("heavy_tank", HeavyTank.class);
         EntityRegistry.addEntity("motorized_unit", MotorizedUnit.class);
+
+        EntityRegistry.addEntity("anti_air", AntiAirBuilding.class);
+        EntityRegistry.addEntity("airport", Airport.class);
+        EntityRegistry.addEntity("heavy_fighter", HeavyFighter.class);
+        EntityRegistry.addEntity("strat_bomber", StrategicBomber.class);
+        EntityRegistry.addEntity("cas_bomber", CloseAirSupportBomber.class);
+        EntityRegistry.addEntity("transport_plane", TransportPlane.class);
         EntityRegistry.addEntity("fighter", Fighter.class);
+
 
         GamemodeRegistry.addGamemode("versus", Versus.class);
         GamemodeRegistry.addGamemode("dev", Sandbox.class);

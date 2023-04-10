@@ -370,6 +370,48 @@ public class EngineerUnit extends Unit implements IUnitName{
                 return "button_engineer_unit_build_menu_build_factory";
             }
         });
+        buttons[6] = (new ConstructBuildingButton(Airport.class, 3, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "P";
+            }
+
+            @Override
+            public String texture() {
+                return "texture_missing";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_airport";
+            }
+        });
+        buttons[7] = (new ConstructBuildingButton(AntiAirBuilding.class, 2, 3, false) {
+            @Override
+            public String selector_texture() {
+                return "assets/ui/selectors/ui_repair.png";
+            }
+
+            @Override
+            public String bind() {
+                return "R";
+            }
+
+            @Override
+            public String texture() {
+                return "texture_missing";
+            }
+
+            @Override
+            public String identifier() {
+                return "button_engineer_unit_build_menu_build_antiair";
+            }
+        });
 
         buttons[8] = new ExitBuildMenuButton();
     }

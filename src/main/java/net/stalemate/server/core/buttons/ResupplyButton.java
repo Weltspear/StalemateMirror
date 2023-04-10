@@ -22,9 +22,20 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.controller.Game;
 
 public class ResupplyButton implements Unit.ISelectorButtonUnit {
+
+    private Unit.Layer layer = Unit.Layer.GROUND;
+
+    public ResupplyButton(){
+
+    }
+
+    public ResupplyButton(Unit.Layer l){
+        this.layer = l;
+    }
+
     @Override
     public String bind() {
-        return "S";
+        return layer == Unit.Layer.GROUND ? "S" : "R";
     }
 
     @Override
@@ -34,7 +45,7 @@ public class ResupplyButton implements Unit.ISelectorButtonUnit {
 
     @Override
     public String identifier() {
-        return "button_resupply";
+        return layer == Unit.Layer.GROUND ? "button_resupply_ground" : "button_resupply_air";
     }
 
     @Override
@@ -72,5 +83,10 @@ public class ResupplyButton implements Unit.ISelectorButtonUnit {
     @Override
     public boolean isUsedOnAlliedUnit() {
         return true;
+    }
+
+    @Override
+    public Unit.Layer getLayer() {
+        return layer;
     }
 }

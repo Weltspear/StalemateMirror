@@ -6,6 +6,7 @@ properties:
   ar: "Armor"
   atk_ar_1: "ATK (vs Armor: 1)"
   atk_ar_2: "ATK (vs Armor: 2)"
+  atk_building: "ATK (vs Building)"
   ended_turn: "Has ended it's turn"
   move_amount: "Moves left"
   construction_time: "Construction time"

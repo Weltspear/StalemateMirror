@@ -16,22 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.server.core.units;
+package net.stalemate.server.core.units.air;
 
 import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
+import net.stalemate.server.core.buttons.BombButton;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.controller.Game;
+import net.stalemate.server.core.units.util.IMechanized;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Fighter extends AirUnit {
-    public Fighter(int x, int y, Game game) {
-        super(x, y, game, new UnitStats(10, 10, 1, 5, 4, 0, 20, 20, 0, 0, 0), new AnimationController(), "Fighter");
+public class CloseAirSupportBomber extends AirUnit implements IMechanized {
+    public CloseAirSupportBomber(int x, int y, Game game) {
+        super(x, y, game, new UnitStats(8, 8, 0, 2, 4, 0, 16, 16, 0, 0, 0), new AnimationController(), "CAS Bomber");
         Animation animation = new Animation(1);
         animation.addFrame("assets/units/placeholder_fighter.png");
         anim.addAnimation("idle",animation);
@@ -42,7 +41,7 @@ public class Fighter extends AirUnit {
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
 
-        fog_of_war_range = 5;
+        fog_of_war_range = 2;
         move_amount = 2;
         turn_move_amount = 2;
 
@@ -50,6 +49,6 @@ public class Fighter extends AirUnit {
 
     @Override
     public IButton[] getButtons() {
-        return new IButton[]{new MoveButton(5, Layer.AIR), new AttackButton(1, Layer.AIR)};
+        return new IButton[]{new MoveButton(movement_range, Layer.AIR), new BombButton()};
     }
 }

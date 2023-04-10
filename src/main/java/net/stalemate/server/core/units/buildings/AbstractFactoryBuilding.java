@@ -48,7 +48,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
     }
 
-    private Layer layer = Layer.GROUND;
+    protected Layer layer = Layer.GROUND;
 
     final ArrayDeque<UnitProduction> production_queue = new ArrayDeque<>();
     UnitProduction currently_processed_unit = null;

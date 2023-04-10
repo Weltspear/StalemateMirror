@@ -537,15 +537,16 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                     else{
                                                         viewMode = ViewMode.GROUND;
                                                     }
-                                                } else if (button instanceof Unit.ISelectorButtonUnit) {
+                                                } else if (button instanceof Unit.ISelectorButtonUnit iSelectorButtonUnit) {
                                                     if (viewMode == getButtonViewMode(button)) {
                                                         ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
 
                                                         for (Entity entity : entities) {
-                                                            if (entity instanceof Unit) {
-                                                                if ((((Unit.ISelectorButtonUnit) button).isUsedOnAlliedUnit()
-                                                                        && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
-                                                                    ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                            if (entity instanceof Unit u) {
+                                                                if ((iSelectorButtonUnit.getLayer() == Unit.Layer.GROUND) != (u instanceof AirUnit))
+                                                                if (iSelectorButtonUnit.isUsedOnAlliedUnit()
+                                                                        && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity)) {
+                                                                    iSelectorButtonUnit.action(u, selected_unit, game);
                                                                     iselectorbuttonid = null;
 
                                                                     if (selected_unit instanceof AirUnit){
@@ -554,14 +555,14 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                                     else{
                                                                         viewMode = ViewMode.GROUND;
                                                                     }
-                                                                } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
-                                                                        && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
-                                                                    if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
-                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                } else if (iSelectorButtonUnit.isUsedOnEnemy()
+                                                                        && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity)) {
+                                                                    if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && iSelectorButtonUnit.canEnemyTeamUseOnOtherEnemyTeamUnit())
+                                                                        iSelectorButtonUnit.action(u, selected_unit, game);
                                                                     else if (isSelectedUnitEnemyTeam && team.getTeamUnits().contains(entity))
-                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                        iSelectorButtonUnit.action(u, selected_unit, game);
                                                                     else if (!isSelectedUnitEnemyTeam)
-                                                                        ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
+                                                                        iSelectorButtonUnit.action(u, selected_unit, game);
                                                                     iselectorbuttonid = null;
 
                                                                     if (selected_unit instanceof AirUnit){

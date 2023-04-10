@@ -777,6 +777,10 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                             unit_data.put("stats", stats);
                             unit_data.put("fog_of_war_range", unit.getFogOfWarRange());
                             unit_data.put("is_our", t == team);
+                            unit_data.put("has_turn_ended", unit.hasTurnEnded());
+                            unit_data.put("animation_state",
+                                    unit.getAnimationController() == null ? "null" : unit.getAnimationController().getCurrentAnimation() == null ?
+                                            "null" : unit.getAnimationController().getAnimationName(unit.getAnimationController().getCurrentAnimation()));
                             unit_data.put("transparent", unit instanceof AirUnit && viewMode != ViewMode.AIR || !(unit instanceof AirUnit) && viewMode != ViewMode.GROUND);
                             unit_data.put("texture", unit.getTextureFileName());
 

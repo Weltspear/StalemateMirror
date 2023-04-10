@@ -373,6 +373,20 @@ public class InGameUI extends JPanel {
             plane = AssetLoader.load("assets/plane.png");
         }
 
+        private BufferedImage createARGBClone(Image image){
+            BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
+            Graphics2D graphics = clone.createGraphics();
+
+            graphics.setBackground(new Color(0x00FFFFFF, true));
+            graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
+
+            graphics.drawImage(image, 0, 0, null);
+
+            graphics.dispose();
+
+            return clone;
+        }
+
         public Image unit2image(ClientGame.ClientUnit e){
             BufferedImage image;
 
@@ -388,6 +402,10 @@ public class InGameUI extends JPanel {
 
             if (e.isTransparent()){
                 cached = cached+"+transparent";
+            }
+
+            if (e.hasTurnEnded() && e.getAnimationState().equals("idle")){
+                cached = cached+"+turnended";
             }
 
             if (entity_scaled_cache.containsKey(cached)){
@@ -418,15 +436,7 @@ public class InGameUI extends JPanel {
                 }
 
                 if (e.isTransparent()) {
-                    BufferedImage clone = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB_PRE);
-                    Graphics2D graphics = clone.createGraphics();
-
-                    graphics.setBackground(new Color(0x00FFFFFF, true));
-                    graphics.clearRect(0, 0, clone.getWidth(), clone.getHeight());
-
-                    graphics.drawImage(image, 0, 0, null);
-
-                    graphics.dispose();
+                    BufferedImage clone = createARGBClone(image);
 
                     for (int y_ = 0; y_ < 32; y_++) {
                         for (int x_ = 0; x_ < 32; x_++) {
@@ -446,6 +456,34 @@ public class InGameUI extends JPanel {
 
                     image = clone;
                 }
+
+                if (e.hasTurnEnded() && e.getAnimationState().equals("idle")){
+                    BufferedImage clone = createARGBClone(image);
+
+                    for (int y_ = 0; y_ < 32; y_++) {
+                        for (int x_ = 0; x_ < 32; x_++) {
+
+                            Color original = new Color((new Color(clone.getRGB(x_, y_))).getRed(),
+                                    (new Color(clone.getRGB(x_, y_))).getGreen(),
+                                    (new Color(clone.getRGB(x_, y_))).getBlue(),
+                                    (new Color(clone.getRGB(x_, y_), true)).getAlpha());
+
+                            int r = (int) Math.floor(original.getRed()*0.9);
+                            int g = (int) Math.floor(original.getRed()*0.9);
+                            int b = (int) Math.floor(original.getRed()*0.9);
+
+                            clone.setRGB(x_, y_, (new Color(r < 256 ? r: 255,
+                                    g < 256 ? r: 255,
+                                    b < 256 ? r: 255,
+                                    original.getAlpha())).getRGB());
+
+                        }
+                    }
+
+                    image = clone;
+
+                }
+
                 Image img_d = image.getScaledInstance(64, 64, Image.SCALE_FAST);
                 entity_scaled_cache.put(cached, img_d);
                 return img_d;

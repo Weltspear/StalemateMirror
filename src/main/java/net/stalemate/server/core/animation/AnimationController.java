@@ -60,6 +60,10 @@ public class AnimationController {
         else return null;
     }
 
+    public Animation getCurrentAnimation(){
+        return current_animation;
+    }
+
     public boolean containsAnimation(String a){
         return animationMap.containsKey(a);
     }
@@ -67,6 +71,8 @@ public class AnimationController {
     public Animation getAnimation(String a){
         return animationMap.get(a);
     }
+
+    public String getAnimationName(Animation a) {return animationMap2.get(a);}
 
     public void tick(){
         if (current_animation != null){

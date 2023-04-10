@@ -231,6 +231,8 @@ public class ClientGame {
         private final boolean transparent;
         private final int fog_of_war_range;
         private final boolean is_our;
+        private final boolean hasTurnEnded;
+        private final String animation_state;
 
         // if an air unit is above shows an icon / if a ground unit is below shows an icon
         // 0 motorized
@@ -240,7 +242,7 @@ public class ClientGame {
 
         public ClientUnit(int x, int y, boolean flip, BufferedImage texture, String texture_n, int rgb,
                           ArrayList<Integer> stats, boolean transparent,
-                          int fog_of_war_range, boolean is_our) {
+                          int fog_of_war_range, boolean is_our, boolean hasTurnEnded, String animation_state) {
             super(x, y, flip, texture);
             this.texture_n = texture_n;
 
@@ -254,6 +256,8 @@ public class ClientGame {
             this.transparent = transparent;
             this.fog_of_war_range = fog_of_war_range;
             this.is_our = is_our;
+            this.hasTurnEnded = hasTurnEnded;
+            this.animation_state = animation_state;
         }
 
         public int getHp() {
@@ -303,6 +307,15 @@ public class ClientGame {
         public Color getOtherTeamRGB(){
             return rgb_team_other;
         }
+
+        public boolean hasTurnEnded() {
+            return hasTurnEnded;
+        }
+
+        public String getAnimationState() {
+            return animation_state;
+        }
+
 
         public void setOther(int other, Color rgb){
             this.other = other;
@@ -432,10 +445,13 @@ public class ClientGame {
                     ArrayList<Integer> stats = (ArrayList<Integer>) _entity.get("stats");
                     boolean transparent = (boolean) _entity.get("transparent");
                     boolean is_our = (boolean) _entity.get("is_our");
+                    boolean has_turn_ended = (boolean) _entity.get("has_turn_ended");
                     int rgb = (int) _entity.get("rgb");
                     int fog_of_war_range = (int) _entity.get("fog_of_war_range");
+                    String animation_state = (String) _entity.get("animation_state");
 
-                    ClientUnit unit = new ClientUnit(x, y, flip, texture, (String) _entity.get("texture"), rgb, stats, transparent, fog_of_war_range, is_our);
+                    ClientUnit unit = new ClientUnit(x, y, flip, texture, (String) _entity.get("texture"), rgb, stats, transparent,
+                            fog_of_war_range, is_our, has_turn_ended, animation_state);
                     entities.add(unit);
                 }
 

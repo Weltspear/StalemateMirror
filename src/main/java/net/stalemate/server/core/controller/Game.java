@@ -446,4 +446,11 @@ public class Game {
     public Team getVictoriousTeam(){
         return mode.getVictoriousTeam(this);
     }
+
+    /***
+     * @return <code>ArrayList<code/> of entities which are going to be added to game in next tick.
+     */
+    public ArrayList<Entity> getEntitiesToBeAdded(){
+        return to_be_added;
+    }
 }

@@ -190,11 +190,21 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
             if (currently_processed_unit.time_in_production <= 0){
                 boolean isBlocked = false;
                 for (Entity entity: game.getEntities(x+deployment_x, y+deployment_y)){
-                    if (entity instanceof Unit){
+                    if (!entity.isPassable()){
                         isBlocked = true;
                         break;
                     }
                 }
+
+                for (Entity entity: game.getEntitiesToBeAdded()){
+                    if (entity.getX() == x+deployment_x && entity.getY() == y+deployment_y){
+                        if (!entity.isPassable()){
+                            isBlocked = true;
+                            break;
+                        }
+                    }
+                }
+
                 if (!(x+deployment_x < game.getMapWidth()) || x+deployment_x < 0){
                     isBlocked = true;
                 }
@@ -228,8 +238,8 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
     @Override
     public void turnUpdate() {
-        super.endTurn();
         deploy();
+        super.turnUpdate();
     }
 
     @Override

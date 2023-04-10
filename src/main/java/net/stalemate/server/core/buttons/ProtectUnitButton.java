@@ -46,6 +46,7 @@ public class ProtectUnitButton implements Unit.ISelectorButtonUnit{
 
     @Override
     public void action(Unit selected_unit, Unit unit, Game gameController) {
+        if (selected_unit != unit)
         if (!unit.hasTurnEnded()){
             if (gameController.getUnitsTeam(selected_unit) == gameController.getUnitsTeam(unit)){
                 if (selected_unit.getProtector() == null){

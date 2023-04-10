@@ -530,6 +530,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                             ((Unit.ISelectorButton) button).action(selector_x, selector_y, selected_unit, game);
                                                         }
                                                     iselectorbuttonid = null;
+
+                                                    if (selected_unit instanceof AirUnit){
+                                                        viewMode = ViewMode.AIR;
+                                                    }
+                                                    else{
+                                                        viewMode = ViewMode.GROUND;
+                                                    }
                                                 } else if (button instanceof Unit.ISelectorButtonUnit) {
                                                     if (viewMode == getButtonViewMode(button)) {
                                                         ArrayList<Entity> entities = game.getEntities(selector_x, selector_y);
@@ -540,6 +547,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                                         && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
                                                                     ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                     iselectorbuttonid = null;
+
+                                                                    if (selected_unit instanceof AirUnit){
+                                                                        viewMode = ViewMode.AIR;
+                                                                    }
+                                                                    else{
+                                                                        viewMode = ViewMode.GROUND;
+                                                                    }
                                                                 } else if ((((Unit.ISelectorButtonUnit) button).isUsedOnEnemy()
                                                                         && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity))) {
                                                                     if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && ((Unit.ISelectorButtonUnit) button).canEnemyTeamUseOnOtherEnemyTeamUnit())
@@ -549,6 +563,13 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                                     else if (!isSelectedUnitEnemyTeam)
                                                                         ((Unit.ISelectorButtonUnit) button).action(((Unit) entity), selected_unit, game);
                                                                     iselectorbuttonid = null;
+
+                                                                    if (selected_unit instanceof AirUnit){
+                                                                        viewMode = ViewMode.AIR;
+                                                                    }
+                                                                    else{
+                                                                        viewMode = ViewMode.GROUND;
+                                                                    }
                                                                 }
                                                             }
                                                         }

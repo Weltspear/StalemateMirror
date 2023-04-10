@@ -88,12 +88,12 @@ public class SingleplayerLobby extends Lobby {
         }
 
         @Override
-        public synchronized Expect<Integer, ?> push_command(String json){
+        public synchronized Expect<Integer, ?> pushCommand(String json){
             return new Expect<>(() -> "AIPlayer is controlled by AI");
         }
 
         @Override
-        public synchronized String create_json_packet() {
+        public synchronized String createJsonPacket() {
             return null;
         }
 
@@ -226,7 +226,7 @@ public class SingleplayerLobby extends Lobby {
     }
 
     @Override
-    public LobbyState current_lobby_state() {
+    public LobbyState currentLobbyState() {
         return null;
     }
 
@@ -246,7 +246,7 @@ public class SingleplayerLobby extends Lobby {
     }
 
     @Override
-    public Player connect_to_lobby() {
+    public Player connectToLobby() {
         return null;
     }
 

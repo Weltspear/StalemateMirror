@@ -336,7 +336,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
             }
         }
 
-        public void set_nickname(String nickname){
+        public void setNickname(String nickname){
             lock.lock();
             this.nickname = nickname;
             lock.unlock();
@@ -347,7 +347,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         }
 
         @SuppressWarnings("unchecked")
-        public synchronized Expect<Integer, ?> push_command(String json){
+        public synchronized Expect<Integer, ?> pushCommand(String json){
             /* Client sent packet example
             * {
             *   "type" : "ActionPacket",
@@ -679,7 +679,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 }
         }
 
-        public synchronized String create_json_packet(){
+        public synchronized String createJsonPacket(){
             lock.lock();
             if (game != null)
             game.lock.lock();
@@ -1017,7 +1017,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         this.next_maps = next_maps;
     }
 
-    public Player connect_to_lobby(){
+    public Player connectToLobby(){
         lobby_lock.lock();
         try {
             if (players.size() == max_player_count) {
@@ -1048,7 +1048,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
         WAITING_FOR_PLAYERS,
         STARTED
     }
-    public LobbyState current_lobby_state(){
+    public LobbyState currentLobbyState(){
         try {
             lobby_lock.lock();
             return players.size() != max_player_count ? LobbyState.WAITING_FOR_PLAYERS : LobbyState.STARTED;

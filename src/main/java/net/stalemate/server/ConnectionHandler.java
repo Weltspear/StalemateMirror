@@ -24,18 +24,11 @@ import net.stalemate.server.lobby_management.LobbyHandler;
 import net.libutils.error.ErrorResult;
 import net.libutils.error.Expect;
 
-import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
 import java.io.*;
-import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -161,7 +154,7 @@ public class ConnectionHandler implements Runnable{
                     if (lobby < 0 | lobby > lobbyHandler.getLobbyCount() | lobby == 0) {
                         writeSafely("INCORRECT_LOBBY");
                         writeSafely(lobbyHandler.lobby_list_json());
-                    } else if (lobbyHandler.getLobby(lobby - 1).current_lobby_state().equals(Lobby.LobbyState.STARTED)) {
+                    } else if (lobbyHandler.getLobby(lobby - 1).currentLobbyState().equals(Lobby.LobbyState.STARTED)) {
                         writeSafely("STARTED");
                         writeSafely(lobbyHandler.lobby_list_json());
                     } else if (lobbyHandler.getLobby(lobby - 1).currentPlayerCount() == lobbyHandler.getLobby(lobby - 1).getMaxPlayerCount()) {
@@ -169,7 +162,7 @@ public class ConnectionHandler implements Runnable{
                         writeSafely(lobbyHandler.lobby_list_json());
                     } else {
                         writeSafely("OK");
-                        player = lobbyHandler.getLobby(lobby - 1).connect_to_lobby();
+                        player = lobbyHandler.getLobby(lobby - 1).connectToLobby();
                         lobby_final = lobbyHandler.getLobby(lobby-1);
                         lobby_invalid = false;
                     }
@@ -178,7 +171,7 @@ public class ConnectionHandler implements Runnable{
                 LOGGER.log(Level.FINE,"Connection closed unexpectedly!");
                 return;
             }
-            player.set_nickname(nick.unwrap());
+            player.setNickname(nick.unwrap());
 
             // Waits for game start
             while (!player.hasGameStarted()){
@@ -213,7 +206,7 @@ public class ConnectionHandler implements Runnable{
                 }
                 // 66.66 packets per second
                 long t1 = System.currentTimeMillis();
-                writeSafely(player.create_json_packet());
+                writeSafely(player.createJsonPacket());
                 long t2 = System.currentTimeMillis() - t1;
                 if (15 - t2 > 0){
                     Thread.sleep(15-t2);
@@ -229,7 +222,7 @@ public class ConnectionHandler implements Runnable{
                     return;
                 }
                 try{
-                    Expect<Integer, ?> result = player.push_command(packet.unwrap());
+                    Expect<Integer, ?> result = player.pushCommand(packet.unwrap());
                     if (result.isNone()){
                         LOGGER.log(Level.WARNING,"Client miscommunication. Closing connection");
                         player.terminateConnection();

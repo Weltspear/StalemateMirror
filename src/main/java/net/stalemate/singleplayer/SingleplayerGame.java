@@ -44,7 +44,7 @@ public class SingleplayerGame {
 
     public SingleplayerGame(String map){
         this.player = new Lobby.Player();
-        this.player.set_nickname("Player");
+        this.player.setNickname("Player");
 
         lobby = new SingleplayerLobby(map, player);
         lobbyThr = new Thread(lobby, "LobbyThread");
@@ -86,9 +86,9 @@ public class SingleplayerGame {
         while (true){
             // 66.66 updates per second
             long t1 = System.currentTimeMillis();
-            player.push_command(gameController.create_json_packet());
+            player.pushCommand(gameController.create_json_packet());
 
-            gameController.receive_packet(player.create_json_packet());
+            gameController.receive_packet(player.createJsonPacket());
 
             inGameUI.getClDataManager().setSelectorData(gameController.getSelX(), gameController.getSelY());
 

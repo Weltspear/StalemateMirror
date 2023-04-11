@@ -58,7 +58,8 @@ public class InGameUIRunnable implements Runnable {
 
                 g.getClDataManager().updateData(cgame.getChat(),
                         (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], (boolean[][])ef[2], cgame.getSelectedUnit(), cgame.getMp(),
-                        cgame.isIsItYourTurn(), cgame.getClMapLoader(), minimap, cgame.getTeamDoingTurnColor(), cgame.getTeamDoingTurnNick());
+                        cgame.isIsItYourTurn(), cgame.getClMapLoader(), minimap, cgame.getTeamDoingTurnColor(), cgame.getTeamDoingTurnNick(),
+                        cgame.getGamemodeProperties());
 
 
                 try {

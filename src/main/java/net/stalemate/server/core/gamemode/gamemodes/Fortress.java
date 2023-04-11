@@ -24,6 +24,7 @@ import net.stalemate.server.core.ai.BattleGroup;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.IGamemodeAI;
+import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.Artillery;
 import net.stalemate.server.core.units.HeavyTank;
 import net.stalemate.server.core.units.Infantry;
@@ -299,5 +300,13 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener {
 
     public String fortressInfo(){
         return "Turn: " + turns_passed + ' ' + "Wave: " + (ai.waveSize-1);
+    }
+
+    @Override
+    public Properties getProperties() {
+        Properties properties = new Properties();
+        properties.put("wave", "" + (ai.waveSize-1));
+        properties.put("turn", "" + turns_passed);
+        return properties;
     }
 }

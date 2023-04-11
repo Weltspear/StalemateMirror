@@ -979,6 +979,15 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     // Send viewmode
                     toBeJsoned.put("mode", viewMode == ViewMode.GROUND ? 0 : 1);
 
+                    // Gamemode properties
+                    if (game.getMode().getProperties() != null){
+                        ArrayList<String[]> ps = game.getMode().getProperties().serialize();
+                        toBeJsoned.put("gamemode_properties", ps);
+                    }
+                    else{
+                        toBeJsoned.put("gamemode_properties", null);
+                    }
+
                     // Chat
                     ArrayList<String> chat = this.chat.read();
                     toBeJsoned.put("chat", chat);

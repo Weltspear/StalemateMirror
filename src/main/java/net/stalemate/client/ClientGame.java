@@ -46,6 +46,12 @@ public class ClientGame {
     private Color teamDoingTurnColor = Color.WHITE;
     private String teamDoingTurnNick = "";
 
+    private HashMap<String, String> gamemodeProperties = new HashMap<>();
+
+    public HashMap<String, String> getGamemodeProperties() {
+        return gamemodeProperties;
+    }
+
     // 0 ground
     // 1 air
     private int mode = 0;
@@ -502,7 +508,17 @@ public class ClientGame {
             teamDoingTurnColor = new Color((int)data_map.get("team_doing_turn_color"));
             teamDoingTurnNick = ((String)data_map.get("team_doing_turn_nick"));
 
+            // Get viewmode
             mode = (int)data_map.get("mode");
+
+            // Load gamemode properties
+            ArrayList<ArrayList<String>> gmProperties = (ArrayList<ArrayList<String>>) data_map.get("gamemode_properties");
+            if (gmProperties != null){
+                gamemodeProperties = new HashMap<>();
+                for (ArrayList<String> property: gmProperties){
+                    gamemodeProperties.put(property.get(0), property.get(1));
+                }
+            }
         } catch (JsonProcessingException e){
             lock.unlock();
             return new Expect<>(() -> "Failed to parse JSON");

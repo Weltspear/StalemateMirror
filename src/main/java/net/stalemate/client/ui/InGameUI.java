@@ -51,6 +51,7 @@ public class InGameUI extends JPanel {
     private final Font uname_monogram;
     private final MListener m;
     private boolean focus_desktop_pane = false;
+    private HashMap<String, String> gamemodeProperties = new HashMap<>();
 
     private final Image empty;
 
@@ -493,7 +494,7 @@ public class InGameUI extends JPanel {
         public void updateData(ArrayList<String> chat, ClientGame.ClientEntity[][] _entities,
                                boolean[][] fog_of_war, boolean[][] selr, ClientGame.ClientSelectedUnit selectedUnit, int mp,
                                boolean is_it_your_turn, ClientMapLoader clMapLoader, Image minimap, Color teamDoingTurnColor,
-                               String teamDoingTurnNick) {
+                               String teamDoingTurnNick, HashMap<String, String> gamemodeProperties) {
             if (!clMapLoader.isMapLoaded()){
                 return;
             }
@@ -824,6 +825,7 @@ public class InGameUI extends JPanel {
                 this.interface_.id_array = button_ids;
                 this.interface_.chat = chat;
                 this.interface_._selr = sel_r;
+                this.interface_.gamemodeProperties = gamemodeProperties;
                 if (!teamDoingTurnColor.equals(Color.WHITE))
                 this.interface_.teamDoingTurnColor = teamDoingTurnColor;
                 if (!Objects.equals(teamDoingTurnNick, "neutralteam")){
@@ -1478,6 +1480,22 @@ public class InGameUI extends JPanel {
                 g.drawString(Objects.requireNonNullElse(teamDoingTurnNick, "BOT"), 67, 40);
 
                 g.drawString("Camera speed: " + camera_speed, 690, 22);
+                g.setColor(new Color(96, 39, 2));
+                g.fillRoundRect(484, 6, 162,36, 5, 5);
+                g.setColor(new Color(198, 130, 77));
+
+                int y_count = 0;
+                int x_count = 0;
+                for (Map.Entry<String, String> entry: gamemodeProperties.entrySet()){
+                    g.drawString(PropertiesMatcher.matchKeyToString(entry.getKey()) + ": " + entry.getValue(), 490+x_count*50, 22+y_count*10);
+                    y_count++;
+                    if (y_count == 2){
+                        x_count++;
+                        y_count = 0;
+                    }
+                }
+
+                g.setColor(Color.BLACK);
 
                 if (selector != null && do_render_prev) {
                     if (!do_offset)

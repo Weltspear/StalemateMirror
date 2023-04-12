@@ -23,15 +23,16 @@ import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.AttackButton;
 import net.stalemate.server.core.buttons.Scrap;
+import net.stalemate.server.core.buttons.util.NoMoveAttack;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.units.util.IAntiAir;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
 import org.jetbrains.annotations.Nullable;
 
-public class AntiAirBuilding extends Unit implements IBuilding, IConstructableBuilding, IAntiAir {
+public class AntiAirBuilding extends Unit implements IBuilding, IConstructableBuilding, IAntiAir, NoMoveAttack {
     public AntiAirBuilding(int x, int y, Game game) {
-        super(x, y, game, new UnitStats(10, 10, 2, 0, 3, 0, 15, 15, 0, 0, 0), new AnimationController(), "Anti-Air");
+        super(x, y, game, new UnitStats(10, 10, 3, 0, 4, 0, 15, 15, 0, 0, 0), new AnimationController(), "Anti-Air");
 
         Animation idle = new Animation(1);
         idle.addFrame("texture_missing");

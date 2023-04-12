@@ -1564,7 +1564,11 @@ public class InGameUI extends JPanel {
     }
 
     private int correctCoordY(int y){
-        if (y < 0){
+        if (y < 64){
+            return y;
+        }
+
+        if (y > 64*5){
             return y;
         }
 
@@ -1575,6 +1579,10 @@ public class InGameUI extends JPanel {
     private int correctCoordX(int x){
 
         if (x < 0){
+            return x;
+        }
+
+        if (x > 64*12){
             return x;
         }
 

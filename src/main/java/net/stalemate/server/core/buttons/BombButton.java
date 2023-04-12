@@ -34,7 +34,7 @@ public class BombButton implements Unit.IStandardButton {
 
     @Override
     public String texture() {
-        return "texture_missing";
+        return "assets/ui/buttons/bomb_button.png";
     }
 
     @Override
@@ -69,6 +69,7 @@ public class BombButton implements Unit.IStandardButton {
                         unit.consumeSupply(3);
                         gameController.getEvReg().triggerUnitAttackEvent(unit, enemy);
                         unit.endTurn();
+                        unit.getAnimationController().setCurrentAnimation("bomb");
                         break;
                     }
                 }

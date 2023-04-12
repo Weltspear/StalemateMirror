@@ -32,14 +32,20 @@ public class CloseAirSupportBomber extends AirUnit implements IMechanized {
     public CloseAirSupportBomber(int x, int y, Game game) {
         super(x, y, game, new UnitStats(8, 8, 0, 2, 4, 0, 16, 16, 0, 0, 0), new AnimationController(), "CAS Bomber");
         Animation animation = new Animation(1);
-        animation.addFrame("assets/units/placeholder_fighter.png");
+        animation.addFrame("assets/units/cas_bomber_idle.png");
         anim.addAnimation("idle",animation);
         anim.setCurrentAnimation("idle");
 
         Animation attack = new Animation(1);
-        attack.addFrame("assets/units/placeholder_fighter.png");
-        anim.addAnimation("attack", attack);
-        anim.addShift("attack", "idle");
+        attack.addFrame("assets/units/cas_bomber_bomb_1.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_2.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_3.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_4.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_5.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_6.png");
+        attack.addFrame("assets/units/cas_bomber_bomb_7.png");
+        anim.addAnimation("bomb", attack);
+        anim.addShift("bomb", "idle");
 
         fog_of_war_range = 2;
         move_amount = 2;

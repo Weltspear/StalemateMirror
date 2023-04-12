@@ -12,3 +12,6 @@ properties:
   construction_time: "Construction time"
   et: "ET"
   isAir: "Flight"
+
+  wave: "Wave"
+  turn: "Turn"

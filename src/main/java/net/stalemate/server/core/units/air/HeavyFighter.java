@@ -35,12 +35,15 @@ public class HeavyFighter extends AirUnit implements IMechanized{
     public HeavyFighter(int x, int y, Game game) {
         super(x, y, game, new UnitStats(13, 13, 1, 2, 4, 3, 18, 18, 0, 0, 0), new AnimationController(), "Heavy Fighter");
         Animation animation = new Animation(1);
-        animation.addFrame("assets/units/placeholder_fighter.png");
+        animation.addFrame("assets/units/heavy_fighter_idle.png");
         anim.addAnimation("idle",animation);
         anim.setCurrentAnimation("idle");
 
         Animation attack = new Animation(1);
-        attack.addFrame("assets/units/placeholder_fighter.png");
+        attack.addFrame("assets/units/heavy_fighter_attack_1.png");
+        attack.addFrame("assets/units/heavy_fighter_attack_2.png");
+        attack.addFrame("assets/units/heavy_fighter_attack_3.png");
+        attack.addFrame("assets/units/heavy_fighter_attack_4.png");
         anim.addAnimation("attack", attack);
         anim.addShift("attack", "idle");
 

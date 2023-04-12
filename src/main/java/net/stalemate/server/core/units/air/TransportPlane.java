@@ -32,7 +32,7 @@ public class TransportPlane extends AirUnit implements IMechanized {
     public TransportPlane(int x, int y, Game game) {
         super(x, y, game, new Unit.UnitStats(8, 8, 0, 2, 0, 0, 25, 30, 0, 0, 0), new AnimationController(), "Transport Plane");
         Animation animation = new Animation(1);
-        animation.addFrame("assets/units/placeholder_fighter.png");
+        animation.addFrame("assets/units/transport_plane_idle.png");
         anim.addAnimation("idle",animation);
         anim.setCurrentAnimation("idle");
 

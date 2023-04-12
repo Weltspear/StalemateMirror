@@ -33,14 +33,20 @@ public class StrategicBomber extends AirUnit implements IMechanized {
     public StrategicBomber(int x, int y, Game game) {
         super(x, y, game, new UnitStats(8, 8, 0, 2, 3, 0, 16, 16, 0, 0, 0), new AnimationController(), "Strategic Bomber");
         Animation animation = new Animation(1);
-        animation.addFrame("assets/units/placeholder_fighter.png");
+        animation.addFrame("assets/units/strat_bomber_idle.png");
         anim.addAnimation("idle",animation);
         anim.setCurrentAnimation("idle");
 
-        Animation attack = new Animation(1);
-        attack.addFrame("assets/units/placeholder_fighter.png");
-        anim.addAnimation("attack", attack);
-        anim.addShift("attack", "idle");
+        Animation bomb = new Animation(1);
+        bomb.addFrame("assets/units/strat_bomber_bomb_1.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_2.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_3.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_4.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_5.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_6.png");
+        bomb.addFrame("assets/units/strat_bomber_bomb_7.png");
+        anim.addAnimation("bomb", bomb);
+        anim.addShift("bomb", "idle");
 
         fog_of_war_range = 2;
         move_amount = 2;

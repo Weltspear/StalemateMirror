@@ -68,14 +68,20 @@ public class SingleplayerGame {
         frame.getRootPane().getActionMap().put("F10", emptyAction);
         //
 
+        Grass32ConfigClient.loadGrass32();
+
+        String resolution = Grass32ConfigClient.getResolution();
+
+        int width = Integer.parseInt(resolution.split("x")[0]);
+        int height = Integer.parseInt(resolution.split("x")[1]);
+
         cgame = new ClientGame(new ClientMapLoader());
-        inGameUI = new InGameUI(frame);
+        inGameUI = new InGameUI(frame, width, height);
         inGameUIRunnable = new InGameUIRunnable(inGameUI, cgame);
         gameController = new Client.GameControllerClient(inGameUI.getInput(), inGameUI, cgame);
     }
 
     public void startGame(){
-        Grass32ConfigClient.loadGrass32();
         lobbyThr.start();
         (new Thread(inGameUIRunnable)).start();
 

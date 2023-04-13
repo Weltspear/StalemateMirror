@@ -66,8 +66,8 @@ public class InGameUI extends JPanel {
     private Color teamDoingTurnColor = Color.WHITE;
     private String teamDoingTurnNick = "";
 
-    public int tr_width = 832;
-    public int tr_height = 576;
+    public int tr_width;
+    public int tr_height;
 
     public JFrame getFrame(){return frame;}
 
@@ -1033,11 +1033,14 @@ public class InGameUI extends JPanel {
         }
     }
 
-    public InGameUI(JFrame frame){
+    public InGameUI(JFrame frame, int width, int height){
         super(null);
         ButtonTooltips.init();
         PropertiesMatcher.loadPropertyMatcher();
         clDataManager = new ClientDataManager(this);
+
+        tr_width = width;
+        tr_height = height;
 
         this.frame = frame;
         this.frame.setMinimumSize(new Dimension(tr_width+14,tr_height+32+6));

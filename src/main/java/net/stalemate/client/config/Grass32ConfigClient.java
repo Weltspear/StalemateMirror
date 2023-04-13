@@ -30,6 +30,8 @@ public class Grass32ConfigClient {
     private static int lobby_timeout = 120;
     private static boolean steel_button_overlay = false;
 
+    private static String resolution = "832x576";
+
     @SuppressWarnings("unchecked")
     public static void loadGrass32(){
         try {
@@ -45,6 +47,7 @@ public class Grass32ConfigClient {
             timeout = (int) client_config.get("timeout");
             lobby_timeout = (int) client_config.get("lobby_timeout");
             steel_button_overlay = (boolean) client_config.get("steel_button_overlay");
+            resolution = (String) client_config.get("resolution");
 
             HashMap<String, HashMap<String, String>> controls = (HashMap<String, HashMap<String, String>>) client_config.get("controls");
 
@@ -71,4 +74,6 @@ public class Grass32ConfigClient {
     public static boolean doSteelButtonOverlay() {
         return steel_button_overlay;
     }
+
+    public static String getResolution(){return resolution;}
 }

@@ -5,6 +5,13 @@ config:
     timeout: 30
     lobby_timeout: 120
 
+    # List of nice resolutions:
+    # 832x576
+    # 1024x768
+    # 1152x768
+    # WARNING: width and height have to be divisible by 64
+    resolution: 832x576
+
     steel_button_overlay: false
 
     controls:

@@ -346,6 +346,11 @@ public class Client {
             // load grass32
             Grass32ConfigClient.loadGrass32();
 
+            String resolution = Grass32ConfigClient.getResolution();
+
+            int width = Integer.parseInt(resolution.split("x")[0]);
+            int height = Integer.parseInt(resolution.split("x")[1]);
+
             client.setTcpNoDelay(true);
             client.setSoTimeout(Grass32ConfigClient.getTimeout() * 1000);
 
@@ -555,7 +560,7 @@ public class Client {
 
 
             ClientGame cgame = new ClientGame(new ClientMapLoader());
-            InGameUI inGameUI = new InGameUI(frame);
+            InGameUI inGameUI = new InGameUI(frame, width, height);
             InGameUIRunnable runnable = new InGameUIRunnable(inGameUI, cgame);
             (new Thread(runnable)).start();
             GameControllerClient controller = new GameControllerClient(inGameUI.getInput(), inGameUI, cgame);

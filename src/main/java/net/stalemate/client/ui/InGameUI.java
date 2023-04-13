@@ -1637,7 +1637,7 @@ public class InGameUI extends JPanel {
                 if (p != null) {
                     if (focus_desktop_pane) {
                         g.setColor(new Color(0, 0, 0, 0.5F));
-                        g.fillRect(0, 0, 832 + 32, 576 + 32 + 6);
+                        g.fillRect(0, 0, tr_width, tr_height);
                     }
                     p.printAll(g);
                 }

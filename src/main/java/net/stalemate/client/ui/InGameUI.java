@@ -1256,6 +1256,98 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
+    public void drawUITiles(Graphics g, int width, int height){
+        // Top panel
+        BufferedImage top_1 = AssetLoader.load("assets/ui_tile/top_1.png");
+        BufferedImage top_2 = AssetLoader.load("assets/ui_tile/top_2.png");
+        BufferedImage top_3 = AssetLoader.load("assets/ui_tile/top_3.png");
+        // Bottom panel
+        BufferedImage bot_top_fill_1 = AssetLoader.load("assets/ui_tile/bottom_top_fill.png");
+        BufferedImage bot_fill_2 = AssetLoader.load("assets/ui_tile/bottom_fill_2.png");
+        BufferedImage bot_left_end = AssetLoader.load("assets/ui_tile/bottom_left_end.png");
+        BufferedImage bot_top_transition =  AssetLoader.load("assets/ui_tile/bottom_top_transition.png");
+        BufferedImage bot_fill_1 =  AssetLoader.load("assets/ui_tile/bottom_fill_1.png");
+        BufferedImage bot_right_top_corner =  AssetLoader.load("assets/ui_tile/bottom_right_top_corner.png");
+        BufferedImage bot_transition =  AssetLoader.load("assets/ui_tile/bottom_transition.png");
+        BufferedImage bot_top_fill_2 =  AssetLoader.load("assets/ui_tile/bottom_top_fill_2.png");
+        BufferedImage bot_right_end =  AssetLoader.load("assets/ui_tile/bottom_right_end.png");
+        BufferedImage bot_top_left_corner =  AssetLoader.load("assets/ui_tile/bottom_top_left_corner.png");
+
+        int twidth = width/64;
+        int theight = height/64;
+
+        for (int x = 0; x < twidth; x++){
+            if (x == 0){
+                g.drawImage(top_1, 0, 0, null);
+            }
+            else if (x == twidth-1){
+                g.drawImage(top_3, (x*64)-1, 0, null);
+            }
+            else{
+                g.drawImage(top_2, (x*64)-1, 0, null);
+            }
+        }
+
+        int y = theight-3; // first y index
+
+        int transition_x = twidth-13+6;
+        boolean istransition = false;
+
+        for (int i = 0; i < 3; i++){
+            for (int x = 0; x < twidth; x++){
+                if (x == 0){
+                    if (i == 0){
+                        g.drawImage(bot_top_left_corner, 0, (y+i)*64, null);
+                    }
+                    else {
+                        g.drawImage(bot_left_end, 0, (y+i)*64, null);
+                    }
+                }
+                else if (x == twidth - 1){
+                    if (i == 0){
+                        g.drawImage(bot_right_top_corner, x*64, (y+i)*64, null);
+                    }
+                    else {
+                        g.drawImage(bot_right_end, x*64, (y+i)*64, null);
+                    }
+                }
+                else{
+                    if (i == 0){
+                        if (x == transition_x){
+                            g.drawImage(bot_top_transition, x*64, (y+i)*64, null);
+                            istransition = true;
+                        }
+                        else if (!istransition){
+                            g.drawImage(bot_top_fill_1, x*64, (y+i)*64, null);
+                        }
+                        else {
+                            g.drawImage(bot_top_fill_2, x*64, (y+i)*64, null);
+                        }
+                    }
+                    else {
+                        if (x == transition_x){
+                            g.drawImage(bot_transition, x*64, (y+i)*64, null);
+                            istransition = true;
+                        }
+                        else if (!istransition){
+                            g.drawImage(bot_fill_1, x*64, (y+i)*64, null);
+                        }
+                        else {
+                            g.drawImage(bot_fill_2, x*64, (y+i)*64, null);
+                        }
+                    }
+                }
+            }
+            istransition = false;
+        }
+
+        // Draw panels
+        g.drawImage(panel, (twidth-3)*64, y*64, null);
+        g.drawImage(panel, 0, y*64, null);
+    }
+
+
+
     public void paint(Graphics g)
     {
         Graphics2D g2d = (Graphics2D) g;
@@ -1267,10 +1359,7 @@ public class InGameUI extends JPanel {
         unsafeLock.lock();
 
         try {
-            g.drawImage(placeholder_ui, 0, 384, null);
-            g.drawImage(placeholder_ui_2, 0, 0, null);
-            g.drawImage(panel, 640, 384, null);
-            g.drawImage(panel, 0, 384, null);
+            drawUITiles(g, 832, 576);
 
             if (hasFirstPackedBeenReceived) {
                 BufferedImage bufferedImage = new BufferedImage(13 * 64, 5 * 64, BufferedImage.TYPE_INT_ARGB_PRE);

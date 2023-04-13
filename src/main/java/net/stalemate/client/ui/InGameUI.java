@@ -66,6 +66,9 @@ public class InGameUI extends JPanel {
     private Color teamDoingTurnColor = Color.WHITE;
     private String teamDoingTurnNick = "";
 
+    public int tr_width = 832;
+    public int tr_height = 576;
+
     public JFrame getFrame(){return frame;}
 
     /***
@@ -509,7 +512,7 @@ public class InGameUI extends JPanel {
                     mapLoader.loadFromOther(clMapLoader);
                 }
 
-                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y, this.interface_.scale);
+                ArrayList<ArrayList<String>> map_textures = mapLoader.getMap(this.interface_.cam_x, this.interface_.cam_y, this.interface_.scale, (interface_.tr_width-832)/64, (interface_.tr_height-576)/64);
 
                 ArrayList<Image> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
@@ -892,8 +895,8 @@ public class InGameUI extends JPanel {
                     int x = 0;
                     int button_idx = 0;
                     for (String bind : binds) {
-                        if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
-                                && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
+                        if (e.getX() >= rightPanelX() + (x * 64) && e.getY() >= rightPanelY() + (y * 64)
+                                && e.getX() <= rightPanelX() + 64 + (x * 64) && e.getY() <= rightPanelY() + 64 + (y * 64)) {
                             if (bind != null) {
                                 InGameUI.this.smallify_button = button_idx;
                                 InGameUI.this.smallify_button_renders = 3;
@@ -909,10 +912,10 @@ public class InGameUI extends JPanel {
                         button_idx++;
                     }
 
-                    // Move cam
+                    // Move selector
                     if (offset_direction == OffsetDirection.None) {
-                        if ((e.getX() >= 0 && e.getX() <= 832) &&
-                                (e.getY() >= 64 && e.getY() <= 384)) {
+                        if ((e.getX() >= 0 && e.getX() <= tr_width) &&
+                                (e.getY() >= 64 && e.getY() <= rightPanelY())) {
 
                             int x_c = calculateXOnCamera(e.getX());
                             int y_c = calculateYOnCamera(e.getY());
@@ -967,8 +970,8 @@ public class InGameUI extends JPanel {
                 for (String[] row : id_array) {
                     int x = 0;
                     for (String point : row) {
-                        if (e.getX() >= (10 * 64) + (x * 64) && e.getY() >= (6 * 64) + (y * 64)
-                                && e.getX() <= (11 * 64) + (x * 64) && e.getY() <= (7 * 64) + (y * 64)) {
+                        if (e.getX() >= rightPanelX() + (x * 64) && e.getY() >= rightPanelY() + (y * 64)
+                                && e.getX() <= rightPanelX() + 64 + (x * 64) && e.getY() <= rightPanelY() + 64 + (y * 64)) {
                             if (ButtonTooltips.getTooltip(point) != null)
                                 InGameUI.this.setToolTipText("<html><font face=\"monogramextended\" size=5>" + ButtonTooltips.getTooltip(point) + "</font></html>");
                             else
@@ -982,13 +985,13 @@ public class InGameUI extends JPanel {
 
                 // move offset rightwards
                 if (!dis_offset) {
-                    if (e.getX() >= 12 * 64 && e.getY() >= 64 && e.getY() <= 6 * 64) {
+                    if (e.getX() >= tr_width - 64 && e.getY() >= 128 && e.getY() <= rightPanelY() - 64) {
                         offset_direction = OffsetDirection.Right;
-                    } else if (e.getX() <= 64 && e.getY() >= 64 && e.getY() <= 6 * 64) {
+                    } else if (e.getX() <= 64 && e.getY() >= 128 && e.getY() <= rightPanelY() - 64) {
                         offset_direction = OffsetDirection.Left;
-                    } else if (e.getX() <= 12 * 64 && e.getY() >= 5 * 64 && e.getY() <= 6 * 64) {
+                    } else if (e.getX() <= tr_width && e.getY() >= rightPanelY()-64 && e.getY() <= rightPanelY()) {
                         offset_direction = OffsetDirection.Down;
-                    } else if (e.getX() <= 12 * 64 && e.getY() >= 64 && e.getY() <= 128) {
+                    } else if (e.getX() <= tr_width && e.getY() >= 64 && e.getY() <= 128) {
                         offset_direction = OffsetDirection.Up;
                     } else {
                         offset_direction = OffsetDirection.None;
@@ -999,8 +1002,8 @@ public class InGameUI extends JPanel {
                 }
 
                 if (offset_direction == OffsetDirection.None)
-                    if ((((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) || (((10 * 64 < e.getX()) && (e.getX() < 13 * 64)) && ((6 * 64 < e.getY()) && (e.getY() < 9 * 64)))) {
-                        if (((64 < e.getY()) && (e.getY() < 6 * 64)) && ((0 < e.getX()) && (e.getX() < 13 * 64))) {
+                    if ((((64 < e.getY()) && (e.getY() < rightPanelY())) && ((0 < e.getX()) && (e.getX() < tr_width))) || (((rightPanelX() < e.getX()) && (e.getX() < tr_width)) && ((rightPanelY() < e.getY()) && (e.getY() < tr_height)))) {
+                        if (((64 < e.getY()) && (e.getY() < rightPanelY())) && ((0 < e.getX()) && (e.getX() < tr_width))) {
                             int x_c = calculateXOnCamera(e.getX());
                             int y_c = calculateYOnCamera(e.getY());
 
@@ -1037,8 +1040,8 @@ public class InGameUI extends JPanel {
         clDataManager = new ClientDataManager(this);
 
         this.frame = frame;
-        this.frame.setMinimumSize(new Dimension(832+14,576+32+6));
-        this.frame.setSize(new Dimension(832+32,576+32+6));
+        this.frame.setMinimumSize(new Dimension(tr_width+14,tr_height+32+6));
+        this.frame.setSize(new Dimension(tr_width+32,tr_height+32+6));
         this.m = new MListener();
 
         this.addMouseMotionListener(m);
@@ -1052,13 +1055,13 @@ public class InGameUI extends JPanel {
         p = new JDesktopPane();
         p.setBackground(new Color(0x00FFFFFF, true));
         p.setVisible(true);
-        p.setSize(new Dimension(832+14,576));
-        p.setPreferredSize(new Dimension(832+14,576));
+        p.setSize(new Dimension(tr_width+14,tr_height));
+        p.setPreferredSize(new Dimension(tr_width+14,tr_height));
         p.setFocusable(true);
         this.add(p);
 
-        this.setMinimumSize(new Dimension(832+14,576+32+6));
-        this.setSize(new Dimension(832+32,576+32+6));
+        this.setMinimumSize(new Dimension(tr_width+14,tr_height+32+6));
+        this.setSize(new Dimension(tr_width+32,tr_height+32+6));
 
         this.frame.setResizable(false);
         this.frame.add(this);
@@ -1256,7 +1259,7 @@ public class InGameUI extends JPanel {
         unsafeLock.unlock();
     }
 
-    public void drawUITiles(Graphics g, int width, int height){
+    public void drawUITiles(Graphics g){
         // Top panel
         BufferedImage top_1 = AssetLoader.load("assets/ui_tile/top_1.png");
         BufferedImage top_2 = AssetLoader.load("assets/ui_tile/top_2.png");
@@ -1273,8 +1276,8 @@ public class InGameUI extends JPanel {
         BufferedImage bot_right_end =  AssetLoader.load("assets/ui_tile/bottom_right_end.png");
         BufferedImage bot_top_left_corner =  AssetLoader.load("assets/ui_tile/bottom_top_left_corner.png");
 
-        int twidth = width/64;
-        int theight = height/64;
+        int twidth = tr_width/64;
+        int theight = tr_height/64;
 
         for (int x = 0; x < twidth; x++){
             if (x == 0){
@@ -1346,7 +1349,21 @@ public class InGameUI extends JPanel {
         g.drawImage(panel, 0, y*64, null);
     }
 
+    public int rightPanelX(){
+        return ((tr_width/64)-3)*64;
+    }
 
+    public int rightPanelY(){
+        return ((tr_height/64)-3)*64;
+    }
+
+    public int rightPanelXEnd(){
+        return rightPanelX() + 64*3;
+    }
+
+    public int rightPanelYEnd(){
+        return rightPanelY() + 64*3;
+    }
 
     public void paint(Graphics g)
     {
@@ -1359,10 +1376,10 @@ public class InGameUI extends JPanel {
         unsafeLock.lock();
 
         try {
-            drawUITiles(g, 832, 576);
+            drawUITiles(g);
 
             if (hasFirstPackedBeenReceived) {
-                BufferedImage bufferedImage = new BufferedImage(13 * 64, 5 * 64, BufferedImage.TYPE_INT_ARGB_PRE);
+                BufferedImage bufferedImage = new BufferedImage(tr_width, tr_height-4*64, BufferedImage.TYPE_INT_ARGB_PRE);
                 Graphics2D g2 = bufferedImage.createGraphics();
 
                 int y;
@@ -1393,14 +1410,14 @@ public class InGameUI extends JPanel {
                 for (Image button : buttons) {
                     if (button != null) {
                         if (btn_idx == smallify_button){
-                            g.drawImage(button.getScaledInstance(57, 57, Image.SCALE_FAST), 640 + x + 3, 384 + y + 3, null);
+                            g.drawImage(button.getScaledInstance(57, 57, Image.SCALE_FAST), rightPanelX() + x + 3, rightPanelY() + y + 3, null);
                             if (Grass32ConfigClient.doSteelButtonOverlay())
-                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png").getScaledInstance(57, 57, Image.SCALE_FAST), 640 + x + 3, 384 + y + 3, null);
+                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png").getScaledInstance(57, 57, Image.SCALE_FAST), rightPanelX() + x + 3, rightPanelY() + y + 3, null);
                         }
                         else {
-                            g.drawImage(button, 640 + x, 384 + y, null);
+                            g.drawImage(button, rightPanelX() + x, rightPanelY() + y, null);
                             if (Grass32ConfigClient.doSteelButtonOverlay())
-                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png"), 640 + x, 384 + y, null);
+                                g.drawImage(AssetLoader.load("assets/ui/buttons/steel_button_overlay_2.png"), rightPanelX() + x, rightPanelY() + y, null);
                         }
                     }
                     i++;
@@ -1415,7 +1432,7 @@ public class InGameUI extends JPanel {
 
                 // Render minimap
                 if (minimap != null && queue == null)
-                    g.drawImage(minimap, 16, 400, null);
+                    g.drawImage(minimap, 16, rightPanelY()+16, null);
 
                 // Render the queue
                 if (queue != null) {
@@ -1424,7 +1441,7 @@ public class InGameUI extends JPanel {
                     y = 0;
                     for (Image m : queue) {
                         if (m != null) {
-                            g.drawImage(m, x, 384 + y, null);
+                            g.drawImage(m, x, rightPanelY() + y, null);
                         }
                         i++;
                         x += 64;
@@ -1451,14 +1468,14 @@ public class InGameUI extends JPanel {
                     if (bind != null) {
                         if (btn_idx == smallify_button) {
                             g.setFont(monogram_button_small);
-                            g.drawString(bind, 640 + x + 8 + 3, 383 + y + 11 + 3);
+                            g.drawString(bind, rightPanelX() + x + 8 + 3, rightPanelY() - 1 + y + 11 + 3);
                             smallify_button_renders--;
                             if (smallify_button_renders == 0)
                                 smallify_button = -1;
                             g.setFont(monogram_button);
                         }
                         else{
-                            g.drawString(bind, 640 + x + 8, 383 + y + 11);
+                            g.drawString(bind, rightPanelX() + x + 8, rightPanelY() - 1 + y + 11);
                         }
                     }
                     i++;
@@ -1480,7 +1497,7 @@ public class InGameUI extends JPanel {
                 y = 0;
                 for (String bind : unit_times) {
                     if (bind != null) {
-                        g.drawString(bind, x + 8, 383 + y + 11);
+                        g.drawString(bind, x + 8, rightPanelY() - 1 + y + 11);
                     }
                     i++;
                     x += 64;
@@ -1493,7 +1510,7 @@ public class InGameUI extends JPanel {
 
                 // Render the unit
                 if (unit_img != null)
-                    g.drawImage(unit_img, 192 + 32, 384 + 32, null);
+                    g.drawImage(unit_img, rightPanelX() - 7*64 + 32, rightPanelY() + 32, null);
 
                 // Render the stats
                 if (propertiesToRender != null && monogram != null) {
@@ -1512,7 +1529,7 @@ public class InGameUI extends JPanel {
                     g.setFont(monogram.deriveFont((float) (32)).deriveFont(Font.BOLD));
 
                     // Get font char size
-                    FontMetrics metrics = g.getFontMetrics(monogram.deriveFont((float) (27)).deriveFont(Font.BOLD));
+                    FontMetrics metrics = g.getFontMetrics(monogram.deriveFont((float) (32)).deriveFont(Font.BOLD));
                     int width = metrics.stringWidth("A");
 
                     if (name == null) {
@@ -1521,7 +1538,7 @@ public class InGameUI extends JPanel {
 
                     int h = ((224 - (name.value().length() * width)) / 2);
 
-                    g.drawString(name.value(), 192 + 32 + 64 + 128 + h, 384 + 30); // 416-640
+                    g.drawString(name.value(), rightPanelX() - 64*7 + 32 + 64 + 128 + h, rightPanelY() + 30); // 416-640
 
                     Font monogram23 = monogram.deriveFont(Font.PLAIN, 23f);
 
@@ -1540,7 +1557,7 @@ public class InGameUI extends JPanel {
 
                             int h2 = ((224 - ((clientSideProperty.value().length()+4) * width_16)) / 2);
 
-                            g.drawString("<" + clientSideProperty.value() + ">", 192 + 32 + 64 + 128 + h2, 384 + 43 + 13 * 11);
+                            g.drawString("<" + clientSideProperty.value() + ">", rightPanelX() - 64*7 + 32 + 64 + 128 + h2, rightPanelY() + 43 + 13 * 11);
                             g.setFont(monogram23);
 
                             continue;
@@ -1548,9 +1565,9 @@ public class InGameUI extends JPanel {
 
                         if (PropertiesMatcher.matchKeyToString(clientSideProperty.key()) != null) {
                             if (!Objects.equals("true", clientSideProperty.value()))
-                                g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), 192 + 32 + 64 + 128, 384 + 43 + 13 * y__);
+                                g.drawString(PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ": " + clientSideProperty.value(), rightPanelX() - 64*7 + 32 + 64 + 128, rightPanelY() + 43 + 13 * y__);
                             else
-                                g.drawString("(" + PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ")", 192 + 32 + 64 + 128, 384 + 43 + 13 * y__);
+                                g.drawString("(" + PropertiesMatcher.matchKeyToString(clientSideProperty.key()) + ")", rightPanelX() - 64*7 + 32 + 64 + 128, rightPanelY() + 43 + 13 * y__);
                             y__++;
                         }
                     }
@@ -1568,15 +1585,15 @@ public class InGameUI extends JPanel {
                 g.setColor(Color.black);
                 g.drawString(Objects.requireNonNullElse(teamDoingTurnNick, "BOT"), 67, 40);
 
-                g.drawString("Camera speed: " + camera_speed, 690, 22);
+                g.drawString("Camera speed: " + camera_speed, rightPanelX() + 50, 22);
                 g.setColor(new Color(96, 39, 2));
-                g.fillRoundRect(484, 6, 162,36, 5, 5);
+                g.fillRoundRect(rightPanelX() - 156, 6, 162,36, 5, 5);
                 g.setColor(new Color(198, 130, 77));
 
                 int y_count = 0;
                 int x_count = 0;
                 for (Map.Entry<String, String> entry: gamemodeProperties.entrySet()){
-                    g.drawString(PropertiesMatcher.matchKeyToString(entry.getKey()) + ": " + entry.getValue(), 490+x_count*50, 22+y_count*10);
+                    g.drawString(PropertiesMatcher.matchKeyToString(entry.getKey()) + ": " + entry.getValue(), rightPanelX()-150+x_count*50, 22+y_count*10);
                     y_count++;
                     if (y_count == 2){
                         x_count++;
@@ -1601,9 +1618,9 @@ public class InGameUI extends JPanel {
                         String m = "[Chat]: " + in_client.getCurrentMSG();
 
                         int offset_rect = g.getFontMetrics().stringWidth(m);
-                        g.drawString(m, 500, 383 - 40);
+                        g.drawString(m, rightPanelX()-140, rightPanelY() - 1 - 40);
 
-                        g.fillRect(500+offset_rect, 343-g.getFontMetrics().getHeight()+2, g.getFontMetrics().stringWidth(" "), g.getFontMetrics().getHeight());
+                        g.fillRect(rightPanelX()-140+offset_rect, rightPanelY() - 1 - 40 -g.getFontMetrics().getHeight()+2, g.getFontMetrics().stringWidth(" "), g.getFontMetrics().getHeight());
                     }
 
                 // Render chat
@@ -1613,7 +1630,7 @@ public class InGameUI extends JPanel {
                         g.setColor(Color.WHITE);
                         g.setFont(monogram.deriveFont((float) (15)).deriveFont(Font.BOLD));
                     }
-                    g.drawString(msg, 500, 233 + (y * 10));
+                    g.drawString(msg, rightPanelX() - 140, rightPanelY() - 151 + (y * 10));
                     y++;
                 }
 
@@ -1657,11 +1674,11 @@ public class InGameUI extends JPanel {
             return y;
         }
 
-        if (y > 64*5){
+        if (y > rightPanelY()){
             return y;
         }
 
-        int y_size = (int)Math.ceil(3*scale)*2;
+        int y_size = (int)Math.ceil(3*scale)*2+(tr_height-576)/64;
         return correctCoord(y, y_size, offset_y);
     }
 
@@ -1671,11 +1688,11 @@ public class InGameUI extends JPanel {
             return x;
         }
 
-        if (x > 64*12){
+        if (x > tr_width){
             return x;
         }
 
-        int x_size = (int)Math.ceil(7*scale)*2;
+        int x_size = (int)Math.ceil(7*scale)*2+(tr_width-832)/64;
         return correctCoord(x, x_size, offset_x);
     }
 

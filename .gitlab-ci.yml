@@ -15,7 +15,7 @@ buildJob:
     - echo 'running buildJob'
     - java --version
     - gradle releaseBuildUniversalOnly
-    - zip build/release build-$CI_COMMIT_SHORT_SHA.zip
+    - zip build-$CI_COMMIT_SHORT_SHA.zip build/release
   artifacts:
     paths:
       - build-$CI_COMMIT_SHORT_SHA.zip

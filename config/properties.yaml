@@ -12,6 +12,7 @@ properties:
   construction_time: "Construction time"
   et: "ET"
   isAir: "Flight"
+  ldunit: "Unit onboard"
 
   wave: "Wave"
   turn: "Turn"

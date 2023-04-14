@@ -2,17 +2,28 @@ before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
-build-job:
+buildJob:
   stage: build
   script:
+    - echo 'running buildJob'
     - gradle releaseBuild
     - zip build/release build-$CI_COMMIT_SHORT_SHA.zip
   artifacts:
     paths:
       - build-$CI_COMMIT_SHORT_SHA.zip
 
-release:
+releaseJob:
   stage: release
-needs:
-  - job: build-job
-    artifacts: true
+  script:
+    - echo 'running releaseJob'
+  needs:
+    - job: buildJob
+      artifacts: true
+  release:
+    name: 'dev-build-$CI_COMMIT_SHORT_SHA'
+    description: 'CI/CD development build'
+    tag_name: 'dev-build-$CI_COMMIT_SHORT_SHA'
+    assets:
+      links:
+        - name: 'Build'
+          url: 'https://gitlab.com/codemancers/engineering/cw/-/jobs/${GE_JOB_ID}/artifacts/file/dist/build-$CI_COMMIT_SHORT_SHA.zip'

@@ -1,0 +1,18 @@
+before_script:
+  - GRADLE_USER_HOME="$(pwd)/.gradle"
+  - export GRADLE_USER_HOME
+
+build-job:
+  stage: build
+  script:
+    - gradle releaseBuild
+    - zip build/release build-$CI_COMMIT_SHORT_SHA.zip
+  artifacts:
+    paths:
+      - build-$CI_COMMIT_SHORT_SHA.zip
+
+release:
+  stage: release
+needs:
+  - job: build-job
+    artifacts: true

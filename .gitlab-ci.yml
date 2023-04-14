@@ -1,4 +1,4 @@
-image: openjdk:16
+image: gradle:7.0-openjdk16-alpine
 
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"

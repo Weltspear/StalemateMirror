@@ -13,7 +13,7 @@ buildJob:
   script:
     - echo 'running buildJob'
     - java --version
-    - gradle releaseBuild
+    - gradle releaseBuildUniversalOnly
     - zip build/release build-$CI_COMMIT_SHORT_SHA.zip
   artifacts:
     paths:

@@ -35,4 +35,4 @@ releaseJob:
     assets:
       links:
         - name: 'Build'
-          url: 'https://gitlab.com/codemancers/engineering/cw/-/jobs/${GE_JOB_ID}/artifacts/file/dist/build-$CI_COMMIT_SHORT_SHA.zip'
+          url: 'https://gitlab.com/weltspear/stalemate-pub-repo/-/jobs/${GE_JOB_ID}/artifacts/file/build-$CI_COMMIT_SHORT_SHA.zip'

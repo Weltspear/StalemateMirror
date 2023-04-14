@@ -23,6 +23,8 @@ buildJob:
 
 releaseJob:
   stage: release
+  only: 
+    - tags
   script:
     - echo 'running releaseJob'
   needs:

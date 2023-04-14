@@ -23,8 +23,6 @@ buildJob:
 
 releaseJob:
   stage: release
-  only: 
-    - tags
   script:
     - echo 'running releaseJob'
   needs:
@@ -34,7 +32,4 @@ releaseJob:
     name: 'dev-build-$CI_COMMIT_SHORT_SHA'
     description: 'CI/CD development build'
     tag_name: 'dev-build-$CI_COMMIT_SHORT_SHA'
-    assets:
-      links:
-        - name: 'Build'
-          url: 'https://gitlab.com/weltspear/stalemate-pub-repo/-/jobs/${GE_JOB_ID}/artifacts/file/build-$CI_COMMIT_SHORT_SHA.zip'
+    

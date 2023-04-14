@@ -1,4 +1,4 @@
-image: gradle:7.0-openjdk16-alpine
+image: gradle:7.6.1-jdk17-alpine
 
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
@@ -12,6 +12,7 @@ buildJob:
   stage: build
   script:
     - echo 'running buildJob'
+    - java --version
     - gradle releaseBuild
     - zip build/release build-$CI_COMMIT_SHORT_SHA.zip
   artifacts:

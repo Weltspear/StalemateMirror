@@ -2,6 +2,10 @@ before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
 
+stages:
+  - build
+  - release
+
 buildJob:
   stage: build
   script:

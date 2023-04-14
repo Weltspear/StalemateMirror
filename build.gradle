@@ -15,7 +15,7 @@ shadowJar{
 }
 
 group 'net.stalemate'
-version 'v0.3a'
+version 'v0.3.xa-dev'
 
 task prepareDirsRelease {
     group("stalemate-release")
@@ -88,6 +88,15 @@ task releaseBuild{
     dependsOn createClientExe
     dependsOn createServerExe
     dependsOn cpExes
+    dependsOn prepareFiles
+    dependsOn shadowJar
+    dependsOn copyFatJar
+    dependsOn clearJarsLibs
+}
+
+task releaseBuildUniversalOnly{
+    group("stalemate-release")
+    dependsOn prepareDirsRelease
     dependsOn prepareFiles
     dependsOn shadowJar
     dependsOn copyFatJar

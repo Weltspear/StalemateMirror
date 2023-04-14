@@ -3,6 +3,7 @@ image: gradle:7.6.1-jdk17-alpine
 before_script:
   - GRADLE_USER_HOME="$(pwd)/.gradle"
   - export GRADLE_USER_HOME
+  - apk add zip
 
 stages:
   - build

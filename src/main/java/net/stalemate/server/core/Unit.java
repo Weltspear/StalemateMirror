@@ -566,4 +566,12 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
         return properties;
     }
+
+    /***
+     * If this unit is removed and is selected, the selection
+     * will shift to unit which is returned by this method
+     */
+    public Unit shiftSelectionOnRemoval(){
+        return null;
+    }
 }

@@ -21,6 +21,7 @@ package net.stalemate.server.core.units;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
+import net.stalemate.server.core.buttons.MotorizeButton;
 import net.stalemate.server.core.buttons.MoveButton;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IUnitName;
@@ -28,6 +29,7 @@ import net.stalemate.server.core.controller.Game;
 
 public class MotorizedUnitOther extends Unit implements IUnitName {
     private final Unit contained_unit;
+    private final MotorizeButton mbutton;
 
     @Override
     public String getUnitName() {
@@ -67,14 +69,19 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
                 contained_unit.setX(x);
                 contained_unit.setY(y);
                 gameController.addEntity(contained_unit);
-                MotorizedUnitOther.this.setHp(-1);
+                gameController.rmEntity(MotorizedUnitOther.this);
+                gameController.getUnitsTeam(MotorizedUnitOther.this).rmUnit(MotorizedUnitOther.this);
+                if (mbutton != null){
+                    mbutton.resetShift();
+                }
             }
         }
     }
 
-    public MotorizedUnitOther(int x, int y, Game game, Unit other) {
+    public MotorizedUnitOther(int x, int y, Game game, Unit other, MotorizeButton mbutton) {
         super(x, y, game, new UnitStats(other.getHp(), other.getMaxHp(), 0, 3,0,0,
                         other.getSupply(), other.getMaxSupply(),0, 0, 0), new AnimationController(), other.getName());
+        this.mbutton = mbutton;
 
         Animation idle = new Animation(1);
         idle.addFrame("assets/units/motorized_unit_idle.png");
@@ -88,6 +95,10 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
 
         move_amount = 2;
         turn_move_amount = 2;
+    }
+
+    public MotorizedUnitOther(int x, int y, Game game, Unit other){
+        this(x, y, game, other, null);
     }
 
     @Override
@@ -108,5 +119,12 @@ public class MotorizedUnitOther extends Unit implements IUnitName {
         Properties p = super.getProperties();
         IUnitName.addNameProperty(getUnitName(), p);
         return p;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (hp > 0)
+            return contained_unit;
+        else return null;
     }
 }

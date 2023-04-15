@@ -28,7 +28,7 @@ import net.stalemate.server.core.gamemode.gamemodes.Versus;
 import net.stalemate.server.core.minimap.AttackTracker;
 import net.stalemate.server.core.name.UnitNameGen;
 import net.stalemate.server.core.units.util.IBuilding;
-import net.stalemate.server.core.util.*;
+import net.stalemate.server.core.util.IUnitTeam;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -262,6 +262,10 @@ public class Game {
                 }
             }
 
+            for (Team team : teams) {
+                team.update();
+            }
+
             if (teams.get(team_doing_turn).endedTurn() || teams.get(team_doing_turn).AUTO_SKIP_TURN) {
                 ArrayList<Unit> to_remove_dead = new ArrayList<>();
 
@@ -291,17 +295,14 @@ public class Game {
                 team_doing_turn = 0;
                 mode.onTurnEnd();
             }
+
+            mode.tick(this);
+
             try {
                 Thread.sleep(3);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            for (Team team : teams) {
-                team.update();
-            }
-
-            mode.tick(this);
         } finally {
             lock.unlock();
         }

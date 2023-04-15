@@ -27,6 +27,9 @@ import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.controller.Game;
 
 public class Infantry extends Unit implements IUnitName{
+
+    MotorizeButton motbutton = new MotorizeButton();
+
     public Infantry(int x, int y, Game game) {
         super(x, y, game, new UnitStats(10, 10, 1, 1, 2, 1, 20, 20, 0, 1, 3), new AnimationController(), "Infantry");
         Animation idle = new Animation(20);
@@ -56,7 +59,7 @@ public class Infantry extends Unit implements IUnitName{
         buttons[0] = new AttackButton(attack_range);
         buttons[1] = new MoveButton(movement_range);
         if (supply > 5) {
-            buttons[2] = new MotorizeButton();
+            buttons[2] = motbutton;
         }
         else {
             buttons[8] = new HPSacrificeSU();
@@ -94,5 +97,13 @@ public class Infantry extends Unit implements IUnitName{
     @Override
     public void setUnitName(String n) {
         uname = n;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (hp > 0)
+            return motbutton.getShift();
+        else
+            return null;
     }
 }

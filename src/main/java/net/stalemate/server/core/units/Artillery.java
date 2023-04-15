@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class Artillery extends Unit implements IMechanized, IUnitName {
+
+    MotorizeButton motbutton = new MotorizeButton();
+
     @SuppressWarnings("all")
     public static class ShellingButton implements ISelectorButton{
         private final int attack_range;
@@ -132,7 +135,7 @@ public class Artillery extends Unit implements IMechanized, IUnitName {
         IButton[] buttons = new IButton[9];
         buttons[0] = new AttackButton(attack_range);
         buttons[1] = new MoveButton(movement_range);
-        buttons[2] = new MotorizeButton();
+        buttons[2] = motbutton;
         return buttons;
     }
 
@@ -158,5 +161,13 @@ public class Artillery extends Unit implements IMechanized, IUnitName {
     @Override
     public void setUnitName(String n) {
         uname = n;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (hp > 0)
+            return motbutton.getShift();
+        else
+            return null;
     }
 }

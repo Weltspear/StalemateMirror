@@ -23,6 +23,8 @@ import net.stalemate.server.core.units.MotorizedUnitOther;
 import net.stalemate.server.core.controller.Game;
 
 public class MotorizeButton implements Unit.IStandardButton {
+    private MotorizedUnitOther shift = null;
+
     @Override
     public String bind() {
         return "Q";
@@ -49,6 +51,15 @@ public class MotorizeButton implements Unit.IStandardButton {
             gameController.getUnitsTeam(unit).addUnit(u);
             gameController.addEntity(u);
             u.endTurn();
+            shift = u;
         }
+    }
+
+    public void resetShift(){
+        shift = null;
+    }
+
+    public Unit getShift(){
+        return shift;
     }
 }

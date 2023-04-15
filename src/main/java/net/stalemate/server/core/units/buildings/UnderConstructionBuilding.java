@@ -24,8 +24,6 @@ import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.controller.Game;
 
-import java.util.ArrayList;
-
 public class UnderConstructionBuilding extends Unit implements IBuilding {
     private final Unit outBuilding;
     private int constructionTime;
@@ -53,6 +51,7 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
 
         if (constructionTime == 0){
             game.rmEntity(this);
+            game.getUnitsTeam(this).rmUnit(this);
             game.addEntity(outBuilding);
         }
 
@@ -70,7 +69,17 @@ public class UnderConstructionBuilding extends Unit implements IBuilding {
     public Properties getProperties() {
         Properties p = super.getProperties();
         p.rm("ended_turn");
-        p.put("construction_time", "" + constructionTime);
+        p.put("construction_time", String.valueOf(constructionTime));
         return p;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (constructionTime == 0 && hp > 0){
+            return outBuilding;
+        }
+        else{
+            return null;
+        }
     }
 }

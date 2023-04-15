@@ -30,6 +30,9 @@ import net.stalemate.server.core.units.util.IUnitName;
 import net.stalemate.server.core.controller.Game;
 
 public class AntiTank extends Unit implements IMechanized, IUnitName {
+
+    MotorizeButton motbutton = new MotorizeButton();
+
     public AntiTank(int x, int y, Game game) {
         super(x, y, game, new UnitStats(6, 6, 2, 1, 4, 0, 18, 18, 0, 1, 2), new AnimationController(), "Anti-Tank");
 
@@ -57,7 +60,7 @@ public class AntiTank extends Unit implements IMechanized, IUnitName {
 
         buttons[0] = (new AttackButton(attack_range)).enableAT();
         buttons[1] = new MoveButton(movement_range);
-        buttons[2] = new MotorizeButton();
+        buttons[2] = motbutton;
         return buttons;
     }
 
@@ -65,20 +68,20 @@ public class AntiTank extends Unit implements IMechanized, IUnitName {
     public Properties getProperties() {
         Properties properties = new Properties();
         properties.put("name", this.getName());
-        properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
-        properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
-        properties.put("df", "" + this.unitStats().getDf() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
-        properties.put("atk", "" + (this.unitStats().getAtk() - 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
-        properties.put("atk_ar_1", "" + (this.unitStats().getAtk() + 1) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
-        properties.put("atk_ar_2", "" + (this.unitStats().getAtk() + 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("hp", this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
+        properties.put("su", this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
+        properties.put("df", this.unitStats().getDf() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk", (this.unitStats().getAtk() - 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk_ar_1", (this.unitStats().getAtk() + 1) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+        properties.put("atk_ar_2", (this.unitStats().getAtk() + 3) + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
 
-        properties.put("atk_range", "" + this.unitStats().getAttackRange());
-        properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        properties.put("atk_range", String.valueOf(this.unitStats().getAttackRange()));
+        properties.put("mov_range", String.valueOf(this.unitStats().getMovementRange()));
         properties.put("move_amount", String.valueOf(move_amount));
 
         properties.put("ended_turn", this.hasTurnEnded ? "Yes": "No");
         if (this.entrenchment > 0)
-            properties.put("et", "" + this.entrenchment);
+            properties.put("et", String.valueOf(this.entrenchment));
 
         if (uname.isEmpty()){
             uname = game.getUnitNameGen().genName(name);
@@ -104,5 +107,13 @@ public class AntiTank extends Unit implements IMechanized, IUnitName {
     @Override
     public void setUnitName(String n) {
         uname = n;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (hp > 0)
+            return motbutton.getShift();
+        else
+            return null;
     }
 }

@@ -37,6 +37,9 @@ import net.stalemate.server.core.controller.Game;
 import java.lang.reflect.InvocationTargetException;
 
 public class EngineerUnit extends Unit implements IUnitName{
+
+    MotorizeButton motbutton = new MotorizeButton();
+
     public static class RepairButton implements ISelectorButtonUnit{
         @Override
         public String bind() {
@@ -422,7 +425,7 @@ public class EngineerUnit extends Unit implements IUnitName{
         if (!isInBuildingMode) {
             buttons[0] = new MoveButton(movement_range);
             buttons[1] = new AttackButton(attack_range);
-            buttons[2] = new MotorizeButton();
+            buttons[2] = motbutton;
             buttons[3] = new RepairButton();
 
             buttons[8] = new BuildMenuButton();
@@ -460,5 +463,13 @@ public class EngineerUnit extends Unit implements IUnitName{
     @Override
     public void setUnitName(String n) {
         uname = n;
+    }
+
+    @Override
+    public Unit shiftSelectionOnRemoval() {
+        if (hp > 0)
+            return motbutton.getShift();
+        else
+            return null;
     }
 }

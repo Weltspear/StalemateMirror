@@ -702,6 +702,26 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 }
         }
 
+        public void validateSelection(ArrayList<Entity> entities_in_range){
+            if (selected_unit != null) {
+                if (!entities_in_range.contains(selected_unit)){
+                    if (selected_unit.shiftSelectionOnRemoval() != null){
+                        if (!game.getAllEntities().contains(selected_unit)){
+                            selected_unit = selected_unit.shiftSelectionOnRemoval();
+                            // Validate shifted selection too
+                            validateSelection(entities_in_range);
+                        } else{
+                            selected_unit = null;
+                        }
+                    } else{
+                        selected_unit = null;
+                    }
+
+                    iselectorbuttonid = null;
+                }
+            }
+        }
+
         public synchronized String createJsonPacket(){
             lock.lock();
             if (game != null) {
@@ -845,12 +865,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     toBeJsoned.put("sbas_y", sbas_y);
 
                     // Deselect a unit if it is in fog of war and if it is removed or dead
-                    if (selected_unit != null) {
-                        if (!entities_in_range.contains(selected_unit)){
-                            selected_unit = null;
-                            iselectorbuttonid = null;
-                        }
-                    }
+                    validateSelection(entities_in_range);
 
                     if (selected_unit != null) {
                         HashMap<String, Object> selected_unit_data = new HashMap<>();

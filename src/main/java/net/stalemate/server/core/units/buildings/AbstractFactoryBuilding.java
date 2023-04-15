@@ -22,11 +22,10 @@ import net.stalemate.server.core.AirUnit;
 import net.stalemate.server.core.Entity;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.AnimationController;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IUnitName;
-import net.stalemate.server.core.controller.Game;
-import net.stalemate.server.core.util.PriorityTurnUpdate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
@@ -34,7 +33,7 @@ import java.util.ArrayDeque;
 /***
  * This building produces other units
  */
-public abstract class AbstractFactoryBuilding extends Unit implements IBuilding, PriorityTurnUpdate {
+public abstract class AbstractFactoryBuilding extends Unit implements IBuilding {
     public static class UnitProduction {
         public final Unit unit;
         public int time_in_production;
@@ -76,13 +75,15 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
 
         @Override
         public void action(Unit unit, Game gameController) {
-            if (production_queue.size() != 8)
-            if (gameController.getUnitsTeam(AbstractFactoryBuilding.this).getMilitaryPoints() - cost >= 0) {
-                gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
-                try {
-                    AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, Game.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime, cost);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
+            if (production_queue.size() != 8) {
+                if (gameController.getUnitsTeam(AbstractFactoryBuilding.this).getMilitaryPoints() - cost >= 0) {
+                    gameController.getUnitsTeam(AbstractFactoryBuilding.this).setMilitaryPoints(gameController.getUnitsTeam(unit).getMilitaryPoints() - cost);
+                    try {
+                        AbstractFactoryBuilding.this.addUnitToQueue((Unit) unitclass.getConstructor(int.class, int.class, Game.class).newInstance(unit.getX() + deployment_x, unit.getY() + deployment_y, gameController), productionTime, cost);
+                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                             NoSuchMethodException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -187,7 +188,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding,
     protected void deploy(){
         if (currently_processed_unit != null){
             if (currently_processed_unit.time_in_production != 0)
-            currently_processed_unit.time_in_production -= 1;
+                currently_processed_unit.time_in_production -= 1;
             currently_processed_unit.unit.setX(x+deployment_x);
             currently_processed_unit.unit.setY(y+deployment_y);
             if (currently_processed_unit.time_in_production <= 0){

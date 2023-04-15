@@ -247,27 +247,6 @@ public class Game {
         return (ArrayList<Team>) teams.clone();
     }
 
-    /***
-     * Creates a list in which {@link PriorityTurnUpdate} entities are first
-     * @see PriorityTurnUpdate
-     */
-    private ArrayList<Unit> getPrioritizedListTurn(ArrayList<Unit> entities){
-        ArrayList<Unit> prior = new ArrayList<>();
-        for (Unit e : entities){
-            if (e instanceof PriorityTurnUpdate){
-                prior.add(e);
-            }
-        }
-
-        for (Unit e : entities){
-            if (!(e instanceof PriorityTurnUpdate)){
-                prior.add(e);
-            }
-        }
-
-        return prior;
-    }
-
     @SuppressWarnings("unchecked")
     public void update(){
         lock.lock();
@@ -286,7 +265,7 @@ public class Game {
             if (teams.get(team_doing_turn).endedTurn() || teams.get(team_doing_turn).AUTO_SKIP_TURN) {
                 ArrayList<Unit> to_remove_dead = new ArrayList<>();
 
-                for (Unit unit : getPrioritizedListTurn(teams.get(team_doing_turn).units)) {
+                for (Unit unit : teams.get(team_doing_turn).units) {
                     if (unit.unitStats().getHp() > 0) {
                         if (((ArrayList<Entity>) (entities.clone())).contains(unit)) {
                             unit.endTurn();

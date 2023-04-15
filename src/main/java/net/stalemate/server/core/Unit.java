@@ -234,19 +234,59 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         }
     }
 
-    public interface Buff {
-        UnitStats modStats(UnitStats ustats);
+    public abstract static class Buff {
+        protected int turnTime;
+        private boolean hasBeenApplied = false;
+        public Buff(int turnTime){
+            this.turnTime = turnTime;
+        }
+        public abstract UnitStats modifyStats(UnitStats ustats);
+
+        private UnitStats revertModification(UnitStats ustats){
+
+            UnitStats zero =
+                    new UnitStats(0,0,0,0,0,0,0,0,0,0,0);
+            UnitStats modified = modifyStats(zero);
+
+            if (modified == null){
+                return ustats;
+            }
+
+            return new UnitStats(
+                    ustats.hp-modified.hp,
+                    ustats.max_hp-modified.max_hp,
+                    ustats.attack_range-modified.attack_range,
+                    ustats.movement_range-modified.movement_range,
+                    ustats.atk-modified.atk,
+                    ustats.df-modified.df,
+                    ustats.supply-modified.supply,
+                    ustats.max_supply-modified.max_supply,
+                    ustats.armor-modified.armor,
+                    ustats.et_gain-modified.et_gain,
+                    ustats.et_max-modified.et_max
+            );
+        }
+
+        private void setApplied(){
+            hasBeenApplied = true;
+        }
+
+        public boolean hasBeenApplied(){
+            return hasBeenApplied;
+        }
 
         /***
          * This method should also reduce turnTime
          * @param u Unit which has this Buff
          */
-        void turnAction(Unit u);
+        public abstract void turnAction(Unit u);
 
         /***
          * Amount of ticks during which the buff is active
          */
-        int getTurnTime();
+        public int getTurnTime(){
+            return turnTime;
+        }
     }
 
     /***
@@ -269,17 +309,21 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         isPassable = false;
 
-        atk = unitStats.getAtk();
-        hp = unitStats.getHp();
-        max_hp = unitStats.getMaxHp();
-        df = unitStats.getDf();
-        movement_range = unitStats.getMovementRange();
-        attack_range = unitStats.getAttackRange();
-        supply = unitStats.getSupply();
-        max_supply = unitStats.getMaxSupply();
-        armor = unitStats.getArmor();
-        et_max = unitStats.getEtMax();
-        et_gain = unitStats.getEtGain();
+        applyUnitStats(unitStats);
+    }
+
+    public void applyUnitStats(UnitStats stats){
+        atk = stats.getAtk();
+        hp = stats.getHp();
+        max_hp = stats.getMaxHp();
+        df = stats.getDf();
+        movement_range = stats.getMovementRange();
+        attack_range = stats.getAttackRange();
+        supply = stats.getSupply();
+        max_supply = stats.getMaxSupply();
+        armor = stats.getArmor();
+        et_max = stats.getEtMax();
+        et_gain = stats.getEtGain();
     }
 
     public String getName() {
@@ -297,20 +341,28 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
         has_not_moved += 1;
 
         if (et_max != 0 && et_gain != 0)
-        if (has_not_moved == 3){
-            if (entrenchment < et_max)
-                entrenchment+=et_gain;
-            has_not_moved = 0;
-        }
+            if (has_not_moved == 3) {
+                if (entrenchment < et_max)
+                    entrenchment += et_gain;
+                has_not_moved = 0;
+            }
+
+
+        unitStatsBuff();
 
         ArrayList<Buff> to_be_removed_b = new ArrayList<>();
 
-        for (Buff buff: buffs){
-            if (buff.getTurnTime() == 0)
-                to_be_removed_b.add(buff);
-            else
-                buff.turnAction(this);
-        }
+        if (buffs.size() > 0)
+            for (Buff buff : buffs) {
+                if (buff.getTurnTime() == 0) {
+                    to_be_removed_b.add(buff);
+                    UnitStats ustats = unitStats();
+                    UnitStats reverted = buff.revertModification(ustats);
+                    applyUnitStats(reverted);
+                } else
+                    buff.turnAction(this);
+            }
+
 
         buffs.removeAll(to_be_removed_b);
     }
@@ -373,14 +425,18 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     /***
      * Calculate UnitStats with all buffs taken into account
-     * @return unitStats
      */
-    public UnitStats unitStatsBuff(){
-        UnitStats unitStats = unitStats();
-        for (Buff b: buffs){
-            unitStats = b.modStats(unitStats);
+    public void unitStatsBuff(){
+        if (buffs.size() > 0) {
+            UnitStats unitStats = unitStats();
+            for (Buff b : buffs) {
+                if (!b.hasBeenApplied()) {
+                    unitStats = b.modifyStats(unitStats);
+                    b.setApplied();
+                }
+            }
+            applyUnitStats(unitStats);
         }
-        return unitStats;
     }
 
     /***
@@ -415,7 +471,7 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
         public void addQueueMember(QueueMember q){
             if (queueMembers.size() != 9)
-            queueMembers.add(q);
+                queueMembers.add(q);
         }
 
         public int getSize(){
@@ -483,21 +539,21 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
 
     public Properties getProperties(){
         Properties properties = new Properties();
-        properties.put("hp", "" + this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
+        properties.put("hp", this.unitStats().getHp() + "/" + this.unitStats().getMaxHp());
         if (this.unitStats().max_supply != -1)
-        properties.put("su", "" + this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
+            properties.put("su", this.unitStats().getSupply() + "/" + this.unitStats().getMaxSupply());
         if (this.unitStats().getAtk() > 0)
-        properties.put("atk", "" + this.unitStats().getAtk() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
+            properties.put("atk", this.unitStats().getAtk() + (entrenchment>1?"(+"+((int)(0.5*entrenchment))+")":""));
         if (this.getDf() > 0)
-        properties.put("df", "" + this.unitStats().getDf() + (entrenchment>1?"(+"+ (int)(0.5*entrenchment) +")":""));
+            properties.put("df", this.unitStats().getDf() + (entrenchment>1?"(+"+ (int)(0.5*entrenchment) +")":""));
         if (this.unitStats().armor > 0)
-        properties.put("ar", "" + this.unitStats().getArmor());
+            properties.put("ar", String.valueOf(this.unitStats().getArmor()));
         if (this.entrenchment > 0)
-        properties.put("et", "" + this.entrenchment);
+            properties.put("et", String.valueOf(this.entrenchment));
         properties.put("name", this.getName());
 
-        properties.put("atk_range", "" + this.unitStats().getAttackRange());
-        properties.put("mov_range", "" + this.unitStats().getMovementRange());
+        properties.put("atk_range", String.valueOf(this.unitStats().getAttackRange()));
+        properties.put("mov_range", String.valueOf(this.unitStats().getMovementRange()));
 
         if (move_amount != -1) {
             if (hasTurnEnded) {

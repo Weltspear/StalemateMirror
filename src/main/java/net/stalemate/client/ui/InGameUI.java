@@ -69,6 +69,10 @@ public class InGameUI extends JPanel {
     public int tr_width;
     public int tr_height;
 
+    public int[][] highlights = new int[9][];
+
+    public int[] cur_highlight = null;
+
     public JFrame getFrame(){return frame;}
 
     /***
@@ -516,6 +520,7 @@ public class InGameUI extends JPanel {
 
                 ArrayList<Image> buttons = new ArrayList<>();
                 ArrayList<String> binds = new ArrayList<>();
+                int[][] highlights = new int[9][];
 
                 Image selected_unit_image = null;
                 PropertiesToRender propertiesToRender = null;
@@ -559,6 +564,7 @@ public class InGameUI extends JPanel {
 
                     int by = 0;
                     int bx = 0;
+                    int bi = 0;
                     for (ClientGame.ClientSelectedUnit.ClientButton button : selectedUnit.getButtons()) {
                         if (bx == 3) {
                             bx = 0;
@@ -577,6 +583,10 @@ public class InGameUI extends JPanel {
                                 buttons.add(f);
                             }
 
+                            if (button.isHighlightEnabled()){
+                                highlights[bi] = button.getHighlight();
+                            }
+
                             binds.add(button.getBind());
                         } else {
                             buttons.add(null);
@@ -584,6 +594,7 @@ public class InGameUI extends JPanel {
                         }
 
                         bx++;
+                        bi++;
                     }
                 }
 
@@ -829,8 +840,9 @@ public class InGameUI extends JPanel {
                 this.interface_.chat = chat;
                 this.interface_._selr = sel_r;
                 this.interface_.gamemodeProperties = gamemodeProperties;
+                this.interface_.highlights = highlights;
                 if (!teamDoingTurnColor.equals(Color.WHITE))
-                this.interface_.teamDoingTurnColor = teamDoingTurnColor;
+                    this.interface_.teamDoingTurnColor = teamDoingTurnColor;
                 if (!Objects.equals(teamDoingTurnNick, "neutralteam")){
                     this.interface_.teamDoingTurnNick = teamDoingTurnNick;
                 }
@@ -964,6 +976,7 @@ public class InGameUI extends JPanel {
         @Override
         public void mouseMoved(MouseEvent e) {
             unsafeLock.lock();
+            cur_highlight = null;
             if (!focus_desktop_pane) {
                 boolean clearTooltip = false;
                 int y = 0;
@@ -1018,6 +1031,21 @@ public class InGameUI extends JPanel {
                             InGameUI.this.y_prev = ((e.getY()) / (64));
                             InGameUI.this.do_render_prev = true;
                             InGameUI.this.do_offset = false;
+
+                            int hxb = x_prev-(rightPanelX()/64);
+                            int hyb = y_prev-(rightPanelY()/64);
+                            int hidx = (hyb*3)+hxb;
+
+                            if (highlights[hidx] != null){
+                                cur_highlight = new int[]{
+                                        (int)Math.ceil((highlights[hidx][0]-cam_x)*(int)Math.ceil(64/scale))+(int)Math.ceil(-offset_x/scale),
+                                        (int)Math.ceil((highlights[hidx][1]-cam_y)*(int)Math.ceil(64/scale))+(int)Math.ceil(-(offset_y)/scale),
+                                        highlights[hidx][2]
+                                };
+                            }
+                            else{
+                                cur_highlight = null;
+                            }
                         }
                     } else {
                         InGameUI.this.do_render_prev = false;
@@ -1392,6 +1420,17 @@ public class InGameUI extends JPanel {
                 renderImagesScale(fog_of_war, offset_x, offset_y, scale, g2);
                 renderImagesScale(unit_data_ar, offset_x, offset_y, scale, g2);
                 renderImagesScale(_selr, offset_x, offset_y, scale, g2);
+
+                if (cur_highlight != null){
+
+                    BufferedImage h = new BufferedImage((int)Math.ceil(64/scale), (int)Math.ceil(64/scale), BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g3 = h.createGraphics();
+                    g3.setColor(new Color(cur_highlight[2], true));
+                    g3.fillRect(0, 0, (int)Math.ceil(64/scale), (int)Math.ceil(64/scale));
+                    g3.dispose();
+
+                    g2.drawImage(h, cur_highlight[0], cur_highlight[1], null);
+                }
 
                 // Preview selector
                 if (selector != null && do_render_prev && do_offset) {

@@ -184,6 +184,15 @@ public abstract class Unit extends Entity implements Entity.ServerUpdateTick {
     }
 
     /***
+     * If mouse cursor is over a button which implements this, the coord that was specified will be highlighted.
+     */
+    public interface IHighlightCoordButton {
+        record HighlightCoord(int x, int y, int rgb){}
+
+        HighlightCoord highlightCoord();
+    }
+
+    /***
      * Base Unit statistics
      */
     public record UnitStats(int hp, int max_hp, int attack_range, int movement_range, int atk, int df, int supply,

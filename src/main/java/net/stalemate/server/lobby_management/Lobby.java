@@ -1041,6 +1041,12 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                 button_.put("bind", button.bind());
                 button_.put("texture", button.texture());
                 button_.put("mode", button instanceof Unit.ISelectorButton || button instanceof Unit.ISelectorButtonUnit ? 2 : 1);
+                if (button instanceof Unit.IHighlightCoordButton highlight){
+                    button_.put("hx", highlight.highlightCoord().x());
+                    button_.put("hy", highlight.highlightCoord().y());
+                    button_.put("hrgb", highlight.highlightCoord().rgb());
+                }
+
                 buttons.add(button_);
 
                 if (iselectorbuttonid != null)

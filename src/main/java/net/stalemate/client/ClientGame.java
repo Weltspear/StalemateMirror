@@ -142,11 +142,32 @@ public class ClientGame {
             private final BufferedImage image;
             private final Mode mode;
 
+            private boolean highlightEnabled = false;
+            private int hx = -1;
+            private int hy = -1;
+            private int hrgb = 0;
+
             public ClientButton(String id, String bind, BufferedImage image, Mode mode) {
                 this.id = id;
                 this.bind = bind;
                 this.image = image;
                 this.mode = mode;
+            }
+
+            public ClientButton(String id, String bind, BufferedImage image, Mode mode, int hx, int hy, int hrgb) {
+                this(id, bind, image, mode);
+                this.hx = hx;
+                this.hy = hy;
+                this.hrgb = hrgb;
+                highlightEnabled = true;
+            }
+
+            public boolean isHighlightEnabled(){
+                return highlightEnabled;
+            }
+
+            public int[] getHighlight(){
+                return new int[]{hx, hy, hrgb};
             }
 
             public String getId() {
@@ -385,7 +406,12 @@ public class ClientGame {
                         ClientSelectedUnit.ClientButton.Mode mode = (Integer) b.get("mode") == 1 ?
                                 ClientSelectedUnit.ClientButton.Mode.StandardButton : ClientSelectedUnit.ClientButton.Mode.SelectorButton;
 
-                        buttons[idx] = new ClientSelectedUnit.ClientButton(id, bind, texture, mode);
+                        if (b.containsKey("hx") && b.containsKey("hy") && b.containsKey("hrgb")){
+                            buttons[idx] = new ClientSelectedUnit.ClientButton(id, bind, texture, mode,
+                                    (int) b.get("hx"), (int) b.get("hy"), (int) b.get("hrgb"));
+                        }
+                        else
+                            buttons[idx] = new ClientSelectedUnit.ClientButton(id, bind, texture, mode);
                     }
                     idx++;
                 }

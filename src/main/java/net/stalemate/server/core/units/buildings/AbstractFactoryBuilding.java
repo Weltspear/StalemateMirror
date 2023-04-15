@@ -27,6 +27,7 @@ import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IUnitName;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 
@@ -152,7 +153,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
     /***
      * This button uses default texture and bind.
      */
-    public class DefaultChangeDeploymentPointButton extends ChangeDeploymentPoint{
+    public class DefaultChangeDeploymentPointButton extends ChangeDeploymentPoint implements IHighlightCoordButton {
         @Override
         public String selector_texture() {
             return "assets/ui/selectors/ui_move.png";
@@ -171,6 +172,11 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
         @Override
         public String identifier() {
             return "button_set_deployment_point";
+        }
+
+        @Override
+        public HighlightCoord highlightCoord() {
+            return new HighlightCoord(deployment_x+AbstractFactoryBuilding.this.x, deployment_y+AbstractFactoryBuilding.this.y, new Color(0, 88, 252, 136).getRGB());
         }
     }
 

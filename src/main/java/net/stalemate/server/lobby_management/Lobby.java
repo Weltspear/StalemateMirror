@@ -456,7 +456,7 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         for (Entity entity : entities) {
                             if (entity instanceof Unit) {
                                 if ((entity instanceof AirUnit && viewMode == ViewMode.AIR) || (!(entity instanceof AirUnit) && viewMode == ViewMode.GROUND))
-                                selected_unit = (Unit) entity;
+                                    selected_unit = (Unit) entity;
                             }
                         }
 
@@ -469,17 +469,19 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
                             if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null) {
                                 for (Unit.IButton ibutton : selected_unit.getButtons()) {
-                                    if (ibutton != null)
-                                    if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
-                                        doActionIStandardButtonIfCorrect(params, ibutton);
+                                    if (ibutton != null) {
+                                        if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()) {
+                                            doActionIStandardButtonIfCorrect(params, ibutton);
+                                        }
                                     }
                                 }
                             } else {
                                 if (selected_unit.getButtonsEnemy() != null) {
                                     for (Unit.IButton ibutton : selected_unit.getButtonsEnemy()) {
-                                        if (ibutton != null)
-                                        if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()){
-                                            doActionIStandardButtonIfCorrect(params, ibutton);
+                                        if (ibutton != null) {
+                                            if (game.getTeamDoingTurn() == team || ibutton.canBeUsedWhenOtherTeamsTurn()) {
+                                                doActionIStandardButtonIfCorrect(params, ibutton);
+                                            }
                                         }
                                     }
                                 }
@@ -544,18 +546,17 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                                                         for (Entity entity : entities) {
                                                             if (entity instanceof Unit u) {
                                                                 if ((iSelectorButtonUnit.getLayer() == Unit.Layer.GROUND) != (u instanceof AirUnit))
-                                                                if (iSelectorButtonUnit.isUsedOnAlliedUnit()
+                                                                    if (iSelectorButtonUnit.isUsedOnOurUnit()
                                                                         && game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity)) {
-                                                                    iSelectorButtonUnit.action(u, selected_unit, game);
-                                                                    iselectorbuttonid = null;
+                                                                        iSelectorButtonUnit.action(u, selected_unit, game);
+                                                                        iselectorbuttonid = null;
 
-                                                                    if (selected_unit instanceof AirUnit){
-                                                                        viewMode = ViewMode.AIR;
-                                                                    }
-                                                                    else{
-                                                                        viewMode = ViewMode.GROUND;
-                                                                    }
-                                                                } else if (iSelectorButtonUnit.isUsedOnEnemy()
+                                                                        if (selected_unit instanceof AirUnit) {
+                                                                            viewMode = ViewMode.AIR;
+                                                                        } else {
+                                                                            viewMode = ViewMode.GROUND;
+                                                                        }
+                                                                    } else if (iSelectorButtonUnit.isUsedOnEnemy()
                                                                         && !game.getUnitsTeam(selected_unit).getTeamUnits().contains(entity)) {
                                                                     if (isSelectedUnitEnemyTeam && !team.getTeamUnits().contains(entity) && iSelectorButtonUnit.canEnemyTeamUseOnOtherEnemyTeamUnit())
                                                                         iSelectorButtonUnit.action(u, selected_unit, game);
@@ -703,8 +704,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
 
         public synchronized String createJsonPacket(){
             lock.lock();
-            if (game != null)
-            game.lock.lock();
+            if (game != null) {
+                game.lock.lock();
+            }
             try {
                 if (game != null && team != null) {
 
@@ -863,32 +865,35 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                         if (iselectorbuttonid != null){
                             if (selected_unit.getButtonsEnemy() != null && !team.getTeamUnits().contains(selected_unit)){
                                 for (Unit.IButton b : selected_unit.getButtonsEnemy()) {
-                                    if (b != null)
-                                    if (b.identifier().equals(iselectorbuttonid)){
-                                        if (b instanceof Unit.ISelectorButton bb){
-                                            sel_r = bb.selector_range();
-                                        } else if (b instanceof Unit.ISelectorButtonUnit bb){
-                                            sel_r = bb.selector_range();
+                                    if (b != null) {
+                                        if (b.identifier().equals(iselectorbuttonid)) {
+                                            if (b instanceof Unit.ISelectorButton bb) {
+                                                sel_r = bb.selector_range();
+                                            } else if (b instanceof Unit.ISelectorButtonUnit bb) {
+                                                sel_r = bb.selector_range();
+                                            }
                                         }
                                     }
                                 }
                             }
                             else if (team.getTeamUnits().contains(selected_unit) && selected_unit.getButtons() != null){
                                 for (Unit.IButton b : selected_unit.getButtons()) {
-                                    if (b != null)
-                                    if (b.identifier().equals(iselectorbuttonid)){
-                                        if (b instanceof Unit.ISelectorButton bb){
-                                            sel_r = bb.selector_range();
-                                        } else if (b instanceof Unit.ISelectorButtonUnit bb){
-                                            sel_r = bb.selector_range();
+                                    if (b != null) {
+                                        if (b.identifier().equals(iselectorbuttonid)) {
+                                            if (b instanceof Unit.ISelectorButton bb) {
+                                                sel_r = bb.selector_range();
+                                            } else if (b instanceof Unit.ISelectorButtonUnit bb) {
+                                                sel_r = bb.selector_range();
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
 
-                        if (sel_r != 0)
-                        selected_unit_data.put("sel_r", sel_r);
+                        if (sel_r != 0) {
+                            selected_unit_data.put("sel_r", sel_r);
+                        }
 
                         ArrayList<Object> buttons = new ArrayList<>();
                         Unit.IButton iselectorbutton_used = null;
@@ -999,8 +1004,9 @@ public class Lobby implements Runnable{ // todo add more locks if necessary
                     }
                 }
             } finally {
-                if (game != null)
-                game.lock.unlock();
+                if (game != null) {
+                    game.lock.unlock();
+                }
                 lock.unlock();
             }
             return null;

@@ -79,7 +79,7 @@ public class TransportPlane extends AirUnit implements IMechanized {
 
         @Override
         public boolean isUsedOnAlliedUnit() {
-            return true;
+            return false;
         }
     }
 

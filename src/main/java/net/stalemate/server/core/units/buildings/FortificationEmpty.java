@@ -22,13 +22,10 @@ import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.animation.Animation;
 import net.stalemate.server.core.animation.AnimationController;
 import net.stalemate.server.core.buttons.util.Unflippable;
+import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.util.IBuilding;
 import net.stalemate.server.core.units.util.IConstructableBuilding;
-import net.stalemate.server.core.controller.Game;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
 
 public class FortificationEmpty extends Unit implements IBuilding, Unflippable, IConstructableBuilding {
 
@@ -73,7 +70,7 @@ public class FortificationEmpty extends Unit implements IBuilding, Unflippable, 
 
         @Override
         public boolean isUsedOnOurUnit() {
-            return false;
+            return true;
         }
 
         @Override

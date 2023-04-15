@@ -248,27 +248,6 @@ public class Game {
     }
 
     /***
-     * Creates a list in which {@link PriorityUpdate} entities are first
-     * @see PriorityUpdate
-     */
-    private ArrayList<Entity> getPrioritizedList(){
-        ArrayList<Entity> prior = new ArrayList<>();
-        for (Entity e : entities){
-            if (e instanceof PriorityUpdate){
-                prior.add(e);
-            }
-        }
-
-        for (Entity e : entities){
-            if (!(e instanceof PriorityUpdate)){
-                prior.add(e);
-            }
-        }
-
-        return prior;
-    }
-
-    /***
      * Creates a list in which {@link PriorityTurnUpdate} entities are first
      * @see PriorityTurnUpdate
      */
@@ -298,7 +277,7 @@ public class Game {
             entities.addAll(to_be_added);
             to_be_added.clear();
 
-            for (Entity entity : getPrioritizedList()) {
+            for (Entity entity : entities) {
                 if (entity instanceof Entity.ServerUpdateTick) {
                     ((Entity.ServerUpdateTick) entity).update();
                 }
@@ -439,6 +418,7 @@ public class Game {
 
     // Victory related code
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean hasGameEnded(){
         return mode.hasGameEnded(this);
     }

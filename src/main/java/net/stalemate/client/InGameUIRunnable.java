@@ -54,12 +54,12 @@ public class InGameUIRunnable implements Runnable {
 
                 Image minimap = cgame.drawMinimap(g.cam_x, g.cam_y);
 
-                g.unsafeLock.unlock();
-
                 g.getClDataManager().updateData(cgame.getChat(),
                         (ClientGame.ClientEntity[][])ef[0], (boolean[][])ef[1], (boolean[][])ef[2], cgame.getSelectedUnit(), cgame.getMp(),
                         cgame.isIsItYourTurn(), cgame.getClMapLoader(), minimap, cgame.getTeamDoingTurnColor(), cgame.getTeamDoingTurnNick(),
                         cgame.getGamemodeProperties());
+
+                g.unsafeLock.unlock();
 
 
                 try {

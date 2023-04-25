@@ -1024,11 +1024,17 @@ public class InGameUI extends JPanel {
                             int x_c = calculateXOnCamera(e.getX());
                             int y_c = calculateYOnCamera(e.getY());
 
-                            InGameUI.this.x_prev = createCorrectXFromXC(x_c);
-                            InGameUI.this.y_prev = createCorrectYFromYC(y_c);
+                            if (x_c + cam_x >= 0 && y_c + cam_y >= 0 && clDataManager.getMapLoader() != null) {
+                                if (clDataManager.getMapLoader().isMapLoaded())
+                                    if (clDataManager.getMapLoader().getWidth() > x_c + cam_x
+                                            && clDataManager.getMapLoader().getHeight() >= y_c + cam_y) {
+                                        InGameUI.this.x_prev = createCorrectXFromXC(x_c);
+                                        InGameUI.this.y_prev = createCorrectYFromYC(y_c);
 
-                            InGameUI.this.do_render_prev = true;
-                            InGameUI.this.do_offset = true;
+                                        InGameUI.this.do_render_prev = true;
+                                        InGameUI.this.do_offset = true;
+                                    }
+                            }
                         }
                         else {
                             InGameUI.this.x_prev = ((e.getX()) / (64));

@@ -226,6 +226,7 @@ public abstract class AbstractFactoryBuilding extends Unit implements IBuilding 
                 }
 
                 if (!isBlocked) {
+                    game.getEvReg().triggerUnitTrain(currently_processed_unit.unit, this);
                     game.getUnitsTeam(this).addUnit(currently_processed_unit.unit);
                     if (currently_processed_unit.unit instanceof IUnitName uname){
                         uname.setUnitName(game.getUnitNameGen().genName(currently_processed_unit.unit.getName()));

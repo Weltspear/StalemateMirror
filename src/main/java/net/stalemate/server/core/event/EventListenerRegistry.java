@@ -64,4 +64,21 @@ public class EventListenerRegistry {
             }
         }
     }
+
+    public void triggerUnitTrain(Unit deployed, Unit deployer){
+        for (EventListener eventListener: eventListeners){
+            for (Method m : eventListener.getClass().getMethods()){
+                if (m.isAnnotationPresent(OnEvent.class)){
+                    OnEvent a = m.getAnnotation(OnEvent.class);
+                    if (a.type().equals(OnEvent.EventType.ON_UNIT_TRAIN)){
+                        try {
+                            m.invoke(eventListener, deployed, deployer);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

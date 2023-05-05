@@ -55,6 +55,13 @@ public @interface OnEvent {
          */
         ON_UNIT_DEATH,
 
+        /***
+         * <code>method(Unit deployed, Unit deployer)</code>
+         * Triggered on unit being deployed from any unit training building
+         * @see Unit#update()
+         */
+        ON_UNIT_TRAIN,
+
         @UnimplementedEvent
         ON_HP_SACRIFICE,
         @UnimplementedEvent

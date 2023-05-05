@@ -163,6 +163,18 @@ public class EngineerUnit extends Unit implements IUnitName{
         private final int cost;
         private final boolean isNeutral;
 
+        public Class<? extends Unit> getUnitBuilt() {
+            return b;
+        }
+
+        public int getConstructionTime() {
+            return constructionTime;
+        }
+
+        public int getCost() {
+            return cost;
+        }
+
         public ConstructBuildingButton(Class<? extends Unit> building, int constructionTime, int cost, boolean isNeutral){
             b = building;
             this.constructionTime = constructionTime;

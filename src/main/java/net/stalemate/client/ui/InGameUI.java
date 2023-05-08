@@ -27,6 +27,8 @@ import net.stalemate.client.config.Grass32ConfigClient;
 import net.stalemate.client.config.KeyboardBindMapper;
 import net.stalemate.client.config.PropertiesMatcher;
 import net.stalemate.client.property.ClientSideProperty;
+import net.stalemate.client.ui.misc.GoalUI;
+import net.stalemate.client.ui.misc.TextUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -150,6 +152,8 @@ public class InGameUI extends JPanel {
 
     public int cam_x;
     public int cam_y;
+
+    public TextUI textUI = null;
 
     public class KeyboardInput implements KeyListener {
 
@@ -1688,6 +1692,34 @@ public class InGameUI extends JPanel {
 
                         g.fillRect(rightPanelX()-140+offset_rect, rightPanelY() - 1 - 40 -g.getFontMetrics().getHeight()+2, g.getFontMetrics().stringWidth(" "), g.getFontMetrics().getHeight());
                     }
+
+                if (textUI != null){
+                    BufferedImage img = AssetLoader.load("assets/text_ui.png");
+
+                    g.drawImage(img, rightPanelX()-76, 76, null);
+                    g.setFont(monogram.deriveFont((float) textUI.getFontSize()));
+
+                    Color c1 = new Color(51, 39, 31);
+                    Color c2 = new Color(198, 130, 77);
+
+                    int y_ = 0;
+                    int b = 0;
+                    for (String s: textUI.getText().split("\n")) {
+                        if (textUI instanceof GoalUI gp){
+                            g.setColor(c1);
+                            g.fillRoundRect(rightPanelX() - 76 + 16, 76 + 22 + y_- 7, 9, 9, 2, 2);
+                            g.setColor(c2);
+                            if (gp.getDone()[b])
+                                g.fillRect(rightPanelX() - 76 + 18, 76 + 22 + y_- 5, 5, 5);
+
+                            g.setColor(Color.BLACK);
+                            g.drawString(s, rightPanelX() - 76 + 26, 76 + 22 + y_ + 1);
+                        } else
+                            g.drawString(s, rightPanelX() - 76 + 16, 76 + 22 + y_ + 1);
+                        y_+=g.getFontMetrics().getHeight();
+                        b++;
+                    }
+                }
 
                 // Render chat
                 y = 0;

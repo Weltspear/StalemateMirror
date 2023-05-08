@@ -282,6 +282,7 @@ public class Game {
                 teams.get(team_doing_turn).units.removeAll(to_remove_dead);
                 teams.get(team_doing_turn).setMilitaryPoints(teams.get(team_doing_turn).getMilitaryPoints() + 1);
                 attackTracker.turnUpdate();
+                evReg.triggerTeamTurnEnd(teams.get(team_doing_turn));
                 team_doing_turn++;
             }
 

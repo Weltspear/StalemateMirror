@@ -62,6 +62,13 @@ public @interface OnEvent {
          */
         ON_UNIT_TRAIN,
 
+        /***
+         * <code>method(Team ending_turn)</code>
+         * Triggered on team ending it's turn
+         * @see Unit#update()
+         */
+        ON_TURN_END,
+
         @UnimplementedEvent
         ON_HP_SACRIFICE,
         @UnimplementedEvent

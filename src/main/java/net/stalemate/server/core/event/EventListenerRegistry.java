@@ -19,6 +19,7 @@
 package net.stalemate.server.core.event;
 
 import net.stalemate.server.core.Unit;
+import net.stalemate.server.core.controller.Game;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -73,6 +74,23 @@ public class EventListenerRegistry {
                     if (a.type().equals(OnEvent.EventType.ON_UNIT_TRAIN)){
                         try {
                             m.invoke(eventListener, deployed, deployer);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void triggerTeamTurnEnd(Game.Team ending_turn){
+        for (EventListener eventListener: eventListeners){
+            for (Method m : eventListener.getClass().getMethods()){
+                if (m.isAnnotationPresent(OnEvent.class)){
+                    OnEvent a = m.getAnnotation(OnEvent.class);
+                    if (a.type().equals(OnEvent.EventType.ON_TURN_END)){
+                        try {
+                            m.invoke(eventListener, ending_turn);
                         } catch (IllegalAccessException | InvocationTargetException e) {
                             e.printStackTrace();
                         }

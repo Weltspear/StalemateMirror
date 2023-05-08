@@ -25,6 +25,9 @@ import net.stalemate.server.core.controller.Game;
  */
 public abstract class Entity {
     private final double id = Math.random();
+
+    private String tag = null;
+
     public double getId(){return id;}
 
     // To turn entity texture left
@@ -102,5 +105,15 @@ public abstract class Entity {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    // tags will be used by map scripts
+    // it is something like ids
+    public void setTag(String tag){
+        this.tag = tag;
+    }
+
+    public String getTag(){
+        return tag;
     }
 }

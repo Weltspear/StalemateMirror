@@ -188,6 +188,9 @@ public class MapLoader {
 
             for (HashMap<String, Object> entity : (ArrayList<HashMap<String, Object>>) map.get("entity_data")) {
                 Entity ent = EntityRegistry.constructEntity((String) entity.get("id"), (int) entity.get("x"), (int) entity.get("y"), g);
+                if (entity.containsKey("tag")){
+                    ent.setTag((String) entity.get("tag"));
+                }
 
                 if (entity.get("class").equals("unit")) {
                     team_id_hashmap.get((String) entity.get("team")).getTeamUnits().add((Unit) ent);

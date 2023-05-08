@@ -27,8 +27,8 @@ import net.stalemate.client.config.Grass32ConfigClient;
 import net.stalemate.client.config.KeyboardBindMapper;
 import net.stalemate.client.config.PropertiesMatcher;
 import net.stalemate.client.property.ClientSideProperty;
-import net.stalemate.client.ui.misc.GoalUI;
-import net.stalemate.client.ui.misc.TextUI;
+import net.stalemate.singleplayer.textui.GoalUI;
+import net.stalemate.singleplayer.textui.TextUI;
 
 import javax.swing.*;
 import java.awt.*;

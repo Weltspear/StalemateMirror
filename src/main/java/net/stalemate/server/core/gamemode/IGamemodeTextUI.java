@@ -16,23 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.client.ui.misc;
+package net.stalemate.server.core.gamemode;
 
-public class TextUI {
+import net.stalemate.singleplayer.textui.TextUI;
 
-    private final String text;
-    private final int fontSize;
+public interface IGamemodeTextUI {
 
-    public TextUI(String text, int font_size){
-        this.text = text;
-        this.fontSize = font_size;
-    }
+    TextUI getTextUI();
 
-    public String getText() {
-        return text;
-    }
-
-    public int getFontSize() {
-        return fontSize;
-    }
 }

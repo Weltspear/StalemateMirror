@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.stalemate.client.ui.misc;
+package net.stalemate.singleplayer.textui;
 
 public class GoalUI extends TextUI{
     private final boolean[] done;

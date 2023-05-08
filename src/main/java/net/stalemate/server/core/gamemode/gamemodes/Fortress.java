@@ -24,6 +24,7 @@ import net.stalemate.server.core.ai.BattleGroup;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemode;
 import net.stalemate.server.core.gamemode.IGamemodeAI;
+import net.stalemate.server.core.gamemode.IGamemodeTextUI;
 import net.stalemate.server.core.properties.Properties;
 import net.stalemate.server.core.units.Artillery;
 import net.stalemate.server.core.units.HeavyTank;
@@ -31,12 +32,19 @@ import net.stalemate.server.core.units.Infantry;
 import net.stalemate.server.core.units.LightTank;
 import net.stalemate.server.core.units.buildings.MilitaryTent;
 import net.stalemate.singleplayer.AITurn;
+import net.stalemate.singleplayer.textui.GoalUI;
+import net.stalemate.singleplayer.textui.TextUI;
 
 import java.util.*;
 
-public class Fortress implements IGamemode, IGamemodeAI, EventListener {
+public class Fortress implements IGamemode, IGamemodeAI, EventListener, IGamemodeTextUI {
 
     private int turns_passed = 0;
+
+    @Override
+    public TextUI getTextUI() {
+        return new GoalUI(" Survive for 40 turns", 15, new boolean[]{false});
+    }
 
 
     private record SpawnRect(int x, int y, int x2, int y2){

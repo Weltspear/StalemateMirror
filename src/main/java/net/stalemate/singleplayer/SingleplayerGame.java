@@ -114,6 +114,8 @@ public class SingleplayerGame {
                 System.exit(0);
             }
 
+            inGameUI.textUI = lobby.getTextUI();
+
             if (player.getEndOfAGameMessage() != null){
                 break;
             }

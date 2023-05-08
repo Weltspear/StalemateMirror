@@ -22,8 +22,10 @@ import net.libutils.error.Expect;
 import net.stalemate.server.core.Unit;
 import net.stalemate.server.core.controller.Game;
 import net.stalemate.server.core.gamemode.IGamemodeAI;
+import net.stalemate.server.core.gamemode.IGamemodeTextUI;
 import net.stalemate.server.core.units.util.IBase;
 import net.stalemate.server.lobby_management.Lobby;
+import net.stalemate.singleplayer.textui.TextUI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -258,5 +260,18 @@ public class SingleplayerLobby extends Lobby {
     @Override
     public String playerNicksString() {
         return null;
+    }
+
+    public TextUI getTextUI(){
+        try{
+            game.lock.lock();
+            if (game.getMode() instanceof IGamemodeTextUI t){
+                return t.getTextUI();
+            }
+            else return null;
+        }
+        finally {
+            game.lock.unlock();
+        }
     }
 }

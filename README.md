@@ -25,12 +25,15 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 ## `v0.3.x a` TODO:
 - [ ] Planes
   - [x] AirUnit and packet stuff related to it
-  - [ ] Fighter
-  - [ ] Heavy fighter
-  - [ ] CAS bomber
-  - [ ] Strategic bomber
-  - [ ] Anti-Air
-  - [ ] An icon above a unit signalising that there's a plane over it
+  - [X] Fighter
+  - [X] Heavy fighter
+  - [X] CAS bomber
+  - [X] Strategic bomber
+  - [X] Anti-Air
+  - [X] Transport Plane
+  - [X] An icon above a unit signalising that there's a plane over it
+  - [X] Para-dropping
+  - [ ] Textures
 - [ ] Terrain buffs and debuffs
 - [ ] Unit experience
 - [x] Minimap
@@ -47,7 +50,37 @@ See [NOTICE](NOTICE.md) and [LICENSE](LICENSE)
 - [X] Increase SupplyStation range
 - [x] Protocol refactor
 - [x] Cache uname monogram
-
+- [X] BUG: AirUnits are over ground units when in ground mode
+- [X] BUG: Units spawning on each other
+- [ ] Improve map loading
+  - [ ] Make MapLoader call constructor which takes Game parameter
+  - [ ] Make MapLoader not crash the game if it failed to load map
+- [X] Reduce amount of supply of truck
+- [X] Increase SupplyStation supply gen
+- [ ] Make FortressAI deal with AttackButton move
+- [X] Fix incorrect font at tooltip
+- [X] Unit queue "overflow" bug
+- [X] Weird repair overheal bug reducing hp
+- [X] Rebalance fortification
+- [ ] Rename Fortress to mass assault
+- [X] Fix tankette alignment
+- [X] Rounding error when selecting with selector
+  - [X] Standard selector broken when offset is there   
+- [ ] More QOL
+  - [X] Highlight deployment point when mouse pointer is on change deployment point button
+  - [X] Shift unit selection on certain conditions
+- [ ] Fix special team repr big unit texture
+- [ ] Add replays
+- [ ] Campaign mode
+  - [ ] Add possibility of creating own player lose conditions
 ## Project status
 I commit to this repository from time to time. And this is very W.I.P.
+
+## Official mirrors
+Codeberg: https://codeberg.org/Weltspear/StalemateMirror \
+GitHub: https://github.com/Weltspear/StalemateMirror 
+
+Note: If you want to contribute, send your issues/merge requests to main repository at Gitlab: \
+https://gitlab.com/weltspear/stalemate-pub-repo
+
 

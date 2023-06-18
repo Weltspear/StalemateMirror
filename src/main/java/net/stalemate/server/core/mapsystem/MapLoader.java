@@ -49,12 +49,18 @@ public class MapLoader {
 
     public static class EntityRegistry{
         private static final HashMap<String, Class<? extends Entity>> entity_registry = new HashMap<>();
+        private static final HashMap<Class<? extends Entity>, String> reverse_registry = new HashMap<>();
 
         /***
          * Add an Entity to registry with (int x, int y, Game g) constructor
          */
         public static void addEntity(String id, Class<? extends Entity> entity){
             entity_registry.put(id, entity);
+            reverse_registry.put(entity, id);
+        }
+
+        public static String getEntityRegistryID(Class<? extends Entity> entity){
+            return reverse_registry.get(entity);
         }
 
         public static Entity constructEntity(String id, int x, int y, Game gameController){
@@ -68,6 +74,10 @@ public class MapLoader {
 
         public static boolean containsEntity(String id){
             return entity_registry.containsKey(id);
+        }
+
+        public static boolean containsEntity(Class<? extends Entity> rev){
+            return reverse_registry.containsKey(rev);
         }
 
     }
@@ -178,6 +188,7 @@ public class MapLoader {
                     t.disableTurn();
                 }
                 teams.add(t);
+                t.setTeamName((String) team.get("id"));
                 team_id_hashmap.put((String) team.get("id"), t);
             }
 

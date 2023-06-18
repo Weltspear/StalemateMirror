@@ -216,7 +216,7 @@ public class Fortress implements IGamemode, IGamemodeAI, EventListener, IGamemod
                         battleGroup.addUnit(u);
                     }
                     battleGroup.attack(targetBase.getX(), targetBase.getY());
-
+                    battleGroup.makeAutonomous();
                     battleGroups.add(battleGroup);
                 }
 

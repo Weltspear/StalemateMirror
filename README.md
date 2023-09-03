@@ -1,6 +1,10 @@
 # Stalemate Game
 This is a turn-based strategy game.
 
+## Archived
+This mirror is now archived if you want to view current Stalemate source code go to original GitLab Repository:
+https://gitlab.com/weltspear/stalemate-pub-repo
+
 ## Support
 You can report issues in issue tracker.
 
